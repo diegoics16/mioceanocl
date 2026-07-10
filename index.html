@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mioceano — Bahía Quintero-Puchuncaví</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+<!-- Supabase JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+  /* ============================================================
+     CONFIG — the only block you should need to edit to go live.
+     ============================================================ */
+  :root {
+    --abyss-1: #030F26;
+    --abyss-2: #071630;
+    --panel: rgba(11, 30, 61, 0.55);
+    --panel-solid: #0B1E3D;
+    --hairline: rgba(255, 255, 255, 0.08);
+    --hairline-strong: rgba(255, 255, 255, 0.16);
+    --text-primary: #EAF1FB;
+    --text-secondary: #9FB3CE;
+    --text-muted: #6C7F9C;
+    --mint: #34D399;
+    --mint-glow: #00E5A3;
+    --coral: #F97316;
+    --crimson: #EF4444;
+    --cyan: #38BDF8;
+    --font-head: 'Playfair Display', Georgia, serif;
+    --font-ui: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    --font-data: 'IBM Plex Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: radial-gradient(ellipse at top, var(--abyss-2) 0%, var(--abyss-1) 60%);
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  a { color: var(--cyan); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- glass card primitive ---------- */
+  .glass {
+    background: var(--panel);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--hairline);
+    border-radius: 16px;
+  }
+
+  /* ---------- header / nav ---------- */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(3, 15, 38, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .nav-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 0;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand span {
+    font-family: var(--font-ui); font-weight: 700; font-size: 20px;
+    letter-spacing: -0.02em; color: var(--text-primary);
+  }
+  .tabs { display: flex; gap: 4px; }
+  .tab-btn {
+    font-family: var(--font-ui); font-size: 14px; font-weight: 500;
+    color: var(--text-secondary); background: transparent; border: none;
+    padding: 8px 16px; border-radius: 999px; cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .tab-btn:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
+  .tab-btn.active { color: var(--abyss-1); background: var(--cyan); font-weight: 600; }
+  .sync-pill {
+    font-family: var(--font-data); font-size: 12px; color: var(--text-muted);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 8px var(--mint-glow); }
+
+  /* ---------- hero / KPIs ---------- */
+  .hero { padding: 56px 0 32px; }
+  .hero h1 {
+    font-family: var(--font-head); font-weight: 700; font-size: clamp(32px, 5vw, 52px);
+    line-height: 1.1; max-width: 780px; margin-bottom: 12px;
+  }
+  .hero h1 em { font-style: italic; color: var(--coral); }
+  .hero p.lede {
+    font-size: 17px; color: var(--text-secondary); max-width: 620px; margin-bottom: 36px;
+  }
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  }
+  .kpi-card { padding: 20px 22px; }
+  .kpi-label {
+    font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text-muted); margin-bottom: 8px;
+  }
+  .kpi-value {
+    font-family: var(--font-data); font-size: 30px; font-weight: 500;
+    color: var(--text-primary);
+  }
+  .kpi-value.mint { color: var(--mint); }
+  .kpi-value.cyan { color: var(--cyan); }
+  .kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  /* ---------- section shell ---------- */
+  section.panel { padding: 40px 0; }
+  section.panel h2 {
+    font-family: var(--font-head); font-size: 28px; font-weight: 700; margin-bottom: 6px;
+  }
+  section.panel p.section-lede {
+    color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; max-width: 640px;
+  }
+
+  /* ---------- map + alerts zone ---------- */
+  .map-zone { display: grid; grid-template-columns: 1fr 340px; gap: 16px; align-items: start; }
+  #map {
+    height: 560px; border-radius: 16px; border: 1px solid var(--hairline);
+    overflow: hidden;
+  }
+  .map-controls {
+    display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .chip {
+    font-family: var(--font-ui); font-size: 12px; font-weight: 500;
+    padding: 6px 12px; border-radius: 999px; border: 1px solid var(--hairline-strong);
+    background: rgba(255,255,255,0.03); color: var(--text-secondary); cursor: pointer;
+    display: flex; align-items: center; gap: 6px; transition: all 0.15s ease;
+  }
+  .chip.on { color: var(--abyss-1); background: var(--cyan); border-color: var(--cyan); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+  .alerts-feed { display: flex; flex-direction: column; gap: 10px; max-height: 560px; overflow-y: auto; padding-right: 4px; }
+  .alert-item {
+    padding: 12px 14px; border-radius: 10px; background: rgba(255,255,255,0.03);
+    border-left: 3px solid var(--cyan); font-size: 13px;
+  }
+  .alert-item.crimson { border-left-color: var(--crimson); }
+  .alert-item.coral { border-left-color: var(--coral); }
+  .alert-item.mint { border-left-color: var(--mint); }
+  .alert-item .a-kind { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 3px; }
+  .alert-item .a-body { color: var(--text-primary); line-height: 1.4; }
+  .alert-item .a-meta { font-family: var(--font-data); font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  .detail-panel { margin-top: 16px; padding: 18px; display: none; }
+  .detail-panel.show { display: block; }
+  .detail-panel h3 { font-family: var(--font-ui); font-size: 15px; margin-bottom: 10px; }
+  .detail-panel .chart-wrap { height: 180px; margin-top: 10px; }
+
+  /* ---------- footer resource cards ---------- */
+  .footer-zone { padding: 48px 0 80px; }
+  .footer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: start; }
+  .res-card { padding: 24px; }
+  .res-card h3 {
+    font-family: var(--font-head); font-size: 19px; font-weight: 700; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  /* scientific panel timeline */
+  .timeline-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--hairline); }
+  .timeline-item:last-child { border-bottom: none; }
+  .timeline-year { font-family: var(--font-data); font-size: 13px; color: var(--cyan); min-width: 44px; }
+  .timeline-body .t-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .timeline-body .t-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+
+  /* explainer accordion */
+  .acc-item { border-bottom: 1px solid var(--hairline); }
+  .acc-item:last-child { border-bottom: none; }
+  .acc-trigger {
+    width: 100%; text-align: left; background: none; border: none; color: var(--text-primary);
+    font-family: var(--font-ui); font-size: 13px; font-weight: 600; padding: 12px 0;
+    cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+  }
+  .acc-trigger .chevron { transition: transform 0.2s ease; color: var(--text-muted); }
+  .acc-item.open .acc-trigger .chevron { transform: rotate(180deg); }
+  .acc-panel { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; }
+  .acc-item.open .acc-panel { max-height: 300px; }
+  .acc-panel p { font-size: 12px; color: var(--text-secondary); line-height: 1.6; padding-bottom: 14px; }
+  .acc-panel .src { font-size: 10px; color: var(--text-muted); font-style: italic; }
+
+  /* citizen report form */
+  #report-form { display: flex; flex-direction: column; gap: 10px; }
+  #report-form label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  #report-form select, #report-form input[type="text"], #report-form textarea {
+    width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--hairline-strong);
+    border-radius: 8px; padding: 9px 10px; color: var(--text-primary); font-family: var(--font-ui);
+    font-size: 13px;
+  }
+  #report-form textarea { resize: vertical; min-height: 60px; }
+  #report-form .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); text-transform: none; }
+  #report-form button[type="submit"] {
+    margin-top: 6px; background: var(--cyan); color: var(--abyss-1); border: none;
+    border-radius: 8px; padding: 11px; font-family: var(--font-ui); font-weight: 600;
+    font-size: 13px; cursor: pointer;
+  }
+  #report-form button[type="submit"]:hover { filter: brightness(1.08); }
+  #geo-btn {
+    background: rgba(56,189,248,0.12); border: 1px solid var(--cyan); color: var(--cyan);
+    border-radius: 8px; padding: 8px; font-size: 12px; cursor: pointer; font-family: var(--font-ui);
+  }
+  #form-status { font-size: 12px; margin-top: 4px; display: none; }
+  #form-status.ok { color: var(--mint); display: block; }
+  #form-status.err { color: var(--crimson); display: block; }
+
+  .demo-banner {
+    background: rgba(249, 115, 22, 0.12); border: 1px solid var(--coral); color: var(--coral);
+    font-size: 12px; padding: 10px 16px; text-align: center; font-family: var(--font-data);
+  }
+
+  footer.site-footer {
+    border-top: 1px solid var(--hairline); padding: 24px 0; text-align: center;
+    font-size: 12px; color: var(--text-muted);
+  }
+
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .map-zone { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .tabs { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="demo-banner" class="demo-banner" style="display:none;">
+  Mostrando datos de demostración — conecta tu Supabase real editando SUPABASE_URL / SUPABASE_ANON_KEY en el código.
+</div>
+
+<header>
+  <div class="wrap nav-row">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="logoGrad" x1="0" y1="0" x2="30" y2="30" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#38BDF8"/>
+            <stop offset="1" stop-color="#34D399"/>
+          </linearGradient>
+        </defs>
+        <path d="M4 20C7 14 11 22 15 16C19 10 23 18 26 12" stroke="url(#logoGrad)" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+        <path d="M4 14C7 8 11 16 15 10C19 4 23 12 26 6" stroke="url(#logoGrad)" stroke-width="2.4" stroke-linecap="round" fill="none" opacity="0.5"/>
+      </svg>
+      <span>mioceano</span>
+    </div>
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="mapa">Mapa</button>
+      <button class="tab-btn" data-tab="cientifico">Panel científico</button>
+      <button class="tab-btn" data-tab="explicador">Explicador</button>
+      <button class="tab-btn" data-tab="reportar">Reportar</button>
+    </nav>
+    <div class="sync-pill"><span class="sync-dot"></span><span id="sync-label">sincronizando…</span></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ============ HERO / KPIs ============ -->
+  <section class="hero">
+    <h1>La bahía tiene <em>datos de sobra</em>.<br>Lo que le falta es un lugar donde vivan juntos.</h1>
+    <p class="lede">SNIFA, DIRECTEMAR y reportes ciudadanos de Quintero-Puchuncaví, cruzados en un solo lugar público — para que fiscalización, ciencia y comunidad dejen de mirar hacia lados distintos.</p>
+    <div class="kpi-grid">
+      <div class="glass kpi-card">
+        <div class="kpi-label">Instalaciones fiscalizadas</div>
+        <div class="kpi-value cyan" id="kpi-facilities">—</div>
+        <div class="kpi-sub">SNIFA · Región de Valparaíso</div>
+      </div>
+      <div class="glass kpi-card">
+        <div class="kpi-label">Lecturas POAL</div>
+        <div class="kpi-value mint" id="kpi-poal">—</div>
+        <div class="kpi-sub">DIRECTEMAR · legado + estandarizado</div>
+      </div>
+      <div class="glass kpi-card">
+        <div class="kpi-label">Reportes ciudadanos (30 días)</div>
+        <div class="kpi-value" id="kpi-reports">—</div>
+        <div class="kpi-sub">No verificados por defecto</div>
+      </div>
+      <div class="glass kpi-card">
+        <div class="kpi-label">Última sincronización</div>
+        <div class="kpi-value" id="kpi-synced" style="font-size:18px;">—</div>
+        <div class="kpi-sub" id="kpi-synced-source">—</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MAP + ALERTS ============ -->
+  <section class="panel" id="tab-mapa">
+    <h2>Fiscalización y calidad del agua</h2>
+    <p class="section-lede">Cada burbuja es una instalación fiscalizada por SNIFA — el tamaño indica cuántos procedimientos tiene, el color indica si alguno terminó en sanción firme. Activa las estaciones POAL para ver dónde se mide calidad de agua directamente.</p>
+
+    <div class="map-controls">
+      <button class="chip on" id="chip-snifa"><span class="legend-dot" style="background:var(--crimson)"></span>SNIFA — instalaciones</button>
+      <button class="chip" id="chip-poal"><span class="legend-dot" style="background:var(--mint)"></span>Estaciones POAL</button>
+      <button class="chip" id="chip-reports"><span class="legend-dot" style="background:var(--coral)"></span>Reportes ciudadanos</button>
+    </div>
+
+    <div class="map-zone">
+      <div>
+        <div id="map"></div>
+        <div class="glass detail-panel" id="detail-panel">
+          <h3 id="detail-title">—</h3>
+          <div id="detail-body" style="font-size:12px;color:var(--text-secondary);"></div>
+          <div class="chart-wrap" id="detail-chart-wrap" style="display:none;"><canvas id="detail-chart"></canvas></div>
+        </div>
+      </div>
+      <div class="glass" style="padding:16px;">
+        <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);margin-bottom:10px;">Actividad reciente</div>
+        <div class="alerts-feed" id="alerts-feed">
+          <div class="alert-item"><div class="a-body">Cargando…</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER: SCIENTIFIC PANEL / EXPLAINER / REPORT ============ -->
+  <section class="footer-zone" id="tab-cientifico">
+    <div class="footer-grid">
+
+      <!-- Scientific panel -->
+      <div class="glass res-card" id="tab-cientifico-inner">
+        <h3>Panel científico</h3>
+        <div id="sci-timeline"><!-- populated by JS --></div>
+      </div>
+
+      <!-- Explainer -->
+      <div class="glass res-card" id="tab-explicador">
+        <h3>¿Qué significan estos datos?</h3>
+        <div id="explainer-acc"><!-- populated by JS --></div>
+      </div>
+
+      <!-- Citizen report -->
+      <div class="glass res-card" id="tab-reportar">
+        <h3>Reportar una descarga o anomalía</h3>
+        <form id="report-form">
+          <div>
+            <label for="rep-category">Categoría</label>
+            <select id="rep-category" required>
+              <option value="">Selecciona…</option>
+              <option value="descarga_visible">Descarga visible</option>
+              <option value="decoloracion">Decoloración del agua</option>
+              <option value="olor">Olor anómalo</option>
+              <option value="peces_muertos">Peces u organismos muertos</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div>
+            <label for="rep-desc">Descripción</label>
+            <textarea id="rep-desc" placeholder="¿Qué observaste? Sé lo más específico posible." required></textarea>
+          </div>
+          <div>
+            <label>Ubicación</label>
+            <button type="button" id="geo-btn">Usar mi ubicación actual</button>
+            <span id="geo-status" style="font-size:11px;color:var(--text-muted);margin-left:6px;"></span>
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="rep-armada">
+            <label for="rep-armada" style="text-transform:none;">¿Reportaste esto también a la Armada (137)?</label>
+          </div>
+          <div>
+            <label for="rep-contact">Contacto (opcional)</label>
+            <input type="text" id="rep-contact" placeholder="Email o teléfono, solo si quieres seguimiento">
+          </div>
+          <button type="submit">Enviar reporte</button>
+          <div id="form-status"></div>
+        </form>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    mioceano.cl — un proyecto ciudadano de transparencia ambiental para la Bahía Quintero-Puchuncaví. Datos: SNIFA (SMA), POAL (DIRECTEMAR), reportes comunitarios.
+  </footer>
+</main>
+
+<script>
+/* ============================================================
+   CONFIG — edit these to connect to your real Supabase project.
+   Find both values in Supabase → Project Settings → API.
+   The anon/publishable key is safe to expose client-side as long
+   as Row Level Security policies are correctly set on every table.
+   ============================================================ */
+const CONFIG = {
+  SUPABASE_URL: 'https://umqsexhwzojnfrcojnga.supabase.co',
+  SUPABASE_ANON_KEY: 'sb_publishable_3e1hkWdR9mIIUO-VALdRRg_D3MmTsbJ',
+  TABLES: {
+    facilities: 'snifa_facilities',
+    events: 'snifa_events',
+    poal: 'poal_readings',
+    reports: 'community_reports',
+    syncRuns: 'sync_runs',
+  },
+};
+
+const DEMO_MODE = CONFIG.SUPABASE_URL.includes('YOUR-PROJECT-REF');
+if (DEMO_MODE) document.getElementById('demo-banner').style.display = 'block';
+
+const supabase = DEMO_MODE ? null : window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+
+/* ---------- demo fallback data (shown if DEMO_MODE or a fetch fails) ---------- */
+const DEMO_FACILITIES = [
+  { id: 'demo-1', razon_social: 'ENAP Refinerías — Terminal Quintero', comuna: 'Quintero', categoria: 'Instalación fabril', lat: -32.7767, lon: -71.5322, sanction_count: 3, event_count: 14 },
+  { id: 'demo-2', razon_social: 'CODELCO Ventanas — Fundición', comuna: 'Puchuncaví', categoria: 'Minería', lat: -32.7433, lon: -71.4886, sanction_count: 1, event_count: 9 },
+  { id: 'demo-3', razon_social: 'AES Andes — Central Ventanas', comuna: 'Puchuncaví', categoria: 'Energía', lat: -32.7480, lon: -71.4910, sanction_count: 0, event_count: 5 },
+  { id: 'demo-4', razon_social: 'ESVAL — Emisario Loma Larga', comuna: 'Concón', categoria: 'Saneamiento Ambiental', lat: -32.9280, lon: -71.5150, sanction_count: 0, event_count: 2 },
+  { id: 'demo-5', razon_social: 'Puerto Ventanas S.A.', comuna: 'Puchuncaví', categoria: 'Infraestructura Portuaria', lat: -32.7455, lon: -71.4935, sanction_count: 2, event_count: 11 },
+];
+const DEMO_POAL_STATIONS = [
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', lat: -32.7460, lon: -71.4920, readings: [
+      { year: 2015, parametro: 'Coliformes fecales', valor_numeric: 1200 },
+      { year: 2018, parametro: 'Cadmio', valor_numeric: 0.03 },
+      { year: 2021, parametro: 'Cadmio', valor_numeric: 0.041 },
+      { year: 2024, parametro: 'Cadmio', valor_numeric: 0.052 },
+  ]},
+  { estacion: 'Muelle ENAP', matriz: 'Agua', lat: -32.7770, lon: -71.5330, readings: [
+      { year: 2014, parametro: 'Coliformes fecales', valor_numeric: 800 },
+      { year: 2017, parametro: 'Coliformes fecales', valor_numeric: 650 },
+      { year: 2020, parametro: 'Plomo', valor_numeric: 0.07 },
+      { year: 2024, parametro: 'Plomo', valor_numeric: 0.09 },
+  ]},
+];
+const DEMO_REPORTS = [
+  { categoria: 'descarga_visible', descripcion: 'Agua con coloración inusual cerca del muelle', lat: -32.751, lon: -71.492, created_at: '2026-07-02T14:00:00Z' },
+];
+const DEMO_EVENTS_RECENT = [
+  { kind: 'sancion', body: 'Nueva sanción firme — CODELCO Ventanas (Registro Público)', when: '2026-06-28', severity: 'crimson' },
+  { kind: 'mismatch', body: 'POAL: Cadmio en Frente CT Nueva Ventanas difiere 6% entre fuente legado y estandarizada', when: '2026-06-20', severity: 'coral' },
+  { kind: 'reporte', body: 'Reporte ciudadano: descarga visible cerca del muelle', when: '2026-07-02', severity: 'mint' },
+];
+
+/* ---------- tiny fetch helper with graceful fallback ---------- */
+async function sbSelect(table, query = '*', extra = (q) => q) {
+  if (DEMO_MODE) return null;
+  try {
+    let q = supabase.from(table).select(query);
+    q = extra(q);
+    const { data, error } = await q;
+    if (error) throw error;
+    return data;
+  } catch (e) {
+    console.warn(`Supabase read failed on ${table}:`, e.message);
+    return null;
+  }
+}
+
+/* ============================================================
+   HERO KPIs
+   ============================================================ */
+async function loadKPIs() {
+  const facilities = await sbSelect(CONFIG.TABLES.facilities, 'id', (q) => q);
+  const poal = await sbSelect(CONFIG.TABLES.poal, 'id', (q) => q);
+  const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
+  const reports = await sbSelect(CONFIG.TABLES.reports, 'id, created_at', (q) => q.gte('created_at', since));
+  const lastSync = await sbSelect(CONFIG.TABLES.syncRuns, 'source, finished_at, status', (q) => q.order('finished_at', { ascending: false }).limit(1));
+
+  document.getElementById('kpi-facilities').textContent = (facilities ? facilities.length : DEMO_FACILITIES.length).toLocaleString('es-CL');
+  document.getElementById('kpi-poal').textContent = (poal ? poal.length : 4500).toLocaleString('es-CL');
+  document.getElementById('kpi-reports').textContent = (reports ? reports.length : DEMO_REPORTS.length).toLocaleString('es-CL');
+
+  if (lastSync && lastSync[0]) {
+    const d = new Date(lastSync[0].finished_at);
+    document.getElementById('kpi-synced').textContent = d.toLocaleDateString('es-CL', { day: '2-digit', month: 'short' });
+    document.getElementById('kpi-synced-source').textContent = lastSync[0].source;
+    document.getElementById('sync-label').textContent = lastSync[0].status === 'success' ? 'sincronizado' : 'revisar última sync';
+  } else {
+    document.getElementById('kpi-synced').textContent = DEMO_MODE ? 'demo' : '—';
+    document.getElementById('kpi-synced-source').textContent = DEMO_MODE ? 'sin conexión real' : 'sin datos aún';
+    document.getElementById('sync-label').textContent = DEMO_MODE ? 'modo demo' : 'sin datos';
+  }
+}
+loadKPIs();
+
+/* ============================================================
+   MAP
+   ============================================================ */
+const map = L.map('map', { zoomControl: true, attributionControl: false }).setView([-32.78, -71.48], 12);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  subdomains: 'abcd', maxZoom: 19,
+}).addTo(map);
+
+const layers = { snifa: L.layerGroup().addTo(map), poal: L.layerGroup(), reports: L.layerGroup() };
+
+function facilityColor(f) {
+  const sanctions = f.sanction_count ?? 0;
+  if (sanctions > 0) return '#EF4444';
+  return '#38BDF8';
+}
+function facilityRadius(f) {
+  const n = f.event_count ?? 1;
+  return Math.min(8 + n * 1.6, 28);
+}
+
+async function loadSnifaLayer() {
+  let facilities = await sbSelect(CONFIG.TABLES.facilities, 'id, razon_social, comuna, categoria, lat, lon');
+  let counts = {};
+  if (!DEMO_MODE && facilities) {
+    const events = await sbSelect(CONFIG.TABLES.events, 'facility_id, section');
+    (events || []).forEach(e => {
+      counts[e.facility_id] = counts[e.facility_id] || { event_count: 0, sanction_count: 0 };
+      counts[e.facility_id].event_count++;
+      if (e.section === 'registro_publico_sanciones') counts[e.facility_id].sanction_count++;
+    });
+    facilities = facilities.filter(f => f.lat && f.lon).map(f => ({
+      ...f, ...(counts[f.id] || { event_count: 1, sanction_count: 0 }),
+    }));
+  }
+  if (!facilities || facilities.length === 0) facilities = DEMO_FACILITIES;
+
+  facilities.forEach(f => {
+    const marker = L.circleMarker([f.lat, f.lon], {
+      radius: facilityRadius(f), color: facilityColor(f), weight: 1.5,
+      fillColor: facilityColor(f), fillOpacity: 0.35,
+    });
+    marker.on('click', () => showFacilityDetail(f));
+    marker.addTo(layers.snifa);
+  });
+}
+
+async function loadPoalLayer() {
+  let readings = await sbSelect(CONFIG.TABLES.poal, 'estacion, matriz, parametro, valor_numeric, year, latitud, longitud');
+  let stations;
+  if (!DEMO_MODE && readings) {
+    const byStation = {};
+    readings.forEach(r => {
+      if (!r.latitud || !r.longitud) return;
+      const key = r.estacion;
+      byStation[key] = byStation[key] || { estacion: r.estacion, matriz: r.matriz, lat: parseFloat(r.latitud), lon: parseFloat(r.longitud), readings: [] };
+      byStation[key].readings.push(r);
+    });
+    stations = Object.values(byStation);
+  }
+  if (!stations || stations.length === 0) stations = DEMO_POAL_STATIONS;
+
+  stations.forEach(s => {
+    if (!s.lat || !s.lon) return;
+    const marker = L.circleMarker([s.lat, s.lon], {
+      radius: 7, color: '#34D399', weight: 1.5, fillColor: '#34D399', fillOpacity: 0.4,
+    });
+    marker.on('click', () => showPoalDetail(s));
+    marker.addTo(layers.poal);
+  });
+}
+
+async function loadReportsLayer() {
+  let reports = await sbSelect(CONFIG.TABLES.reports, 'categoria, descripcion, lat, lon, created_at');
+  if (!reports || reports.length === 0) reports = DEMO_REPORTS;
+  reports.forEach(r => {
+    if (!r.lat || !r.lon) return;
+    const marker = L.circleMarker([r.lat, r.lon], {
+      radius: 6, color: '#F97316', weight: 1.5, fillColor: '#F97316', fillOpacity: 0.5, dashArray: '2,2',
+    });
+    marker.bindTooltip(`Reporte ciudadano (no verificado): ${r.categoria}`, { direction: 'top' });
+    marker.addTo(layers.reports);
+  });
+}
+
+loadSnifaLayer();
+loadPoalLayer();
+loadReportsLayer();
+
+document.getElementById('chip-snifa').addEventListener('click', (e) => toggleLayer('snifa', e.currentTarget));
+document.getElementById('chip-poal').addEventListener('click', (e) => toggleLayer('poal', e.currentTarget));
+document.getElementById('chip-reports').addEventListener('click', (e) => toggleLayer('reports', e.currentTarget));
+function toggleLayer(key, btn) {
+  if (map.hasLayer(layers[key])) { map.removeLayer(layers[key]); btn.classList.remove('on'); }
+  else { map.addLayer(layers[key]); btn.classList.add('on'); }
+}
+
+/* ---------- detail panel ---------- */
+let detailChart = null;
+function showFacilityDetail(f) {
+  const panel = document.getElementById('detail-panel');
+  panel.classList.add('show');
+  document.getElementById('detail-chart-wrap').style.display = 'none';
+  document.getElementById('detail-title').textContent = f.razon_social || 'Instalación';
+  document.getElementById('detail-body').innerHTML = `
+    <div>${f.categoria || '—'} · ${f.comuna || '—'}</div>
+    <div style="margin-top:6px;">${(f.event_count ?? '—')} procedimientos registrados · ${(f.sanction_count ?? 0)} sanciones firmes</div>
+    <div style="margin-top:6px;color:var(--text-muted);font-size:11px;">SNIFA no publica una tasa de cumplimiento — esto es el conteo bruto de procedimientos, no un veredicto.</div>
+  `;
+}
+function showPoalDetail(s) {
+  const panel = document.getElementById('detail-panel');
+  panel.classList.add('show');
+  document.getElementById('detail-title').textContent = s.estacion;
+  document.getElementById('detail-body').innerHTML = `<div>Matriz: ${s.matriz || '—'} · ${s.readings.length} lecturas</div>`;
+  const wrap = document.getElementById('detail-chart-wrap');
+  wrap.style.display = 'block';
+  const ctx = document.getElementById('detail-chart').getContext('2d');
+  if (detailChart) detailChart.destroy();
+  const sorted = [...s.readings].sort((a, b) => (a.year || 0) - (b.year || 0));
+  detailChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: sorted.map(r => r.year),
+      datasets: [{
+        label: 'Valor', data: sorted.map(r => r.valor_numeric),
+        borderColor: '#38BDF8', backgroundColor: 'rgba(56,189,248,0.15)', tension: 0.3, fill: true,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#6C7F9C', font: { family: 'IBM Plex Mono', size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+        y: { ticks: { color: '#6C7F9C', font: { family: 'IBM Plex Mono', size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+      },
+    },
+  });
+}
+
+/* ============================================================
+   ALERTS FEED
+   ============================================================ */
+async function loadAlerts() {
+  const feed = document.getElementById('alerts-feed');
+  let items = [];
+
+  if (!DEMO_MODE) {
+    const sanctions = await sbSelect(CONFIG.TABLES.events, 'facility_id, section, estado, anio', (q) =>
+      q.eq('section', 'registro_publico_sanciones').order('anio', { ascending: false }).limit(5));
+    const mismatches = await sbSelect(CONFIG.TABLES.poal, 'estacion, parametro, match_status, year', (q) =>
+      q.eq('match_status', 'value_mismatch').order('year', { ascending: false }).limit(5));
+    const reports = await sbSelect(CONFIG.TABLES.reports, 'categoria, descripcion, created_at', (q) =>
+      q.order('created_at', { ascending: false }).limit(5));
+
+    (sanctions || []).forEach(s => items.push({ kind: 'Sanción firme', body: `Instalación ${s.facility_id?.split('/').pop() || '—'}`, when: s.anio, severity: 'crimson' }));
+    (mismatches || []).forEach(m => items.push({ kind: 'POAL — discrepancia', body: `${m.parametro} en ${m.estacion} difiere entre fuentes`, when: m.year, severity: 'coral' }));
+    (reports || []).forEach(r => items.push({ kind: 'Reporte ciudadano', body: r.descripcion?.slice(0, 80) || r.categoria, when: new Date(r.created_at).toLocaleDateString('es-CL'), severity: 'mint' }));
+  }
+
+  if (items.length === 0) {
+    items = DEMO_EVENTS_RECENT.map(e => ({ kind: e.kind, body: e.body, when: e.when, severity: e.severity }));
+  }
+
+  feed.innerHTML = items.map(i => `
+    <div class="alert-item ${i.severity}">
+      <div class="a-kind">${i.kind}</div>
+      <div class="a-body">${i.body}</div>
+      <div class="a-meta">${i.when || ''}</div>
+    </div>
+  `).join('');
+}
+loadAlerts();
+
+/* ============================================================
+   SCIENTIFIC PANEL — curated, published sources only.
+   Do NOT add unpublished figures here (e.g. any not-yet-published
+   coliform data) — anything not peer-reviewed or publicly released
+   stays off this public page until its authors publish it.
+   ============================================================ */
+const SCI_TIMELINE = [
+  { year: '1993', title: 'POAL — DIRECTEMAR', desc: 'Inicio del monitoreo bianual de agua, sedimento y biota en el litoral chileno, incluyendo Quintero-Puchuncaví.' },
+  { year: '2017', title: 'Quiebre en el panel de monitoreo', desc: 'Los indicadores de aguas servidas (coliformes fecales, oxígeno disuelto) dejan de medirse en las estaciones POAL de la bahía; los metales pesados continúan.' },
+  { year: '2024', title: 'D.S. 43/2023 — Norma Secundaria de Calidad Ambiental', desc: 'Publicada el 2 de octubre de 2024 para la bahía. El monitoreo exigido por la norma aún no ha comenzado.' },
+  { year: '2026', title: 'Curaz-Leiva et al.', desc: 'Estudio de 144 muestras de metales pesados en biota, comparando Quintero-Puchuncaví con el sitio control de Quintay, 10 especies, 8 metales.' },
+];
+document.getElementById('sci-timeline').innerHTML = SCI_TIMELINE.map(t => `
+  <div class="timeline-item">
+    <div class="timeline-year">${t.year}</div>
+    <div class="timeline-body">
+      <div class="t-title">${t.title}</div>
+      <div class="t-desc">${t.desc}</div>
+    </div>
+  </div>
+`).join('');
+
+/* ============================================================
+   EXPLAINER ACCORDION
+   ============================================================ */
+const EXPLAINER_ITEMS = [
+  {
+    q: '¿Qué son los coliformes fecales?',
+    a: 'Bacterias indicadoras de contaminación por aguas servidas. Programas de seguridad de mariscos en otros países exigen un promedio geométrico bajo 14 organismos por 100 mL en aguas de cultivo — un estándar mucho más estricto que el usado para playas de baño (cercano a 200/100 mL).',
+    src: 'Referencia internacional (NSSP / estándares comparables) — no es un límite legal chileno.',
+  },
+  {
+    q: '¿Qué significa que haya cadmio o plomo en el agua o los mariscos?',
+    a: 'Son metales pesados que se acumulan en tejido biológico con el tiempo. La Unión Europea limita el cadmio a 0.05 mg/kg y el plomo a 0.3 mg/kg en la mayoría de los peces; Codex Alimentarius fija sus propios límites según la especie y matriz.',
+    src: 'EU Commission Regulation (EC) 488/2014; Codex Alimentarius CXS 193-1995.',
+  },
+  {
+    q: '¿Por qué Chile no tiene un límite de cadmio para mariscos?',
+    a: 'A diferencia de la UE y Codex, la normativa chilena de seguridad alimentaria no fija un límite específico de cadmio para productos del mar — un vacío regulatorio que esta plataforma documenta, no resuelve.',
+    src: 'Hallazgo del equipo, ver Regulatory Gap Map.',
+  },
+  {
+    q: '¿Qué efectos tiene el cadmio y el plomo en la salud?',
+    a: 'El cadmio daña los riñones y debilita los huesos con exposición prolongada. El plomo es neurotóxico, especialmente dañino para el desarrollo del sistema nervioso en niños — la OMS no ha identificado un nivel de plomo en sangre considerado seguro.',
+    src: 'Consenso científico general — no reemplaza orientación médica.',
+  },
+];
+document.getElementById('explainer-acc').innerHTML = EXPLAINER_ITEMS.map((item, i) => `
+  <div class="acc-item" id="acc-${i}">
+    <button class="acc-trigger" onclick="toggleAcc(${i})">
+      <span>${item.q}</span>
+      <span class="chevron">⌄</span>
+    </button>
+    <div class="acc-panel">
+      <p>${item.a}</p>
+      <div class="src">${item.src}</div>
+    </div>
+  </div>
+`).join('');
+function toggleAcc(i) {
+  document.getElementById(`acc-${i}`).classList.toggle('open');
+}
+
+/* ============================================================
+   TABS (scroll-to + active state — sections stay on one page)
+   ============================================================ */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const target = document.getElementById(`tab-${btn.dataset.tab}`);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+/* ============================================================
+   CITIZEN REPORT FORM
+   ============================================================ */
+let geoLat = null, geoLon = null;
+document.getElementById('geo-btn').addEventListener('click', () => {
+  const status = document.getElementById('geo-status');
+  if (!navigator.geolocation) { status.textContent = 'Geolocalización no disponible en este navegador.'; return; }
+  status.textContent = 'Obteniendo ubicación…';
+  navigator.geolocation.getCurrentPosition(
+    (pos) => { geoLat = pos.coords.latitude; geoLon = pos.coords.longitude; status.textContent = `Ubicación capturada (${geoLat.toFixed(4)}, ${geoLon.toFixed(4)})`; },
+    () => { status.textContent = 'No se pudo obtener la ubicación — puedes enviar el reporte sin ella.'; },
+  );
+});
+
+document.getElementById('report-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const statusEl = document.getElementById('form-status');
+  const payload = {
+    categoria: document.getElementById('rep-category').value,
+    descripcion: document.getElementById('rep-desc').value,
+    lat: geoLat, lon: geoLon,
+    reported_to_armada: document.getElementById('rep-armada').checked,
+    contact: document.getElementById('rep-contact').value || null,
+    status: 'unverified',
+    created_at: new Date().toISOString(),
+  };
+
+  if (DEMO_MODE) {
+    statusEl.textContent = 'Modo demo — este reporte no se guardó. Conecta Supabase para activar el envío real.';
+    statusEl.className = 'err';
+    return;
+  }
+
+  try {
+    const { error } = await supabase.from(CONFIG.TABLES.reports).insert([payload]);
+    if (error) throw error;
+    statusEl.textContent = 'Reporte enviado. Gracias — aparecerá en el mapa como no verificado.';
+    statusEl.className = 'ok';
+    e.target.reset();
+    geoLat = null; geoLon = null;
+    document.getElementById('geo-status').textContent = '';
+    loadAlerts();
+  } catch (err) {
+    statusEl.textContent = `No se pudo enviar: ${err.message}. Verifica que la tabla community_reports permita inserciones públicas (RLS).`;
+    statusEl.className = 'err';
+  }
+});
+</script>
+</body>
+</html>
