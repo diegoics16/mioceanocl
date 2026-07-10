@@ -1,0 +1,45 @@
+name: SNIFA weekly sync
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'   # every Monday, 09:00 UTC
+  workflow_dispatch: {}    # manual "Run workflow" button - use this to test
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install playwright requests
+          # Installs the real Chrome channel, not just bundled Chromium -
+          # this is a genuine attempt at the anti-detection setup working
+          # in a headless CI runner. Not a confirmed-working combination -
+          # the only proven-working test was a real visible browser window,
+          # which no CI runner has. Check the first run's actual results
+          # (especially fiscalizaciones) before trusting this unattended.
+          playwright install --with-deps chrome
+
+      - name: Run the SNIFA scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SNIFA_HEADFUL: "0"   # forced - GitHub Actions runners have no display,
+                                 # headful isn't an option here regardless
+        run: python snifa_scraper.py
+
+      - name: Upload local backups as a build artifact (survives even if Supabase write fails)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snifa-local-backup
+          path: local_backup/
+          retention-days: 90
