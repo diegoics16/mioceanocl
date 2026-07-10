@@ -1,0 +1,39 @@
+name: POAL monthly sync
+
+on:
+  schedule:
+    - cron: '0 8 1 * *'   # 08:00 UTC on the 1st of every month
+  workflow_dispatch: {}    # manual "Run workflow" button - use this to test
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60   # full run is ~15+ min per the script's own docstring;
+                            # generous ceiling so a hang fails loudly instead of
+                            # burning your Actions minutes for hours
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests pandas beautifulsoup4 xlrd openpyxl lxml
+
+      - name: Run the POAL pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python poal_full_pipeline.py
+
+      - name: Upload output CSVs as a build artifact (survives even if Supabase push fails)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: poal-output
+          path: poal_output/
+          retention-days: 90
