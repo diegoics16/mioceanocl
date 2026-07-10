@@ -463,19 +463,38 @@ async function sbSelect(table, query = '*', extra = (q) => q) {
   }
 }
 
+/* Counting via .select(query).length caps at Supabase's default 1000-row
+   page size — fine while tables are small, silently wrong once poal_readings
+   or snifa_events grow past 1000 rows (which they will). head:true asks
+   Postgres for an exact count without transferring any rows at all, so
+   it's both correct at any table size and cheaper than sbSelect. */
+async function sbCount(table, extra = (q) => q) {
+  if (DEMO_MODE) return null;
+  try {
+    let q = supabase.from(table).select('*', { count: 'exact', head: true });
+    q = extra(q);
+    const { count, error } = await q;
+    if (error) throw error;
+    return count;
+  } catch (e) {
+    console.warn(`Supabase count failed on ${table}:`, e.message);
+    return null;
+  }
+}
+
 /* ============================================================
    HERO KPIs
    ============================================================ */
 async function loadKPIs() {
-  const facilities = await sbSelect(CONFIG.TABLES.facilities, 'id', (q) => q);
-  const poal = await sbSelect(CONFIG.TABLES.poal, 'id', (q) => q);
+  const facilitiesCount = await sbCount(CONFIG.TABLES.facilities);
+  const poalCount = await sbCount(CONFIG.TABLES.poal);
   const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
-  const reports = await sbSelect(CONFIG.TABLES.reports, 'id, created_at', (q) => q.gte('created_at', since));
+  const reportsCount = await sbCount(CONFIG.TABLES.reports, (q) => q.gte('created_at', since));
   const lastSync = await sbSelect(CONFIG.TABLES.syncRuns, 'source, finished_at, status', (q) => q.order('finished_at', { ascending: false }).limit(1));
 
-  document.getElementById('kpi-facilities').textContent = (facilities ? facilities.length : DEMO_FACILITIES.length).toLocaleString('es-CL');
-  document.getElementById('kpi-poal').textContent = (poal ? poal.length : 4500).toLocaleString('es-CL');
-  document.getElementById('kpi-reports').textContent = (reports ? reports.length : DEMO_REPORTS.length).toLocaleString('es-CL');
+  document.getElementById('kpi-facilities').textContent = (facilitiesCount ?? DEMO_FACILITIES.length).toLocaleString('es-CL');
+  document.getElementById('kpi-poal').textContent = (poalCount ?? 4500).toLocaleString('es-CL');
+  document.getElementById('kpi-reports').textContent = (reportsCount ?? DEMO_REPORTS.length).toLocaleString('es-CL');
 
   if (lastSync && lastSync[0]) {
     const d = new Date(lastSync[0].finished_at);
