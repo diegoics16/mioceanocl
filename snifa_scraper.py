@@ -68,7 +68,7 @@ REGISTRY_MODULES = {
     "fiscalizaciones": {"url": "https://snifa.sma.gob.cl/Fiscalizacion", "categoria_field": "categoria", "detail_prefix": "/Fiscalizacion/Ficha/"},
 }
 
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_URL = (os.environ.get("SUPABASE_URL") or "").rstrip("/")
 SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
 HEADLESS = os.environ.get("SNIFA_HEADFUL", "1") != "1"  # headful by default; CI forces this via env
 
@@ -83,6 +83,8 @@ def check_credentials():
     if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
         print("SUPABASE_URL / SUPABASE_SERVICE_KEY not set.")
         raise SystemExit(1)
+    print(f"Testing Supabase connection against: {SUPABASE_URL}/rest/v1/sync_runs")
+    print(f"(SUPABASE_URL as received, length {len(SUPABASE_URL)}: {SUPABASE_URL!r})")
     try:
         supabase_write("sync_runs", [{
             "source": "credentials_check", "started_at": datetime.now(timezone.utc).isoformat(),

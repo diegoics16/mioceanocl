@@ -70,7 +70,7 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) research-scr
 # local backup written BEFORE the network call so a credentials/network
 # failure can't lose an hour of parsing.
 # ---------------------------------------------------------------------------
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_URL = (os.environ.get("SUPABASE_URL") or "").rstrip("/")
 SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
 SUPABASE_TABLE = "poal_readings"
 SUPABASE_CHUNK_SIZE = 500  # rows per POST — centralized dataset can run into the
@@ -82,6 +82,8 @@ def check_credentials():
         print("SUPABASE_URL / SUPABASE_SERVICE_KEY not set — will run the full parse "
               "and write local CSVs, but will SKIP the Supabase push at the end.")
         return False
+    print(f"Testing Supabase connection against: {SUPABASE_URL}/rest/v1/sync_runs")
+    print(f"(SUPABASE_URL as received, length {len(SUPABASE_URL)}: {SUPABASE_URL!r})")
     try:
         supabase_write("sync_runs", [{
             "source": "credentials_check", "started_at": datetime.now(timezone.utc).isoformat(),
