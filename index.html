@@ -5,6 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>mioceano — Bahía Quintero-Puchuncaví</title>
 
+<!-- Error visibility, installed BEFORE any CDN script below so a failure
+     in Leaflet/Chart.js/Supabase loading itself gets caught too, not just
+     errors in our own code further down. Body doesn't exist yet this early,
+     so failures queue here and get flushed into a visible banner by the
+     main script at the bottom of the page. -->
+<script>
+  window.__pageErrors = [];
+  window.addEventListener('error', function (e) {
+    if (e.target && e.target !== window && e.target.tagName) {
+      var src = e.target.src || e.target.href || '(fuente desconocida)';
+      window.__pageErrors.push('no se pudo cargar un recurso externo: ' + src);
+      return;
+    }
+    window.__pageErrors.push((e.message || 'error desconocido') + ' — línea ' + e.lineno + (e.filename ? ' de ' + e.filename.split('/').pop() : ''));
+  }, true);
+  window.addEventListener('unhandledrejection', function (e) {
+    window.__pageErrors.push('promesa no manejada — ' + (e.reason && e.reason.message ? e.reason.message : String(e.reason)));
+  });
+</script>
+
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -299,7 +319,7 @@
   <!-- ============ HERO / KPIs ============ -->
   <section class="hero">
     <div class="hero-eyebrow">Bahía Quintero-Puchuncaví</div>
-    <h1>Valparaiso, <em>en vivo</em>.</h1>
+    <h1>La bahía, <em>en vivo</em>.</h1>
     <p class="lede">Fiscalizaciones, mediciones de agua y reportes ciudadanos, en un solo lugar público.</p>
 
     <div class="trust-strip">
@@ -428,6 +448,43 @@
 </main>
 
 <script>
+/* ============================================================
+   ERROR VISIBILITY — catches any uncaught error or promise
+   rejection anywhere on this page and shows it directly, on the
+   page itself, in plain sight. No F12 needed. This exists because
+   the last two rounds of debugging this page relied on browser
+   console output that was hard to get — this makes that step
+   unnecessary. If the page is broken, this WILL say why, at the
+   very top, in red.
+   ============================================================ */
+(function () {
+  var shown = false;
+  function showError(msg) {
+    if (shown) return; // one banner is enough, don't stack duplicates
+    shown = true;
+    var el = document.createElement('div');
+    el.style.cssText = 'background:#DC2626;color:#fff;padding:14px 20px;font-family:monospace;font-size:13px;text-align:left;white-space:pre-wrap;position:relative;z-index:9999;';
+    el.textContent = 'ERROR EN LA PÁGINA: ' + msg;
+    document.body.insertBefore(el, document.body.firstChild);
+  }
+  // flush anything caught before this script even ran (e.g. a CDN <script>
+  // in <head> failing to load) — this is the gap a bottom-only handler misses
+  if (window.__pageErrors && window.__pageErrors.length) {
+    showError(window.__pageErrors[0]);
+  }
+  window.addEventListener('error', function (e) {
+    if (e.target && e.target !== window && e.target.tagName) {
+      var src = e.target.src || e.target.href || '(fuente desconocida)';
+      showError('no se pudo cargar un recurso externo: ' + src);
+      return;
+    }
+    showError((e.message || 'error desconocido') + ' — línea ' + e.lineno + (e.filename ? ' de ' + e.filename.split('/').pop() : ''));
+  }, true);
+  window.addEventListener('unhandledrejection', function (e) {
+    showError('promesa no manejada — ' + (e.reason && e.reason.message ? e.reason.message : String(e.reason)));
+  });
+})();
+
 /* ============================================================
    CONFIG — edit these to connect to your real Supabase project.
    Find both values in Supabase → Project Settings → API.
