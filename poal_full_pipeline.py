@@ -116,21 +116,36 @@ def supabase_write(table, rows, on_conflict=None):
 def supabase_write_chunked(table, rows, on_conflict=None, label=""):
     """Same as supabase_write but in batches, with progress printed — the
     centralized POAL dataset is long-format and can easily be 5,000+ rows
-    once legacy + standardized are both included."""
+    once legacy + standardized are both included.
+
+    Returns (written, failed, first_error) — NOT just len(rows). A previous
+    version of this function returned len(rows) unconditionally, so a run
+    where every single chunk failed still logged status="success" with the
+    full attempted row count. That's the exact bug behind sync_runs showing
+    rows_written=83814 while poal_readings was empty: the number logged was
+    always "attempted," never "actually landed."
+    """
     if not rows:
-        return 0
+        return 0, 0, None
     n_chunks = (len(rows) + SUPABASE_CHUNK_SIZE - 1) // SUPABASE_CHUNK_SIZE
+    written = 0
+    failed = 0
+    first_error = None
     for i in range(0, len(rows), SUPABASE_CHUNK_SIZE):
         chunk = rows[i:i + SUPABASE_CHUNK_SIZE]
         chunk_num = i // SUPABASE_CHUNK_SIZE + 1
         try:
             supabase_write(table, chunk, on_conflict=on_conflict)
             print(f"    [{label}] chunk {chunk_num}/{n_chunks} written ({len(chunk)} rows)")
+            written += len(chunk)
         except Exception as e:
             print(f"    [{label}] chunk {chunk_num}/{n_chunks} FAILED ({len(chunk)} rows): {e}")
+            failed += len(chunk)
+            if first_error is None:
+                first_error = str(e)
             # keep going — one bad chunk (e.g. a NaN that serializes wrong)
             # shouldn't block every other chunk from landing
-    return len(rows)
+    return written, failed, first_error
 
 
 def log_sync_run(source, started_at, finished_at, status, rows_written, error=None):
@@ -601,7 +616,10 @@ def push_centralized_to_supabase(centralized_df):
     export_df = centralized_df[present_cols].where(pd.notnull(centralized_df[present_cols]), None)
     rows = export_df.to_dict("records")
     print(f"\nPushing {len(rows)} centralized rows to Supabase table '{SUPABASE_TABLE}'...")
-    return supabase_write_chunked(SUPABASE_TABLE, rows, on_conflict="id", label=SUPABASE_TABLE)
+    written, failed, first_error = supabase_write_chunked(SUPABASE_TABLE, rows, on_conflict="id", label=SUPABASE_TABLE)
+    print(f"\n[{SUPABASE_TABLE}] {written} rows actually written, {failed} rows failed"
+          + (f" — first error: {first_error}" if first_error else ""))
+    return written, failed, first_error
 
 
 def sample_files(files):
@@ -699,6 +717,7 @@ def main():
     print("\n" + "=" * 80)
     print("PHASE 4 — push centralized dataset to Supabase")
     print("=" * 80)
+    push_error = None
     if not has_supabase:
         print("Skipped — no working Supabase credentials this run. Local CSVs in ./poal_output/ "
               "are complete; run again with SUPABASE_URL / SUPABASE_SERVICE_KEY set to push them.")
@@ -708,13 +727,31 @@ def main():
         log_status, rows_written = "success_empty", 0
     else:
         try:
-            rows_written = push_centralized_to_supabase(centralized_df)
-            log_status = "success"
+            written, failed, first_error = push_centralized_to_supabase(centralized_df)
+            rows_written = written
+            if failed == 0:
+                log_status = "success"
+            elif written == 0:
+                log_status = "failed"
+                push_error = first_error
+                print(f"\n[FAILED] ALL {failed} rows failed to write to '{SUPABASE_TABLE}'. "
+                      f"First error: {first_error}")
+                print("This almost always means either (a) the 'id' column in poal_readings "
+                      "doesn't accept the string ids this script generates (check its column "
+                      "type in the Supabase table editor — it needs to be text, not int8/uuid), "
+                      "or (b) there's no unique constraint on 'id' for on_conflict to target, "
+                      "or (c) an RLS policy is blocking the service key. Check the exact error "
+                      "text above against those three first.")
+            else:
+                log_status = "partial_failure"
+                push_error = f"{failed} of {written + failed} rows failed; first error: {first_error}"
+                print(f"\n[PARTIAL FAILURE] {written} rows written, {failed} rows failed. "
+                      f"First error: {first_error}")
         except Exception as e:
             print(f"[FAILED] Supabase push: {e}")
-            log_status, rows_written = "failed", 0
+            log_status, rows_written, push_error = "failed", 0, str(e)
 
-    log_sync_run("poal_pipeline", pipeline_started_at, datetime.now(timezone.utc), log_status, rows_written)
+    log_sync_run("poal_pipeline", pipeline_started_at, datetime.now(timezone.utc), log_status, rows_written, error=push_error)
 
     print("\nDone. Check ./poal_output/parsing_manifest.csv first — that tells you how much of the")
     print("legacy archive actually parsed cleanly before trusting anything downstream of it.")
