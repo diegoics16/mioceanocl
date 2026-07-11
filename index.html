@@ -166,7 +166,23 @@
   }
 
   /* ---------- map + alerts zone ---------- */
-  .map-zone { display: grid; grid-template-columns: 1fr 340px; gap: 16px; align-items: start; }
+  .map-shell-fullbleed {
+    width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);
+  }
+  .map-shell-fullbleed #map { border-radius: 0; height: 500px; }
+  .map-below-grid { margin-top: 16px; }
+  .map-below-grid .detail-panel { margin-bottom: 16px; }
+
+  .region-photo-band {
+    position: relative; width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);
+    height: 340px; overflow: hidden; margin-top: 8px; margin-bottom: 40px;
+  }
+  .region-photo-band img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .region-photo-caption {
+    position: absolute; bottom: 0; left: 0; right: 0; padding: 16px 28px;
+    background: linear-gradient(transparent, rgba(15,36,56,0.78));
+    color: #F3F6F8; font-size: 11px; font-family: var(--font-data);
+  }
   .map-shell { position: relative; }
   #map {
     height: 560px; border-radius: 16px; border: 1px solid var(--hairline);
@@ -347,7 +363,6 @@
 
   @media (max-width: 900px) {
     .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-    .map-zone { grid-template-columns: 1fr; }
     .footer-grid { grid-template-columns: 1fr; }
     .footer-grid-2 { grid-template-columns: 1fr; }
     .sci-timeline-track { height: auto; }
@@ -403,6 +418,11 @@
     </div>
   </section>
 
+  <div class="region-photo-band">
+    <img src="https://images.unsplash.com/photo-1718781208870-a7a8be57c448?auto=format&fit=crop&w=2000&q=75" alt="Vista costera de la Región de Valparaíso, Chile" loading="lazy">
+    <div class="region-photo-caption">Región de Valparaíso, Chile · Foto: Denys Amaro / Unsplash</div>
+  </div>
+
   <!-- ============ MAP + ALERTS ============ -->
   <section class="panel" id="tab-mapa">
     <h2>Qué está pasando</h2>
@@ -411,22 +431,21 @@
       <button class="chip on" id="chip-snifa"><span class="legend-dot" style="background:var(--crimson)"></span>SNIFA — instalaciones</button>
     </div>
 
-    <div class="map-zone">
-      <div>
-        <div class="map-shell">
-          <div id="map"></div>
-          <div class="map-info-badge">
-            ⓘ
-            <div class="map-info-panel">
-              <strong>Cómo leer el mapa</strong>
-              Cada burbuja es una instalación fiscalizada por SNIFA. El tamaño indica cuántos procedimientos tiene; el color indica si alguno terminó en sanción firme.
-            </div>
-          </div>
+    <div class="map-shell map-shell-fullbleed">
+      <div id="map"></div>
+      <div class="map-info-badge">
+        ⓘ
+        <div class="map-info-panel">
+          <strong>Cómo leer el mapa</strong>
+          Cada burbuja es una instalación fiscalizada por SNIFA. El tamaño indica cuántos procedimientos tiene; el color indica si alguno terminó en sanción firme.
         </div>
-        <div class="glass detail-panel" id="detail-panel">
-          <h3 id="detail-title">—</h3>
-          <div id="detail-body" style="font-size:12px;color:var(--ink-secondary);"></div>
-        </div>
+      </div>
+    </div>
+
+    <div class="map-below-grid">
+      <div class="glass detail-panel" id="detail-panel">
+        <h3 id="detail-title">—</h3>
+        <div id="detail-body" style="font-size:12px;color:var(--ink-secondary);"></div>
       </div>
       <div class="glass" style="padding:16px;">
         <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-muted);margin-bottom:10px;">Actividad reciente</div>
