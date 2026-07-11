@@ -174,8 +174,6 @@
     width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);
   }
   .map-shell-fullbleed #map { border-radius: 0; height: 500px; }
-  .map-below-grid { margin-top: 16px; }
-  .map-below-grid .detail-panel { margin-bottom: 16px; }
 
   .region-photo-band {
     position: relative; width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);
@@ -241,23 +239,6 @@
   .popup-outcome { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--ink-secondary); }
   .popup-outcome-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
   .popup-caveat { color: var(--ink-muted); font-size: 10.5px; font-style: italic; border-top: 1px solid rgba(15,36,56,0.08); padding-top: 6px; }
-
-  .alerts-feed { display: flex; flex-direction: column; gap: 10px; max-height: 560px; overflow-y: auto; padding-right: 4px; }
-  .alert-item {
-    padding: 12px 14px; border-radius: 10px; background: var(--bg-alt);
-    border-left: 3px solid var(--cyan); font-size: 13px;
-  }
-  .alert-item.crimson { border-left-color: var(--crimson); }
-  .alert-item.coral { border-left-color: var(--coral); }
-  .alert-item.mint { border-left-color: var(--mint); }
-  .alert-item .a-kind { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-muted); margin-bottom: 3px; }
-  .alert-item .a-body { color: var(--ink); line-height: 1.4; }
-  .alert-item .a-meta { font-family: var(--font-data); font-size: 11px; color: var(--ink-muted); margin-top: 4px; }
-
-  .detail-panel { margin-top: 16px; padding: 18px; display: none; }
-  .detail-panel.show { display: block; }
-  .detail-panel h3 { font-family: var(--font-ui); font-size: 15px; margin-bottom: 10px; }
-  .detail-panel .chart-wrap { height: 180px; margin-top: 10px; }
 
   /* ---------- POAL trends ---------- */
   .poal-select {
@@ -477,19 +458,6 @@
         </div>
       </div>
     </div>
-
-    <div class="map-below-grid">
-      <div class="glass detail-panel" id="detail-panel">
-        <h3 id="detail-title">—</h3>
-        <div id="detail-body" style="font-size:12px;color:var(--ink-secondary);"></div>
-      </div>
-      <div class="glass" style="padding:16px;">
-        <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-muted);margin-bottom:10px;">Actividad reciente</div>
-        <div class="alerts-feed" id="alerts-feed">
-          <div class="alert-item"><div class="a-body">Cargando…</div></div>
-        </div>
-      </div>
-    </div>
   </section>
 
   <section class="panel" id="tab-poal">
@@ -704,11 +672,6 @@ const DEMO_POAL_READINGS = [
   { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Cadmio', year: 2023, valor_numeric: 0.024, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
   { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Plomo', year: 2016, valor_numeric: 12.4, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
   { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Plomo', year: 2023, valor_numeric: 15.8, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
-];
-const DEMO_EVENTS_RECENT = [
-  { kind: 'sancion', body: 'Nueva sanción firme — CODELCO Ventanas (Registro Público)', when: '2026-06-28', severity: 'crimson' },
-  { kind: 'mismatch', body: 'POAL: Cadmio en Frente CT Nueva Ventanas difiere 6% entre fuente legado y estandarizada', when: '2026-06-20', severity: 'coral' },
-  { kind: 'reporte', body: 'Reporte ciudadano: descarga visible cerca del muelle', when: '2026-07-02', severity: 'mint' },
 ];
 
 /* ---------- tiny fetch helper with graceful fallback ---------- */
@@ -1055,49 +1018,6 @@ try {
 }
 
 /* ============================================================
-   ALERTS FEED
-   ============================================================ */
-async function loadAlerts() {
-  const feed = document.getElementById('alerts-feed');
-  let items = [];
-
-  if (!DEMO_MODE) {
-    const sanctions = await sbSelect(CONFIG.TABLES.events, 'facility_id, section, estado, anio, raw', (q) =>
-      q.eq('section', 'registro_publico_sanciones').order('anio', { ascending: false }).limit(5));
-    const mismatches = await sbSelect(CONFIG.TABLES.poal, 'estacion, parametro, match_status, year', (q) =>
-      q.eq('match_status', 'value_mismatch').order('year', { ascending: false }).limit(5));
-    const reports = await sbSelect(CONFIG.TABLES.reports, 'categoria, descripcion, created_at', (q) =>
-      q.order('created_at', { ascending: false }).limit(5));
-
-    (sanctions || []).forEach(s => {
-      const r = parseRaw(s);
-      const company = r['Nombre Razon Social'] || r['Nombre razón social'] || r['Unidad Fiscalizable'] || `Instalación ${s.facility_id?.split('/').pop() || '—'}`;
-      const reason = r['Categoría'] || null;
-      const fine = r['Multa (UTA)'] || null;
-      const bodyParts = [company];
-      if (reason) bodyParts.push(reason);
-      if (fine) bodyParts.push(`Multa: ${fine}`);
-      items.push({ kind: 'Sanción firme', body: bodyParts.join(' · '), when: s.anio, severity: 'crimson' });
-    });
-    (mismatches || []).forEach(m => items.push({ kind: 'POAL — discrepancia', body: `${m.parametro} en ${m.estacion} difiere entre fuentes`, when: m.year, severity: 'coral' }));
-    (reports || []).forEach(r => items.push({ kind: 'Reporte ciudadano', body: r.descripcion?.slice(0, 80) || r.categoria, when: new Date(r.created_at).toLocaleDateString('es-CL'), severity: 'mint' }));
-  }
-
-  if (items.length === 0) {
-    items = DEMO_EVENTS_RECENT.map(e => ({ kind: e.kind, body: e.body, when: e.when, severity: e.severity }));
-  }
-
-  feed.innerHTML = items.map(i => `
-    <div class="alert-item ${i.severity}">
-      <div class="a-kind">${i.kind}</div>
-      <div class="a-body">${i.body}</div>
-      <div class="a-meta">${i.when || ''}</div>
-    </div>
-  `).join('');
-}
-loadAlerts();
-
-/* ============================================================
    SCIENTIFIC PANEL — curated, published sources only.
    Do NOT add unpublished figures here (e.g. any not-yet-published
    coliform data) — anything not peer-reviewed or publicly released
@@ -1391,7 +1311,6 @@ document.getElementById('report-form').addEventListener('submit', async (e) => {
     e.target.reset();
     geoLat = null; geoLon = null;
     document.getElementById('geo-status').textContent = '';
-    loadAlerts();
   } catch (err) {
     statusEl.textContent = `No se pudo enviar: ${err.message}. Verifica que la tabla community_reports permita inserciones públicas (RLS).`;
     statusEl.className = 'err';
