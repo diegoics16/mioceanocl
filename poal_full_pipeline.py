@@ -59,6 +59,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import requests
 import pandas as pd
+import numpy as np
 from bs4 import BeautifulSoup
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) research-script/1.0"}
@@ -97,6 +98,51 @@ def check_credentials():
         return False
 
 
+def _sanitize(obj):
+    """Recursively convert a rows payload into plain JSON-safe values.
+
+    Deliberately NOT just a json.dumps(default=...) fallback: default() is
+    only called for types the encoder doesn't recognize at all. Two real
+    values from this pipeline slip past that net silently instead of
+    raising, which is worse than an error:
+      - plain float('nan') IS "recognized" by json — it gets emitted as the
+        bare token NaN, which isn't valid JSON and PostgREST will reject.
+      - pd.NaT has an .isoformat() method that returns the *string* "NaT"
+        instead of raising, so a naive isoformat-fallback would happily
+        write the literal text "NaT" into a date column.
+    Both are handled explicitly below, before any generic isoformat call.
+    """
+    if isinstance(obj, dict):
+        return {k: _sanitize(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_sanitize(v) for v in obj]
+    if obj is None or obj is pd.NaT:
+        return None
+    if isinstance(obj, float) and obj != obj:  # NaN (self-inequality trick; catches np.float64 too)
+        return None
+    if isinstance(obj, np.floating):
+        return None if np.isnan(obj) else float(obj)
+    if isinstance(obj, np.integer):
+        return int(obj)
+    if isinstance(obj, np.bool_):
+        return bool(obj)
+    if isinstance(obj, np.ndarray):
+        return _sanitize(obj.tolist())
+    if isinstance(obj, datetime):  # covers pd.Timestamp — it subclasses datetime.datetime
+        return obj.isoformat()
+    if hasattr(obj, "isoformat"):  # datetime.date, datetime.time
+        try:
+            return obj.isoformat()
+        except Exception:
+            return str(obj)
+    try:
+        if pd.isna(obj):
+            return None
+    except (TypeError, ValueError):
+        pass  # pd.isna() raises on some array-likes/objects — not what we're sanitizing here
+    return obj
+
+
 def supabase_write(table, rows, on_conflict=None):
     if not rows:
         return
@@ -108,7 +154,12 @@ def supabase_write(table, rows, on_conflict=None):
         "Content-Type": "application/json",
         "Prefer": ("resolution=merge-duplicates,return=minimal" if on_conflict else "return=minimal"),
     }
-    resp = requests.post(url, headers=headers, json=rows, timeout=60)
+    # NOTE: deliberately NOT using requests' json=rows here — see _sanitize()
+    # docstring for why that silently produced bad payloads (not just threw
+    # exceptions) for exactly the kind of values real POAL data contains.
+    # default=str is a last-resort net for anything _sanitize() didn't think of.
+    payload = json.dumps(_sanitize(rows), default=str).encode("utf-8")
+    resp = requests.post(url, headers=headers, data=payload, timeout=60)
     if resp.status_code >= 300:
         raise RuntimeError(f"Supabase write to {table} failed ({resp.status_code}): {resp.text}")
 
