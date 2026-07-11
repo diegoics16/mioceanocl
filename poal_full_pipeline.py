@@ -644,9 +644,16 @@ def build_centralized(legacy_kw, std_kw, comparison_df):
         df = df.copy()
         df["source"] = source_name
         df["match_status"] = df[JOIN_KEYS].apply(lambda r: status_lookup.get(tuple(r), "unknown"), axis=1)
+        # 'valor' (not just valor_numeric) is part of the id on purpose: two
+        # rows with the same station/parameter/date but different depths or
+        # replicates are DIFFERENT measurements, and previously hashed to the
+        # same id — which is exactly what caused "ON CONFLICT DO UPDATE
+        # cannot affect row a second time" when both landed in one chunk.
+        # Genuinely identical rows (same value too) still collapse to one id,
+        # which is correct — that's the same measurement, not two.
         df["id"] = df.apply(lambda r: make_row_id(
             source_name, r.get("location"), r.get("matriz"), r.get("estacion"),
-            r.get("parametro"), r.get("fecha"), r.get("source_file")), axis=1)
+            r.get("parametro"), r.get("fecha"), r.get("source_file"), r.get("valor")), axis=1)
         return df
 
     parts = []
@@ -697,6 +704,29 @@ def push_centralized_to_supabase(centralized_df):
             index=export_df.index, dtype="object",
         )
     rows = export_df.to_dict("records")
+
+    # Belt-and-suspenders: 'valor' in the id hash (see finalize()) should
+    # make same-id rows genuinely identical content, so collapsing them is
+    # correct rather than lossy — but making that visible beats a silent
+    # overwrite if that assumption is ever wrong for some future data shape.
+    seen = {}
+    deduped = []
+    for r in rows:
+        rid = r.get("id")
+        if rid in seen:
+            seen[rid] += 1
+            continue
+        seen[rid] = 1
+        deduped.append(r)
+    dupe_count = sum(v - 1 for v in seen.values() if v > 1)
+    if dupe_count:
+        print(f"\n[{SUPABASE_TABLE}] {dupe_count} rows had an id matching an earlier row in this "
+              f"push and were skipped (first occurrence kept). If this number is large, the "
+              f"disambiguation in finalize()/make_row_id() needs another look — it should be near "
+              f"zero, since it now means truly identical (station, matriz, parametro, fecha, source, "
+              f"valor) rows, not just same-day/same-station replicates.")
+    rows = deduped
+
     print(f"\nPushing {len(rows)} centralized rows to Supabase table '{SUPABASE_TABLE}'...")
     written, failed, first_error = supabase_write_chunked(SUPABASE_TABLE, rows, on_conflict="id", label=SUPABASE_TABLE)
     print(f"\n[{SUPABASE_TABLE}] {written} rows actually written, {failed} rows failed"
