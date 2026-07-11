@@ -155,16 +155,6 @@
   .kpi-value.cyan { color: var(--cyan); }
   .kpi-sub { font-size: 12px; color: var(--ink-muted); margin-top: 4px; }
 
-  /* ---------- mid-page pull quote ---------- */
-  .pull-quote {
-    background: var(--bg-alt); border-radius: 20px; padding: 56px 40px;
-    text-align: center; margin: 8px 0 48px;
-  }
-  .pull-quote p {
-    font-family: var(--font-head); font-style: italic; font-weight: 600;
-    font-size: clamp(20px, 3vw, 30px); line-height: 1.35; color: var(--ink);
-    max-width: 700px; margin: 0 auto;
-  }
 
   /* ---------- section shell ---------- */
   section.panel { padding: 40px 0; }
@@ -210,9 +200,53 @@
   .detail-panel h3 { font-family: var(--font-ui); font-size: 15px; margin-bottom: 10px; }
   .detail-panel .chart-wrap { height: 180px; margin-top: 10px; }
 
+  /* ---------- POAL trends ---------- */
+  .poal-select {
+    font-family: var(--font-ui); font-size: 13px; font-weight: 500;
+    padding: 8px 14px; border-radius: 999px; border: 1px solid var(--hairline-strong);
+    background: #FFFFFF; color: var(--ink); cursor: pointer;
+  }
+  .chart-wrap-tall { height: 380px; }
+
   /* ---------- footer resource cards ---------- */
   .footer-zone { padding: 48px 0 80px; }
   .footer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: start; }
+  .footer-grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .poal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-top: 20px; }
+  .poal-card { padding: 18px; }
+  .poal-card-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .poal-card-title { font-family: var(--font-ui); font-weight: 700; font-size: 14px; color: var(--ink); }
+  .poal-card-unit { font-family: var(--font-data); font-size: 11px; color: var(--ink-muted); }
+  .poal-card-chart { height: 190px; margin-top: 8px; }
+  .poal-card-legend { display: flex; flex-wrap: wrap; gap: 8px 12px; margin-top: 8px; }
+  .poal-card-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--ink-secondary); }
+  .poal-card-legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .poal-card-footnote { font-size: 10px; color: var(--ink-muted); margin-top: 8px; line-height: 1.5; }
+
+  /* ---------- scientific timeline ---------- */
+  .sci-timeline-track { position: relative; margin: 32px 0 8px; padding: 60px 0; }
+  .sci-timeline-line { position: absolute; top: 50%; left: 0; right: 0; height: 2px; background: var(--hairline-strong); transform: translateY(-50%); }
+  .sci-point { position: absolute; top: 50%; transform: translate(-50%, -50%); z-index: 2; }
+  .sci-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--ocean); border: 3px solid var(--bg); box-shadow: 0 0 0 1px var(--hairline-strong); margin: 0 auto; }
+  .sci-card { position: absolute; left: 50%; transform: translateX(-50%); width: 180px; text-align: center; }
+  .sci-card.above { bottom: 26px; }
+  .sci-card.below { top: 26px; }
+  .sci-badge {
+    display: inline-block; font-family: var(--font-data); font-size: 9px; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--ocean); background: rgba(14,116,144,0.08);
+    padding: 2px 8px; border-radius: 999px; margin-bottom: 6px;
+  }
+  .sci-year { font-family: var(--font-data); font-size: 12px; color: var(--ink-muted); font-weight: 500; }
+  .sci-title { font-size: 12px; font-weight: 700; color: var(--ink); margin: 3px 0; line-height: 1.3; }
+  .sci-stat { font-family: var(--font-data); font-size: 13px; font-weight: 600; color: var(--mint); margin: 3px 0; }
+  .sci-desc { font-size: 10.5px; color: var(--ink-secondary); line-height: 1.4; }
+  @media (max-width: 900px) {
+    .sci-timeline-track { padding: 0; }
+    .sci-timeline-line { display: none; }
+    .sci-point { position: static; transform: none; display: flex; gap: 14px; align-items: flex-start; margin-bottom: 24px; }
+    .sci-dot { flex-shrink: 0; margin-top: 4px; }
+    .sci-card { position: static; transform: none; width: auto; text-align: left; }
+  }
   .res-card { padding: 24px; }
   .res-card h3 {
     font-family: var(--font-head); font-size: 19px; font-weight: 700; margin-bottom: 14px;
@@ -279,6 +313,8 @@
     .kpi-grid { grid-template-columns: repeat(2, 1fr); }
     .map-zone { grid-template-columns: 1fr; }
     .footer-grid { grid-template-columns: 1fr; }
+    .footer-grid-2 { grid-template-columns: 1fr; }
+    .sci-timeline-track { height: auto; }
     .tabs { display: none; }
   }
 </style>
@@ -306,6 +342,7 @@
     </div>
     <nav class="tabs">
       <button class="tab-btn active" data-tab="mapa">Mapa</button>
+      <button class="tab-btn" data-tab="poal">POAL</button>
       <button class="tab-btn" data-tab="cientifico">Ciencia</button>
       <button class="tab-btn" data-tab="explicador">Explicador</button>
       <button class="tab-btn" data-tab="reportar">Reportar</button>
@@ -319,7 +356,7 @@
   <!-- ============ HERO / KPIs ============ -->
   <section class="hero">
     <div class="hero-eyebrow">Bahía Quintero-Puchuncaví</div>
-    <h1>La bahía, <em>en vivo</em>.</h1>
+    <h1>Valparaíso, <em>en vivo</em>.</h1>
     <p class="lede">Fiscalizaciones, mediciones de agua y reportes ciudadanos, en un solo lugar público.</p>
 
     <div class="trust-strip">
@@ -356,11 +393,10 @@
   <!-- ============ MAP + ALERTS ============ -->
   <section class="panel" id="tab-mapa">
     <h2>Qué está pasando</h2>
-    <p class="section-lede">Cada burbuja es una instalación fiscalizada por SNIFA — el tamaño indica cuántos procedimientos tiene, el color indica si alguno terminó en sanción firme. Activa las estaciones POAL para ver dónde se mide calidad de agua directamente.</p>
+    <p class="section-lede">Cada burbuja es una instalación fiscalizada por SNIFA — el tamaño indica cuántos procedimientos tiene, el color indica si alguno terminó en sanción firme.</p>
 
     <div class="map-controls">
       <button class="chip on" id="chip-snifa"><span class="legend-dot" style="background:var(--crimson)"></span>SNIFA — instalaciones</button>
-      <button class="chip" id="chip-poal"><span class="legend-dot" style="background:var(--mint)"></span>Estaciones POAL</button>
       <button class="chip" id="chip-reports"><span class="legend-dot" style="background:var(--coral)"></span>Reportes ciudadanos</button>
     </div>
 
@@ -370,7 +406,6 @@
         <div class="glass detail-panel" id="detail-panel">
           <h3 id="detail-title">—</h3>
           <div id="detail-body" style="font-size:12px;color:var(--ink-secondary);"></div>
-          <div class="chart-wrap" id="detail-chart-wrap" style="display:none;"><canvas id="detail-chart"></canvas></div>
         </div>
       </div>
       <div class="glass" style="padding:16px;">
@@ -382,19 +417,26 @@
     </div>
   </section>
 
-  <section class="pull-quote">
-    <p>Los datos ya existen. Lo que faltaba era un lugar donde vivieran juntos.</p>
+  <section class="panel" id="tab-poal">
+    <h2>Metales y coliformes</h2>
+    <p class="section-lede">Mediciones de DIRECTEMAR (POAL) en agua, sedimento y biota — un gráfico por parámetro, comparando estaciones en el tiempo. La línea punteada, cuando aparece, es un valor de referencia internacional — no un límite legal chileno.</p>
+
+    <div class="map-controls">
+      <select id="poal-matriz" class="poal-select"></select>
+    </div>
+
+    <div id="poal-grid" class="poal-grid"></div>
   </section>
 
-  <!-- ============ FOOTER: SCIENTIFIC PANEL / EXPLAINER / REPORT ============ -->
-  <section class="footer-zone" id="tab-cientifico">
-    <div class="footer-grid">
+  <section class="panel" id="tab-cientifico">
+    <h2>Panel científico</h2>
+    <p class="section-lede">Solo fuentes publicadas o institucionales — nada de datos no publicados de investigadores individuales.</p>
+    <div id="sci-timeline"><!-- populated by JS --></div>
+  </section>
 
-      <!-- Scientific panel -->
-      <div class="glass res-card" id="tab-cientifico-inner">
-        <h3>Panel científico</h3>
-        <div id="sci-timeline"><!-- populated by JS --></div>
-      </div>
+  <!-- ============ FOOTER: EXPLAINER / REPORT ============ -->
+  <section class="footer-zone">
+    <div class="footer-grid footer-grid-2">
 
       <!-- Explainer -->
       <div class="glass res-card" id="tab-explicador">
@@ -526,19 +568,31 @@ const DEMO_FACILITIES = [
   { id: 'demo-4', razon_social: 'ESVAL — Emisario Loma Larga', comuna: 'Concón', categoria: 'Saneamiento Ambiental', lat: -32.9280, lon: -71.5150, sanction_count: 0, event_count: 2 },
   { id: 'demo-5', razon_social: 'Puerto Ventanas S.A.', comuna: 'Puchuncaví', categoria: 'Infraestructura Portuaria', lat: -32.7455, lon: -71.4935, sanction_count: 2, event_count: 11 },
 ];
-const DEMO_POAL_STATIONS = [
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', lat: -32.7460, lon: -71.4920, readings: [
-      { year: 2015, parametro: 'Coliformes fecales', valor_numeric: 1200 },
-      { year: 2018, parametro: 'Cadmio', valor_numeric: 0.03 },
-      { year: 2021, parametro: 'Cadmio', valor_numeric: 0.041 },
-      { year: 2024, parametro: 'Cadmio', valor_numeric: 0.052 },
-  ]},
-  { estacion: 'Muelle ENAP', matriz: 'Agua', lat: -32.7770, lon: -71.5330, readings: [
-      { year: 2014, parametro: 'Coliformes fecales', valor_numeric: 800 },
-      { year: 2017, parametro: 'Coliformes fecales', valor_numeric: 650 },
-      { year: 2020, parametro: 'Plomo', valor_numeric: 0.07 },
-      { year: 2024, parametro: 'Plomo', valor_numeric: 0.09 },
-  ]},
+const DEMO_POAL_READINGS = [
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Cadmio', year: 2015, valor_numeric: 0.021, location: 'Puchuncaví', source: 'legado', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Cadmio', year: 2018, valor_numeric: 0.030, location: 'Puchuncaví', source: 'legado', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Cadmio', year: 2021, valor_numeric: 0.041, location: 'Puchuncaví', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Cadmio', year: 2024, valor_numeric: 0.052, location: 'Puchuncaví', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Cadmio', year: 2015, valor_numeric: 0.015, location: 'Quintero', source: 'legado', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Cadmio', year: 2018, valor_numeric: 0.018, location: 'Quintero', source: 'legado', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Cadmio', year: 2021, valor_numeric: 0.022, location: 'Quintero', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Cadmio', year: 2024, valor_numeric: 0.026, location: 'Quintero', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio', year: 2015, valor_numeric: 0.006, location: 'Zapallar', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio', year: 2018, valor_numeric: 0.007, location: 'Zapallar', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio', year: 2021, valor_numeric: 0.006, location: 'Zapallar', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio', year: 2024, valor_numeric: 0.008, location: 'Zapallar', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Agua', parametro: 'Coliformes fecales', year: 2014, valor_numeric: 800, location: 'Quintero', source: 'legado', unidad: 'NMP/100ml' },
+  { estacion: 'Muelle ENAP', matriz: 'Agua', parametro: 'Coliformes fecales', year: 2017, valor_numeric: 650, location: 'Quintero', source: 'legado', unidad: 'NMP/100ml' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Agua', parametro: 'Coliformes fecales', year: 2014, valor_numeric: 1200, location: 'Puchuncaví', source: 'legado', unidad: 'NMP/100ml' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Agua', parametro: 'Coliformes fecales', year: 2017, valor_numeric: 980, location: 'Puchuncaví', source: 'legado', unidad: 'NMP/100ml' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Plomo', year: 2020, valor_numeric: 0.070, location: 'Puchuncaví', source: 'estandarizado', unidad: 'mg/kg', match_status: 'value_mismatch' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Plomo', year: 2024, valor_numeric: 0.090, location: 'Puchuncaví', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Plomo', year: 2020, valor_numeric: 0.050, location: 'Quintero', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Plomo', year: 2024, valor_numeric: 0.060, location: 'Quintero', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Mercurio', year: 2018, valor_numeric: 0.09, location: 'Puchuncaví', source: 'legado', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Mercurio', year: 2024, valor_numeric: 0.15, location: 'Puchuncaví', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Mercurio', year: 2018, valor_numeric: 0.03, location: 'Zapallar', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Mercurio', year: 2024, valor_numeric: 0.02, location: 'Zapallar', source: 'estandarizado', unidad: 'mg/kg' },
 ];
 const DEMO_REPORTS = [
   { categoria: 'descarga_visible', descripcion: 'Agua con coloración inusual cerca del muelle', lat: -32.751, lon: -71.492, created_at: '2026-07-02T14:00:00Z' },
@@ -626,7 +680,7 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   subdomains: 'abcd', maxZoom: 19,
 }).addTo(map);
 
-const layers = { snifa: L.layerGroup().addTo(map), poal: L.layerGroup(), reports: L.layerGroup() };
+const layers = { snifa: L.layerGroup().addTo(map), reports: L.layerGroup() };
 
 function facilityColor(f) {
   const sanctions = f.sanction_count ?? 0;
@@ -664,31 +718,6 @@ async function loadSnifaLayer() {
   });
 }
 
-async function loadPoalLayer() {
-  let readings = await sbSelect(CONFIG.TABLES.poal, 'estacion, matriz, parametro, valor_numeric, year, latitud, longitud');
-  let stations;
-  if (!DEMO_MODE && readings) {
-    const byStation = {};
-    readings.forEach(r => {
-      if (!r.latitud || !r.longitud) return;
-      const key = r.estacion;
-      byStation[key] = byStation[key] || { estacion: r.estacion, matriz: r.matriz, lat: parseFloat(r.latitud), lon: parseFloat(r.longitud), readings: [] };
-      byStation[key].readings.push(r);
-    });
-    stations = Object.values(byStation);
-  }
-  if (!stations || stations.length === 0) stations = DEMO_POAL_STATIONS;
-
-  stations.forEach(s => {
-    if (!s.lat || !s.lon) return;
-    const marker = L.circleMarker([s.lat, s.lon], {
-      radius: 7, color: '#059669', weight: 1.5, fillColor: '#059669', fillOpacity: 0.4,
-    });
-    marker.on('click', () => showPoalDetail(s));
-    marker.addTo(layers.poal);
-  });
-}
-
 async function loadReportsLayer() {
   let reports = await sbSelect(CONFIG.TABLES.reports, 'categoria, descripcion, lat, lon, created_at');
   if (!reports || reports.length === 0) reports = DEMO_REPORTS;
@@ -703,11 +732,9 @@ async function loadReportsLayer() {
 }
 
 loadSnifaLayer();
-loadPoalLayer();
 loadReportsLayer();
 
 document.getElementById('chip-snifa').addEventListener('click', (e) => toggleLayer('snifa', e.currentTarget));
-document.getElementById('chip-poal').addEventListener('click', (e) => toggleLayer('poal', e.currentTarget));
 document.getElementById('chip-reports').addEventListener('click', (e) => toggleLayer('reports', e.currentTarget));
 function toggleLayer(key, btn) {
   if (map.hasLayer(layers[key])) { map.removeLayer(layers[key]); btn.classList.remove('on'); }
@@ -715,11 +742,9 @@ function toggleLayer(key, btn) {
 }
 
 /* ---------- detail panel ---------- */
-let detailChart = null;
 function showFacilityDetail(f) {
   const panel = document.getElementById('detail-panel');
   panel.classList.add('show');
-  document.getElementById('detail-chart-wrap').style.display = 'none';
   document.getElementById('detail-title').textContent = f.razon_social || 'Instalación';
   document.getElementById('detail-body').innerHTML = `
     <div>${f.categoria || '—'} · ${f.comuna || '—'}</div>
@@ -727,40 +752,154 @@ function showFacilityDetail(f) {
     <div style="margin-top:6px;color:var(--ink-muted);font-size:11px;">SNIFA no publica una tasa de cumplimiento — esto es el conteo bruto de procedimientos, no un veredicto.</div>
   `;
 }
-function showPoalDetail(s) {
-  const panel = document.getElementById('detail-panel');
-  panel.classList.add('show');
-  document.getElementById('detail-title').textContent = s.estacion;
-  document.getElementById('detail-body').innerHTML = `<div>Matriz: ${s.matriz || '—'} · ${s.readings.length} lecturas</div>`;
-  const wrap = document.getElementById('detail-chart-wrap');
-  wrap.style.display = 'block';
-  const ctx = document.getElementById('detail-chart').getContext('2d');
-  if (detailChart) detailChart.destroy();
-  const sorted = [...s.readings].sort((a, b) => (a.year || 0) - (b.year || 0));
-  detailChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: sorted.map(r => r.year),
-      datasets: [{
-        label: 'Valor', data: sorted.map(r => r.valor_numeric),
-        borderColor: '#0891B2', backgroundColor: 'rgba(8,145,178,0.15)', tension: 0.3, fill: true,
-      }],
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: '#8598A8', font: { family: 'IBM Plex Mono', size: 10 } }, grid: { color: 'rgba(15,36,56,0.06)' } },
-        y: { ticks: { color: '#8598A8', font: { family: 'IBM Plex Mono', size: 10 } }, grid: { color: 'rgba(15,36,56,0.06)' } },
-      },
-    },
-  });
-}
 
 } catch (e) {
   console.error('Map failed to initialize:', e);
   const mapEl = document.getElementById('map');
   if (mapEl) mapEl.innerHTML = '<div style="padding:24px;color:#DC2626;font-size:13px;font-family:\'Plus Jakarta Sans\',sans-serif;">No se pudo cargar el mapa (' + e.message + '). El resto de la página sigue funcionando — revisa la consola (F12) para más detalle.</div>';
+}
+
+/* ============================================================
+   POAL TRENDS — a card per parameter, not one chart with a
+   dropdown. Wrapped in its own try/catch so a Chart.js hiccup
+   can't take down the scientific panel, explainer, or report
+   form that come after it.
+
+   REFERENCE_VALUES — real, cited thresholds, matched carefully
+   to the right matrix. This matters: WHO sets food-safety limits
+   for BIOTA (what people eat), not for sediment or raw water.
+   Putting a fish-safety number on a sediment chart would be a
+   real factual error, not just a design choice, so sediment
+   metals use CCME's Interim Sediment Quality Guideline (ISQG)
+   instead — the correct, internationally-recognized framework
+   for that matrix — clearly labeled as such, not mislabeled as
+   WHO. Only parameters with a real, checkable source get a line;
+   everything else renders without one rather than a guess.
+   ============================================================ */
+const REFERENCE_VALUES = {
+  'Cadmio':   { sedimento: { value: 0.7,  unit: 'mg/kg',    source: 'CCME ISQG, sedimento marino' },
+                biota:     { value: 0.05, unit: 'mg/kg',    source: 'UE (CE) 488/2014, la mayoría de peces' } },
+  'Plomo':    { sedimento: { value: 30.2, unit: 'mg/kg',    source: 'CCME ISQG, sedimento marino' },
+                biota:     { value: 0.3,  unit: 'mg/kg',    source: 'UE (CE) 488/2014, músculo de pez' } },
+  'Mercurio': { sedimento: { value: 0.13, unit: 'mg/kg',    source: 'CCME ISQG, sedimento marino' } },
+  'Coliformes fecales': { agua: { value: 14, unit: 'NMP/100ml', source: 'NSSP, aguas de cultivo de mariscos (EE.UU.)' } },
+};
+
+try {
+  if (typeof Chart === 'undefined') throw new Error('Chart.js (Chart) is undefined — the Chart.js CDN script did not load.');
+
+(async function initPoalGrid() {
+  let rows = await sbSelect(CONFIG.TABLES.poal, 'estacion, matriz, parametro, valor_numeric, year, location, match_status, source, unidad');
+  if (!rows || rows.length === 0) rows = DEMO_POAL_READINGS;
+  rows = rows.filter(r => r.valor_numeric != null && r.year != null && r.estacion && r.parametro && r.matriz);
+
+  const matrizSel = document.getElementById('poal-matriz');
+  const grid = document.getElementById('poal-grid');
+
+  if (rows.length === 0) {
+    grid.innerHTML = '<p style="color:var(--ink-muted);font-size:13px;">No hay datos POAL disponibles todavía.</p>';
+    return;
+  }
+
+  const matrices = [...new Set(rows.map(r => r.matriz))].sort();
+  matrizSel.innerHTML = matrices.map(m => `<option value="${m}">${m}</option>`).join('');
+
+  const STATION_COLORS = ['#0891B2', '#059669', '#EA580C', '#DC2626', '#7C3AED', '#0F2438', '#CA8A04'];
+  let charts = [];
+
+  function render() {
+    charts.forEach(c => c.destroy());
+    charts = [];
+    const matriz = matrizSel.value;
+    const inMatriz = rows.filter(r => r.matriz === matriz);
+    const parametros = [...new Set(inMatriz.map(r => r.parametro))].sort();
+
+    if (parametros.length === 0) {
+      grid.innerHTML = '<p style="color:var(--ink-muted);font-size:13px;">Sin datos para esta matriz.</p>';
+      return;
+    }
+
+    grid.innerHTML = parametros.map(p => `
+      <div class="glass poal-card">
+        <div class="poal-card-head">
+          <span class="poal-card-title">${p}</span>
+          <span class="poal-card-unit" id="poal-unit-${cssSafe(p)}"></span>
+        </div>
+        <div class="poal-card-chart"><canvas id="poal-chart-${cssSafe(p)}"></canvas></div>
+        <div class="poal-card-legend" id="poal-cardlegend-${cssSafe(p)}"></div>
+        <div class="poal-card-footnote" id="poal-cardfoot-${cssSafe(p)}"></div>
+      </div>
+    `).join('');
+
+    parametros.forEach(param => {
+      const filtered = inMatriz.filter(r => r.parametro === param);
+      const byStation = {};
+      filtered.forEach(r => { (byStation[r.estacion] = byStation[r.estacion] || []).push(r); });
+      const stationNames = Object.keys(byStation);
+      const allYears = [...new Set(filtered.map(r => r.year))].sort((a, b) => a - b);
+
+      const datasets = stationNames.map((name, i) => {
+        const color = STATION_COLORS[i % STATION_COLORS.length];
+        const byYear = {};
+        byStation[name].forEach(r => { byYear[r.year] = r.valor_numeric; });
+        return {
+          label: name, data: allYears.map(y => byYear[y] ?? null),
+          borderColor: color, backgroundColor: color + '22', spanGaps: true, tension: 0.3, pointRadius: 3,
+        };
+      });
+
+      const matrizKey = matriz.toLowerCase();
+      const ref = REFERENCE_VALUES[param]?.[matrizKey];
+      if (ref && allYears.length) {
+        datasets.push({
+          label: `Referencia (${ref.source})`, data: allYears.map(() => ref.value),
+          borderColor: '#DC2626', borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0, fill: false,
+        });
+      }
+
+      const ctx = document.getElementById(`poal-chart-${cssSafe(param)}`).getContext('2d');
+      charts.push(new Chart(ctx, {
+        type: 'line',
+        data: { labels: allYears, datasets },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#8598A8', font: { family: 'IBM Plex Mono', size: 10 } }, grid: { color: 'rgba(15,36,56,0.06)' } },
+            y: { ticks: { color: '#8598A8', font: { family: 'IBM Plex Mono', size: 10 } }, grid: { color: 'rgba(15,36,56,0.06)' } },
+          },
+        },
+      }));
+
+      const unit = filtered.find(r => r.unidad)?.unidad || '';
+      document.getElementById(`poal-unit-${cssSafe(param)}`).textContent = unit;
+
+      document.getElementById(`poal-cardlegend-${cssSafe(param)}`).innerHTML =
+        stationNames.map((name, i) => `
+          <div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:${STATION_COLORS[i % STATION_COLORS.length]}"></span>${name}</div>
+        `).join('') +
+        (ref ? `<div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:#DC2626"></span>Referencia</div>` : '');
+
+      const mismatches = filtered.filter(r => r.match_status === 'value_mismatch').length;
+      const footParts = [];
+      if (ref) footParts.push(`Línea de referencia: ${ref.value} ${ref.unit} (${ref.source}) — no es un límite legal chileno.`);
+      if (!ref) footParts.push('Sin valor de referencia confirmado para este parámetro y matriz.');
+      if (mismatches > 0) footParts.push(`${mismatches} lectura(s) con discrepancia entre fuentes.`);
+      document.getElementById(`poal-cardfoot-${cssSafe(param)}`).textContent = footParts.join(' ');
+    });
+  }
+
+  function cssSafe(s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, ''); }
+
+  matrizSel.addEventListener('change', render);
+  if (matrices.includes('Sedimento')) matrizSel.value = 'Sedimento';
+  render();
+})();
+
+} catch (e) {
+  console.error('POAL grid failed to initialize:', e);
+  const gridEl = document.getElementById('poal-grid');
+  if (gridEl) gridEl.innerHTML = '<div style="padding:24px;color:#DC2626;font-size:13px;">No se pudo cargar los gráficos POAL (' + e.message + ').</div>';
 }
 
 /* ============================================================
@@ -804,20 +943,35 @@ loadAlerts();
    stays off this public page until its authors publish it.
    ============================================================ */
 const SCI_TIMELINE = [
-  { year: '1993', title: 'POAL — DIRECTEMAR', desc: 'Inicio del monitoreo bianual de agua, sedimento y biota en el litoral chileno, incluyendo Quintero-Puchuncaví.' },
-  { year: '2017', title: 'Quiebre en el panel de monitoreo', desc: 'Los indicadores de aguas servidas (coliformes fecales, oxígeno disuelto) dejan de medirse en las estaciones POAL de la bahía; los metales pesados continúan.' },
-  { year: '2024', title: 'D.S. 43/2023 — Norma Secundaria de Calidad Ambiental', desc: 'Publicada el 2 de octubre de 2024 para la bahía. El monitoreo exigido por la norma aún no ha comenzado.' },
-  { year: '2026', title: 'Curaz-Leiva et al.', desc: 'Estudio de 144 muestras de metales pesados en biota, comparando Quintero-Puchuncaví con el sitio control de Quintay, 10 especies, 8 metales.' },
+  { year: 1993, badge: 'Programa', title: 'POAL — DIRECTEMAR', stat: null, desc: 'Inicio del monitoreo bianual de agua, sedimento y biota en el litoral chileno, incluyendo Quintero-Puchuncaví.' },
+  { year: 2017, badge: 'Metodología', title: 'Quiebre en el monitoreo', stat: null, desc: 'Los indicadores de aguas servidas (coliformes fecales, oxígeno disuelto) dejan de medirse en la bahía; los metales pesados continúan.' },
+  { year: 2024, badge: 'Norma', title: 'D.S. 43/2023', stat: null, desc: 'Norma Secundaria de Calidad Ambiental para la bahía, publicada el 2 de octubre. El monitoreo que exige aún no ha comenzado.' },
+  { year: 2026, badge: 'Estudio', title: 'Curaz-Leiva et al.', stat: '144 muestras · 8 metales · 10 especies', desc: 'Metales pesados en biota, comparando Quintero-Puchuncaví con el sitio control de Quintay.' },
 ];
-document.getElementById('sci-timeline').innerHTML = SCI_TIMELINE.map(t => `
-  <div class="timeline-item">
-    <div class="timeline-year">${t.year}</div>
-    <div class="timeline-body">
-      <div class="t-title">${t.title}</div>
-      <div class="t-desc">${t.desc}</div>
-    </div>
-  </div>
-`).join('');
+
+(function renderSciTimeline() {
+  const years = SCI_TIMELINE.map(t => t.year);
+  const minY = Math.min(...years), maxY = Math.max(...years);
+  const span = Math.max(maxY - minY, 1);
+  const points = SCI_TIMELINE.map((t, i) => {
+    const pct = ((t.year - minY) / span) * 100;
+    const side = i % 2 === 0 ? 'above' : 'below';
+    return `
+      <div class="sci-point" style="left:${pct}%">
+        <div class="sci-dot"></div>
+        <div class="sci-card ${side}">
+          <span class="sci-badge">${t.badge}</span>
+          <div class="sci-year">${t.year}</div>
+          <div class="sci-title">${t.title}</div>
+          ${t.stat ? `<div class="sci-stat">${t.stat}</div>` : ''}
+          <div class="sci-desc">${t.desc}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('sci-timeline').innerHTML =
+    `<div class="sci-timeline-track"><div class="sci-timeline-line"></div>${points}</div>`;
+})();
 
 /* ============================================================
    EXPLAINER ACCORDION
