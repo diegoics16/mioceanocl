@@ -659,12 +659,43 @@ def build_centralized(legacy_kw, std_kw, comparison_df):
     return pd.concat(parts, ignore_index=True, sort=False)
 
 
+def _clean_int(v):
+    """Coerce anything year-like (int, float, '2005', '2005.0', numpy scalar,
+    NaN/None) into a plain Python int or None. Applied right before export
+    rather than fixed further upstream: pandas silently upcasts an
+    int-with-nulls column to float64 on concat (legacy_kw + std_kw merging in
+    build_centralized), and there's more than one place that could happen —
+    validating at the system boundary, right before the external write,
+    catches all of them instead of chasing each one individually."""
+    if v is None:
+        return None
+    try:
+        if pd.isna(v):
+            return None
+    except (TypeError, ValueError):
+        pass
+    try:
+        return int(float(v))
+    except (TypeError, ValueError):
+        return None
+
+
 def push_centralized_to_supabase(centralized_df):
     keep_cols = ["id", "source", "location", "matriz", "estacion", "parametro", "valor",
                  "valor_numeric", "unidad", "fecha", "year", "latitud", "longitud",
                  "source_file", "match_status"]
     present_cols = [c for c in keep_cols if c in centralized_df.columns]
     export_df = centralized_df[present_cols].where(pd.notnull(centralized_df[present_cols]), None)
+    if "year" in export_df.columns:
+        # NOT export_df["year"].map(_clean_int) — pandas re-infers a numeric
+        # dtype from the mapped output when the source column is float64,
+        # silently turning the clean ints right back into floats (and None
+        # back into NaN). Confirmed by testing; costly to get wrong silently
+        # a second time. Explicit object dtype is what actually holds.
+        export_df["year"] = pd.Series(
+            [_clean_int(v) for v in export_df["year"]],
+            index=export_df.index, dtype="object",
+        )
     rows = export_df.to_dict("records")
     print(f"\nPushing {len(rows)} centralized rows to Supabase table '{SUPABASE_TABLE}'...")
     written, failed, first_error = supabase_write_chunked(SUPABASE_TABLE, rows, on_conflict="id", label=SUPABASE_TABLE)
