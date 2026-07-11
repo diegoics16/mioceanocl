@@ -167,10 +167,27 @@
 
   /* ---------- map + alerts zone ---------- */
   .map-zone { display: grid; grid-template-columns: 1fr 340px; gap: 16px; align-items: start; }
+  .map-shell { position: relative; }
   #map {
     height: 560px; border-radius: 16px; border: 1px solid var(--hairline);
     overflow: hidden;
   }
+  .map-info-badge {
+    position: absolute; top: 12px; right: 12px; z-index: 1000;
+    width: 26px; height: 26px; border-radius: 50%; background: #FFFFFF;
+    border: 1px solid var(--hairline-strong); box-shadow: 0 2px 6px rgba(15,36,56,0.18);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-ui); font-weight: 700; font-size: 13px; color: var(--ocean);
+    cursor: help;
+  }
+  .map-info-panel {
+    display: none; position: absolute; top: 32px; right: 0; width: 230px;
+    background: #FFFFFF; border: 1px solid var(--hairline-strong); border-radius: 10px;
+    padding: 12px 14px; box-shadow: 0 10px 28px rgba(15,36,56,0.2);
+    font-size: 12px; color: var(--ink-secondary); line-height: 1.5; text-align: left;
+  }
+  .map-info-panel strong { display: block; color: var(--ink); font-size: 12.5px; margin-bottom: 4px; }
+  .map-info-badge:hover .map-info-panel { display: block; }
   .map-controls {
     display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;
   }
@@ -242,12 +259,6 @@
   .sci-chip:hover { border-color: var(--ink-muted); color: var(--ink); }
   .sci-chip.active { background: var(--ink); color: #FFFFFF; border-color: var(--ink); }
   .sci-chip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .sci-toolbar-right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
-  .sci-toggle { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-secondary); cursor: pointer; }
-  .sci-switch { width: 32px; height: 18px; border-radius: 999px; background: var(--hairline-strong); position: relative; transition: background 0.15s ease; flex-shrink: 0; }
-  .sci-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #FFFFFF; transition: transform 0.15s ease; box-shadow: 0 1px 2px rgba(15,36,56,0.2); }
-  .sci-switch.on { background: var(--ocean); }
-  .sci-switch.on::after { transform: translateX(14px); }
 
   #sci-chart { width: 100%; display: block; overflow: visible; }
   .sci-row-label { font-family: var(--font-data); font-size: 10.5px; fill: var(--ink-muted); }
@@ -277,9 +288,7 @@
     display: inline-block; font-family: var(--font-data); font-size: 9.5px; padding: 2px 8px; border-radius: 999px;
     margin-top: 9px; margin-right: 6px; border: 1px solid var(--hairline-strong); color: var(--ink-secondary);
   }
-  @media (max-width: 720px) {
-    .sci-toolbar-right { margin-left: 0; width: 100%; }
-  }
+
 
   .res-card { padding: 24px; }
   .res-card h3 {
@@ -392,44 +401,28 @@
       <span>POAL (DIRECTEMAR)</span><span class="trust-sep">·</span>
       <span>Reportes ciudadanos</span>
     </div>
-
-    <div class="kpi-grid">
-      <div class="glass kpi-card">
-        <div class="kpi-label">Instalaciones fiscalizadas</div>
-        <div class="kpi-value cyan" id="kpi-facilities">—</div>
-        <div class="kpi-sub">SNIFA · Región de Valparaíso</div>
-      </div>
-      <div class="glass kpi-card">
-        <div class="kpi-label">Lecturas POAL</div>
-        <div class="kpi-value mint" id="kpi-poal">—</div>
-        <div class="kpi-sub">DIRECTEMAR · legado + estandarizado</div>
-      </div>
-      <div class="glass kpi-card">
-        <div class="kpi-label">Reportes ciudadanos (30 días)</div>
-        <div class="kpi-value" id="kpi-reports">—</div>
-        <div class="kpi-sub">No verificados por defecto</div>
-      </div>
-      <div class="glass kpi-card">
-        <div class="kpi-label">Última sincronización</div>
-        <div class="kpi-value" id="kpi-synced" style="font-size:18px;">—</div>
-        <div class="kpi-sub" id="kpi-synced-source">—</div>
-      </div>
-    </div>
   </section>
 
   <!-- ============ MAP + ALERTS ============ -->
   <section class="panel" id="tab-mapa">
     <h2>Qué está pasando</h2>
-    <p class="section-lede">Cada burbuja es una instalación fiscalizada por SNIFA — el tamaño indica cuántos procedimientos tiene, el color indica si alguno terminó en sanción firme.</p>
 
     <div class="map-controls">
       <button class="chip on" id="chip-snifa"><span class="legend-dot" style="background:var(--crimson)"></span>SNIFA — instalaciones</button>
-      <button class="chip" id="chip-reports"><span class="legend-dot" style="background:var(--coral)"></span>Reportes ciudadanos</button>
     </div>
 
     <div class="map-zone">
       <div>
-        <div id="map"></div>
+        <div class="map-shell">
+          <div id="map"></div>
+          <div class="map-info-badge">
+            ⓘ
+            <div class="map-info-panel">
+              <strong>Cómo leer el mapa</strong>
+              Cada burbuja es una instalación fiscalizada por SNIFA. El tamaño indica cuántos procedimientos tiene; el color indica si alguno terminó en sanción firme.
+            </div>
+          </div>
+        </div>
         <div class="glass detail-panel" id="detail-panel">
           <h3 id="detail-title">—</h3>
           <div id="detail-body" style="font-size:12px;color:var(--ink-secondary);"></div>
@@ -638,9 +631,24 @@ const DEMO_POAL_READINGS = [
   { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Mercurio', year: 2024, valor_numeric: 0.15, location: 'Puchuncaví', source: 'estandarizado', unidad: 'mg/kg' },
   { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Mercurio', year: 2018, valor_numeric: 0.03, location: 'Zapallar', source: 'estandarizado', unidad: 'mg/kg' },
   { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Mercurio', year: 2024, valor_numeric: 0.02, location: 'Zapallar', source: 'estandarizado', unidad: 'mg/kg' },
-];
-const DEMO_REPORTS = [
-  { categoria: 'descarga_visible', descripcion: 'Agua con coloración inusual cerca del muelle', lat: -32.751, lon: -71.492, created_at: '2026-07-02T14:00:00Z' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Cadmio', year: 2018, valor_numeric: 0.09, location: 'Puchuncaví', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Cadmio', year: 2024, valor_numeric: 0.14, location: 'Puchuncaví', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Cadmio', year: 2018, valor_numeric: 0.04, location: 'Quintero', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Cadmio', year: 2024, valor_numeric: 0.06, location: 'Quintero', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Biota', parametro: 'Cadmio', year: 2018, valor_numeric: 0.01, location: 'Zapallar', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Biota', parametro: 'Cadmio', year: 2024, valor_numeric: 0.01, location: 'Zapallar', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Plomo', year: 2020, valor_numeric: 0.22, location: 'Puchuncaví', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Plomo', year: 2024, valor_numeric: 0.38, location: 'Puchuncaví', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Plomo', year: 2020, valor_numeric: 0.12, location: 'Quintero', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Plomo', year: 2024, valor_numeric: 0.19, location: 'Quintero', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Desembocadura Aconcagua', matriz: 'Sedimento', parametro: 'Cadmio', year: 2017, valor_numeric: 0.012, location: 'Concón', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Desembocadura Aconcagua', matriz: 'Sedimento', parametro: 'Cadmio', year: 2023, valor_numeric: 0.017, location: 'Concón', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Desembocadura Aconcagua', matriz: 'Agua', parametro: 'Coliformes fecales', year: 2017, valor_numeric: 210, location: 'Concón', source: 'legado', unidad: 'NMP/100ml' },
+  { estacion: 'Desembocadura Aconcagua', matriz: 'Agua', parametro: 'Coliformes fecales', year: 2023, valor_numeric: 340, location: 'Concón', source: 'estandarizado', unidad: 'NMP/100ml' },
+  { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Cadmio', year: 2016, valor_numeric: 0.019, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Cadmio', year: 2023, valor_numeric: 0.024, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Plomo', year: 2016, valor_numeric: 12.4, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Plomo', year: 2023, valor_numeric: 15.8, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
 ];
 const DEMO_EVENTS_RECENT = [
   { kind: 'sancion', body: 'Nueva sanción firme — CODELCO Ventanas (Registro Público)', when: '2026-06-28', severity: 'crimson' },
@@ -685,29 +693,15 @@ async function sbCount(table, extra = (q) => q) {
 /* ============================================================
    HERO KPIs
    ============================================================ */
-async function loadKPIs() {
-  const facilitiesCount = await sbCount(CONFIG.TABLES.facilities);
-  const poalCount = await sbCount(CONFIG.TABLES.poal);
-  const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
-  const reportsCount = await sbCount(CONFIG.TABLES.reports, (q) => q.gte('created_at', since));
+async function loadSyncStatus() {
   const lastSync = await sbSelect(CONFIG.TABLES.syncRuns, 'source, finished_at, status', (q) => q.order('finished_at', { ascending: false }).limit(1));
-
-  document.getElementById('kpi-facilities').textContent = (facilitiesCount ?? DEMO_FACILITIES.length).toLocaleString('es-CL');
-  document.getElementById('kpi-poal').textContent = (poalCount ?? 4500).toLocaleString('es-CL');
-  document.getElementById('kpi-reports').textContent = (reportsCount ?? DEMO_REPORTS.length).toLocaleString('es-CL');
-
   if (lastSync && lastSync[0]) {
-    const d = new Date(lastSync[0].finished_at);
-    document.getElementById('kpi-synced').textContent = d.toLocaleDateString('es-CL', { day: '2-digit', month: 'short' });
-    document.getElementById('kpi-synced-source').textContent = lastSync[0].source;
     document.getElementById('sync-label').textContent = lastSync[0].status === 'success' ? 'sincronizado' : 'revisar última sync';
   } else {
-    document.getElementById('kpi-synced').textContent = DEMO_MODE ? 'demo' : '—';
-    document.getElementById('kpi-synced-source').textContent = DEMO_MODE ? 'sin conexión real' : 'sin datos aún';
     document.getElementById('sync-label').textContent = DEMO_MODE ? 'modo demo' : 'sin datos';
   }
 }
-loadKPIs();
+loadSyncStatus();
 
 /* ============================================================
    MAP — wrapped in try/catch: if Leaflet's CDN script fails to
@@ -725,7 +719,7 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   subdomains: 'abcd', maxZoom: 19,
 }).addTo(map);
 
-const layers = { snifa: L.layerGroup().addTo(map), reports: L.layerGroup() };
+const layers = { snifa: L.layerGroup().addTo(map) };
 
 function facilityColor(f) {
   const sanctions = f.sanction_count ?? 0;
@@ -763,24 +757,9 @@ async function loadSnifaLayer() {
   });
 }
 
-async function loadReportsLayer() {
-  let reports = await sbSelect(CONFIG.TABLES.reports, 'categoria, descripcion, lat, lon, created_at');
-  if (!reports || reports.length === 0) reports = DEMO_REPORTS;
-  reports.forEach(r => {
-    if (!r.lat || !r.lon) return;
-    const marker = L.circleMarker([r.lat, r.lon], {
-      radius: 6, color: '#EA580C', weight: 1.5, fillColor: '#EA580C', fillOpacity: 0.5, dashArray: '2,2',
-    });
-    marker.bindTooltip(`Reporte ciudadano (no verificado): ${r.categoria}`, { direction: 'top' });
-    marker.addTo(layers.reports);
-  });
-}
-
 loadSnifaLayer();
-loadReportsLayer();
 
 document.getElementById('chip-snifa').addEventListener('click', (e) => toggleLayer('snifa', e.currentTarget));
-document.getElementById('chip-reports').addEventListener('click', (e) => toggleLayer('reports', e.currentTarget));
 function toggleLayer(key, btn) {
   if (map.hasLayer(layers[key])) { map.removeLayer(layers[key]); btn.classList.remove('on'); }
   else { map.addLayer(layers[key]); btn.classList.add('on'); }
@@ -1028,7 +1007,6 @@ try {
   const svg = document.getElementById('sci-chart');
   const tooltip = document.getElementById('sci-tooltip');
   let activeCats = new Set(SCI_CATEGORIES.map(c => c.key));
-  let marineOnly = false;
 
   function colorOf(key) { return (SCI_CATEGORIES.find(c => c.key === key) || {}).color || '#8598A8'; }
   function labelOf(key) { return (SCI_CATEGORIES.find(c => c.key === key) || {}).label || key; }
@@ -1062,15 +1040,6 @@ try {
       };
       bar.appendChild(chip);
     });
-    const right = document.createElement('div');
-    right.className = 'sci-toolbar-right';
-    right.innerHTML = `<div class="sci-toggle" id="sci-marine-toggle"><div class="sci-switch" id="sci-switch"></div><span>Solo mediciones marinas</span></div>`;
-    bar.appendChild(right);
-    document.getElementById('sci-marine-toggle').onclick = () => {
-      marineOnly = !marineOnly;
-      document.getElementById('sci-switch').classList.toggle('on', marineOnly);
-      draw();
-    };
   }
 
   const MARGIN = { top: 26, right: 20, bottom: 34, left: 150 };
@@ -1140,7 +1109,7 @@ try {
       const siblings = byRowYear[d.category + '-' + d.year_pub];
       const idx = siblings.indexOf(d);
       const jitter = siblings.length > 1 ? (idx - (siblings.length - 1) / 2) * 8 : 0;
-      const isDim = (!activeCats.has(d.category)) || (marineOnly && !d.marine);
+      const isDim = !activeCats.has(d.category);
 
       const c = document.createElementNS(ns, 'circle');
       c.setAttribute('cx', x(d.year_pub)); c.setAttribute('cy', y0 + jitter);
