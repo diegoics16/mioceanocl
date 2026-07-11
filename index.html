@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>mioceano — Bahía Quintero-Puchuncaví</title>
+<title>mioceano — Región de Valparaíso</title>
 
 <!-- Error visibility, installed BEFORE any CDN script below so a failure
      in Leaflet/Chart.js/Supabase loading itself gets caught too, not just
@@ -216,6 +216,24 @@
   .chip.on { color: #FFFFFF; background: var(--ocean); border-color: var(--ocean); }
   .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 
+  .map-legend-bar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px;
+    padding: 8px 2px 12px; font-size: 12px; color: var(--ink-secondary);
+  }
+  .map-legend-item { display: flex; align-items: center; gap: 6px; }
+  .map-legend-item .legend-dot { flex-shrink: 0; }
+  .map-legend-size, .map-legend-note { color: var(--ink-muted); font-size: 11.5px; }
+  .map-legend-note { font-style: italic; }
+
+  .popup-facility { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12.5px; line-height: 1.4; }
+  .popup-name { font-weight: 700; color: var(--ink); font-size: 13.5px; margin-bottom: 3px; }
+  .popup-meta { color: var(--ink-secondary); margin-bottom: 6px; }
+  .popup-count { color: var(--ink); margin-bottom: 6px; }
+  .popup-outcomes { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
+  .popup-outcome { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--ink-secondary); }
+  .popup-outcome-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .popup-caveat { color: var(--ink-muted); font-size: 10.5px; font-style: italic; border-top: 1px solid rgba(15,36,56,0.08); padding-top: 6px; }
+
   .alerts-feed { display: flex; flex-direction: column; gap: 10px; max-height: 560px; overflow-y: auto; padding-right: 4px; }
   .alert-item {
     padding: 12px 14px; border-radius: 10px; background: var(--bg-alt);
@@ -406,9 +424,9 @@
 
   <!-- ============ HERO / KPIs ============ -->
   <section class="hero">
-    <div class="hero-eyebrow">Bahía Quintero-Puchuncaví</div>
+    <div class="hero-eyebrow">Región de Valparaíso</div>
     <h1>Valparaíso, <em>en vivo</em>.</h1>
-    <p class="lede">Fiscalizaciones, mediciones de agua y reportes ciudadanos, en un solo lugar público.</p>
+    <p class="lede">Fiscalizaciones, mediciones de agua y reportes ciudadanos de toda la región — con foco en Bahía Quintero-Puchuncaví, el punto de mayor concentración industrial.</p>
 
     <div class="trust-strip">
       <span>Fuentes</span><span class="trust-sep">·</span>
@@ -431,13 +449,20 @@
       <button class="chip on" id="chip-snifa"><span class="legend-dot" style="background:var(--crimson)"></span>SNIFA — instalaciones</button>
     </div>
 
+    <div class="map-legend-bar">
+      <span class="map-legend-item"><span class="legend-dot" style="background:var(--crimson)"></span>Con sanción firme registrada</span>
+      <span class="map-legend-item"><span class="legend-dot" style="background:var(--cyan)"></span>Fiscalizada, sin sanción firme</span>
+      <span class="map-legend-item map-legend-size">El tamaño de la burbuja = cantidad de procedimientos</span>
+      <span class="map-legend-item map-legend-note">Una sanción no equivale a un veredicto de contaminación — ver detalle en cada burbuja</span>
+    </div>
+
     <div class="map-shell map-shell-fullbleed">
       <div id="map"></div>
       <div class="map-info-badge">
         ⓘ
         <div class="map-info-panel">
           <strong>Cómo leer el mapa</strong>
-          Cada burbuja es una instalación fiscalizada por SNIFA. El tamaño indica cuántos procedimientos tiene; el color indica si alguno terminó en sanción firme.
+          Cada burbuja es una instalación fiscalizada por SNIFA. El tamaño indica cuántos procedimientos tiene; el color indica si alguno terminó en sanción firme. Toca o pasa el cursor sobre una burbuja para ver el detalle.
         </div>
       </div>
     </div>
@@ -750,30 +775,76 @@ function facilityRadius(f) {
   return Math.min(8 + n * 1.6, 28);
 }
 
+/* Outcome labels for procedimientos_sancionatorios.estado — shown in the
+   popup so "sanción" isn't flattened into one bucket. A procedure that
+   ended in "Absolución" or a completed compliance program ("PDC
+   Satisfactorio") is materially different from a upheld sanction, and
+   lumping them together would misrepresent what SNIFA's data says. */
+const ESTADO_LABELS = {
+  'Terminado - Sanción':               { label: 'Sanción confirmada',          tone: 'crimson' },
+  'Terminado - Absolución':            { label: 'Absuelto',                     tone: 'mint' },
+  'Terminado - PDC Satisfactorio':     { label: 'Programa de cumplimiento OK',  tone: 'cyan' },
+  'Programa de Cumplimiento en ejecución': { label: 'Programa de cumplimiento en curso', tone: 'coral' },
+  'En curso':                          { label: 'Procedimiento en curso',       tone: 'coral' },
+  'Terminado - Archivado':             { label: 'Archivado',                    tone: 'ink-muted' },
+  'Suspendido':                        { label: 'Suspendido',                   tone: 'ink-muted' },
+};
+
+function parseRaw(e) {
+  try { return JSON.parse(e.raw || '{}'); } catch { return {}; }
+}
+
 async function loadSnifaLayer() {
   let facilities = await sbSelect(CONFIG.TABLES.facilities, 'id, razon_social, comuna, categoria, lat, lon');
   let counts = {};
   if (!DEMO_MODE && facilities) {
-    const events = await sbSelect(CONFIG.TABLES.events, 'facility_id, section');
+    const events = await sbSelect(CONFIG.TABLES.events, 'facility_id, section, estado, anio, raw');
     (events || []).forEach(e => {
-      counts[e.facility_id] = counts[e.facility_id] || { event_count: 0, sanction_count: 0 };
-      counts[e.facility_id].event_count++;
-      if (e.section === 'registro_publico_sanciones') counts[e.facility_id].sanction_count++;
+      const c = counts[e.facility_id] = counts[e.facility_id] || {
+        event_count: 0, sanction_count: 0, procedures: [], fallback_name: null,
+      };
+      c.event_count++;
+      if (e.section === 'registro_publico_sanciones') c.sanction_count++;
+      if (e.section === 'procedimientos_sancionatorios') {
+        const r = parseRaw(e);
+        c.procedures.push({
+          estado: e.estado, expediente: r['Expediente'] || null, anio: e.anio,
+        });
+      }
+      // Facility name is missing for ~1 in 4 rows in the current scrape —
+      // fall back to whatever name the events themselves carry.
+      if (!c.fallback_name) {
+        const r = parseRaw(e);
+        c.fallback_name = r['Nombre razón social'] || r['Nombre Razon Social']
+          || r['Unidad Fiscalizable'] || r['Nombre Unidad Fiscalizable'] || null;
+      }
     });
     facilities = facilities.filter(f => f.lat && f.lon).map(f => ({
-      ...f, ...(counts[f.id] || { event_count: 1, sanction_count: 0 }),
+      ...f, ...(counts[f.id] || { event_count: 1, sanction_count: 0, procedures: [], fallback_name: null }),
     }));
   }
   if (!facilities || facilities.length === 0) facilities = DEMO_FACILITIES;
 
+  const markers = [];
   facilities.forEach(f => {
     const marker = L.circleMarker([f.lat, f.lon], {
       radius: facilityRadius(f), color: facilityColor(f), weight: 1.5,
       fillColor: facilityColor(f), fillOpacity: 0.35,
     });
-    marker.on('click', () => showFacilityDetail(f));
+    marker.bindPopup(facilityPopupHTML(f), { maxWidth: 280 });
+    // click opens/closes on any device; mouseover is a bonus on desktop
+    // (no-op on touch, since touch devices never fire mouseover).
+    marker.on('mouseover', () => marker.openPopup());
     marker.addTo(layers.snifa);
+    markers.push(marker);
   });
+
+  // Region-wide data, region-wide view: fit to every marker instead of a
+  // fixed bay-only zoom, so San Antonio / Petorca / Zapallar etc. aren't
+  // scraped and stored but invisible on load.
+  if (markers.length > 0) {
+    map.fitBounds(L.featureGroup(markers).getBounds().pad(0.15));
+  }
 }
 
 loadSnifaLayer();
@@ -784,15 +855,27 @@ function toggleLayer(key, btn) {
   else { map.addLayer(layers[key]); btn.classList.add('on'); }
 }
 
-/* ---------- detail panel ---------- */
-function showFacilityDetail(f) {
-  const panel = document.getElementById('detail-panel');
-  panel.classList.add('show');
-  document.getElementById('detail-title').textContent = f.razon_social || 'Instalación';
-  document.getElementById('detail-body').innerHTML = `
-    <div>${f.categoria || '—'} · ${f.comuna || '—'}</div>
-    <div style="margin-top:6px;">${(f.event_count ?? '—')} procedimientos registrados · ${(f.sanction_count ?? 0)} sanciones firmes</div>
-    <div style="margin-top:6px;color:var(--ink-muted);font-size:11px;">SNIFA no publica una tasa de cumplimiento — esto es el conteo bruto de procedimientos, no un veredicto.</div>
+/* ---------- popup content (was a below-map side panel; now lives on the marker itself) ---------- */
+function facilityPopupHTML(f) {
+  const name = f.razon_social || f.fallback_name || 'Instalación no identificada';
+  const procs = f.procedures || [];
+  let outcomeRows = '';
+  if (procs.length > 0) {
+    const tally = {};
+    procs.forEach(p => { tally[p.estado] = (tally[p.estado] || 0) + 1; });
+    outcomeRows = Object.entries(tally).map(([estado, n]) => {
+      const meta = ESTADO_LABELS[estado] || { label: estado, tone: 'ink-muted' };
+      return `<div class="popup-outcome"><span class="popup-outcome-dot" style="background:var(--${meta.tone})"></span>${n} × ${meta.label}</div>`;
+    }).join('');
+  }
+  return `
+    <div class="popup-facility">
+      <div class="popup-name">${name}</div>
+      <div class="popup-meta">${f.categoria || '—'} · ${f.comuna || '—'}</div>
+      <div class="popup-count">${f.event_count ?? '—'} procedimientos registrados · ${f.sanction_count ?? 0} sanción(es) firme(s)</div>
+      ${outcomeRows ? `<div class="popup-outcomes">${outcomeRows}</div>` : ''}
+      <div class="popup-caveat">SNIFA no publica una tasa de cumplimiento — esto es el conteo bruto de procedimientos, no un veredicto de contaminación. Una "sanción" puede corresponder a incumplimientos de reporte, no solo a descargas fuera de norma.</div>
+    </div>
   `;
 }
 
@@ -953,14 +1036,23 @@ async function loadAlerts() {
   let items = [];
 
   if (!DEMO_MODE) {
-    const sanctions = await sbSelect(CONFIG.TABLES.events, 'facility_id, section, estado, anio', (q) =>
+    const sanctions = await sbSelect(CONFIG.TABLES.events, 'facility_id, section, estado, anio, raw', (q) =>
       q.eq('section', 'registro_publico_sanciones').order('anio', { ascending: false }).limit(5));
     const mismatches = await sbSelect(CONFIG.TABLES.poal, 'estacion, parametro, match_status, year', (q) =>
       q.eq('match_status', 'value_mismatch').order('year', { ascending: false }).limit(5));
     const reports = await sbSelect(CONFIG.TABLES.reports, 'categoria, descripcion, created_at', (q) =>
       q.order('created_at', { ascending: false }).limit(5));
 
-    (sanctions || []).forEach(s => items.push({ kind: 'Sanción firme', body: `Instalación ${s.facility_id?.split('/').pop() || '—'}`, when: s.anio, severity: 'crimson' }));
+    (sanctions || []).forEach(s => {
+      const r = parseRaw(s);
+      const company = r['Nombre Razon Social'] || r['Nombre razón social'] || r['Unidad Fiscalizable'] || `Instalación ${s.facility_id?.split('/').pop() || '—'}`;
+      const reason = r['Categoría'] || null;
+      const fine = r['Multa (UTA)'] || null;
+      const bodyParts = [company];
+      if (reason) bodyParts.push(reason);
+      if (fine) bodyParts.push(`Multa: ${fine}`);
+      items.push({ kind: 'Sanción firme', body: bodyParts.join(' · '), when: s.anio, severity: 'crimson' });
+    });
     (mismatches || []).forEach(m => items.push({ kind: 'POAL — discrepancia', body: `${m.parametro} en ${m.estacion} difiere entre fuentes`, when: m.year, severity: 'coral' }));
     (reports || []).forEach(r => items.push({ kind: 'Reporte ciudadano', body: r.descripcion?.slice(0, 80) || r.categoria, when: new Date(r.created_at).toLocaleDateString('es-CL'), severity: 'mint' }));
   }
