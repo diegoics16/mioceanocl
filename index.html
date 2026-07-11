@@ -223,42 +223,69 @@
   .poal-card-legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .poal-card-footnote { font-size: 10px; color: var(--ink-muted); margin-top: 8px; line-height: 1.5; }
 
-  /* ---------- scientific timeline ---------- */
-  .sci-timeline-track { position: relative; margin: 32px 0 8px; padding: 60px 0; }
-  .sci-timeline-line { position: absolute; top: 50%; left: 0; right: 0; height: 2px; background: var(--hairline-strong); transform: translateY(-50%); }
-  .sci-point { position: absolute; top: 50%; transform: translate(-50%, -50%); z-index: 2; }
-  .sci-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--ocean); border: 3px solid var(--bg); box-shadow: 0 0 0 1px var(--hairline-strong); margin: 0 auto; }
-  .sci-card { position: absolute; left: 50%; transform: translateX(-50%); width: 180px; text-align: center; }
-  .sci-card.above { bottom: 26px; }
-  .sci-card.below { top: 26px; }
-  .sci-badge {
-    display: inline-block; font-family: var(--font-data); font-size: 9px; text-transform: uppercase;
-    letter-spacing: 0.06em; color: var(--ocean); background: rgba(14,116,144,0.08);
-    padding: 2px 8px; border-radius: 999px; margin-bottom: 6px;
+  /* ---------- scientific timeline (SVG scatter, category rows x years) ---------- */
+  .sci-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 20px 0 4px; }
+  .sci-stat-card { padding: 14px 16px; }
+  .sci-stat-card .n { font-family: var(--font-head); font-size: 26px; font-weight: 700; color: var(--ink); }
+  .sci-stat-card .l { font-size: 11px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+
+  .sci-toolbar {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    margin: 18px 0 16px; padding: 12px 14px; border: 1px solid var(--hairline); border-radius: 12px; background: var(--bg-alt);
   }
-  .sci-year { font-family: var(--font-data); font-size: 12px; color: var(--ink-muted); font-weight: 500; }
-  .sci-title { font-size: 12px; font-weight: 700; color: var(--ink); margin: 3px 0; line-height: 1.3; }
-  .sci-stat { font-family: var(--font-data); font-size: 13px; font-weight: 600; color: var(--mint); margin: 3px 0; }
-  .sci-desc { font-size: 10.5px; color: var(--ink-secondary); line-height: 1.4; }
-  @media (max-width: 900px) {
-    .sci-timeline-track { padding: 0; }
-    .sci-timeline-line { display: none; }
-    .sci-point { position: static; transform: none; display: flex; gap: 14px; align-items: flex-start; margin-bottom: 24px; }
-    .sci-dot { flex-shrink: 0; margin-top: 4px; }
-    .sci-card { position: static; transform: none; width: auto; text-align: left; }
+  .sci-toolbar-label { font-family: var(--font-data); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-muted); margin-right: 4px; }
+  .sci-chip {
+    display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px 5px 9px; border-radius: 999px;
+    border: 1px solid var(--hairline-strong); background: #FFFFFF; font-size: 12px; color: var(--ink-secondary);
+    cursor: pointer; user-select: none; transition: all 0.15s ease;
   }
+  .sci-chip:hover { border-color: var(--ink-muted); color: var(--ink); }
+  .sci-chip.active { background: var(--ink); color: #FFFFFF; border-color: var(--ink); }
+  .sci-chip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .sci-toolbar-right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+  .sci-toggle { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-secondary); cursor: pointer; }
+  .sci-switch { width: 32px; height: 18px; border-radius: 999px; background: var(--hairline-strong); position: relative; transition: background 0.15s ease; flex-shrink: 0; }
+  .sci-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #FFFFFF; transition: transform 0.15s ease; box-shadow: 0 1px 2px rgba(15,36,56,0.2); }
+  .sci-switch.on { background: var(--ocean); }
+  .sci-switch.on::after { transform: translateX(14px); }
+
+  #sci-chart { width: 100%; display: block; overflow: visible; }
+  .sci-row-label { font-family: var(--font-data); font-size: 10.5px; fill: var(--ink-muted); }
+  .sci-axis-year { font-family: var(--font-data); font-size: 10px; fill: var(--ink-muted); }
+  .sci-gridline { stroke: var(--hairline); stroke-width: 1; }
+  .sci-row-band { fill: var(--bg-alt); }
+  .sci-era-label { font-family: var(--font-data); font-size: 9px; fill: var(--ink-muted); letter-spacing: 0.04em; }
+  .sci-pt { cursor: pointer; transition: opacity 0.12s ease; }
+  .sci-pt.dim { opacity: 0.12; }
+
+  .sci-legend-foot { display: flex; flex-wrap: wrap; gap: 16px; padding: 16px 4px 4px; font-size: 11.5px; color: var(--ink-secondary); }
+  .sci-legend-foot .item { display: flex; align-items: center; gap: 7px; }
+  .sci-legend-foot-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  #sci-tooltip {
+    position: fixed; max-width: 340px; background: #FFFFFF; border: 1px solid var(--hairline-strong);
+    border-radius: 12px; padding: 14px 15px; font-size: 12.5px; line-height: 1.5; color: var(--ink);
+    box-shadow: 0 18px 40px rgba(15,36,56,0.18); pointer-events: none; opacity: 0;
+    transform: translateY(4px); transition: opacity 0.1s ease, transform 0.1s ease; z-index: 999;
+  }
+  #sci-tooltip.show { opacity: 1; transform: translateY(0); }
+  #sci-tooltip .t-year { font-family: var(--font-data); font-size: 11px; color: var(--ink-muted); margin-bottom: 5px; }
+  #sci-tooltip .t-title { font-weight: 700; color: var(--ink); margin-bottom: 6px; font-size: 13px; line-height: 1.35; }
+  #sci-tooltip .t-meta { color: var(--ink-secondary); font-size: 11.5px; margin-bottom: 8px; }
+  #sci-tooltip .t-finding { color: var(--ink); font-size: 12px; }
+  #sci-tooltip .t-tag {
+    display: inline-block; font-family: var(--font-data); font-size: 9.5px; padding: 2px 8px; border-radius: 999px;
+    margin-top: 9px; margin-right: 6px; border: 1px solid var(--hairline-strong); color: var(--ink-secondary);
+  }
+  @media (max-width: 720px) {
+    .sci-toolbar-right { margin-left: 0; width: 100%; }
+  }
+
   .res-card { padding: 24px; }
   .res-card h3 {
     font-family: var(--font-head); font-size: 19px; font-weight: 700; margin-bottom: 14px;
     display: flex; align-items: center; gap: 8px;
   }
-
-  /* scientific panel timeline */
-  .timeline-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--hairline); }
-  .timeline-item:last-child { border-bottom: none; }
-  .timeline-year { font-family: var(--font-data); font-size: 13px; color: var(--cyan); min-width: 44px; }
-  .timeline-body .t-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
-  .timeline-body .t-desc { font-size: 12px; color: var(--ink-secondary); line-height: 1.4; }
 
   /* explainer accordion */
   .acc-item { border-bottom: 1px solid var(--hairline); }
@@ -430,9 +457,26 @@
 
   <section class="panel" id="tab-cientifico">
     <h2>Panel científico</h2>
-    <p class="section-lede">Solo fuentes publicadas o institucionales — nada de datos no publicados de investigadores individuales.</p>
-    <div id="sci-timeline"><!-- populated by JS --></div>
+    <p class="section-lede">Cronología de mediciones marinas directas en la bahía — agua, sedimento y biota — desde 2010. Cada punto es una fuente citable, no una síntesis. Solo fuentes publicadas o institucionales — nada de datos no publicados de investigadores individuales.</p>
+
+    <div class="sci-stats" id="sci-stats"></div>
+
+    <div class="sci-toolbar" id="sci-toolbar">
+      <span class="sci-toolbar-label">Filtrar por categoría</span>
+    </div>
+
+    <div class="glass" style="padding:20px;">
+      <svg id="sci-chart"></svg>
+    </div>
+
+    <div class="sci-legend-foot">
+      <div class="item"><span class="sci-legend-foot-dot" style="background:#fff;border:1.4px solid var(--ink);"></span>Borde = medición marina directa (agua / sedimento / biota de bahía)</div>
+      <div class="item"><span class="sci-legend-foot-dot" style="background:rgba(15,36,56,0.25);"></span>Sin borde = contexto terrestre / aéreo / humano</div>
+      <div class="item">Tamaño del punto = alcance del estudio</div>
+    </div>
   </section>
+
+  <div id="sci-tooltip"></div>
 
   <!-- ============ FOOTER: EXPLAINER / REPORT ============ -->
   <section class="footer-zone">
@@ -542,6 +586,7 @@ const CONFIG = {
     poal: 'poal_readings',
     reports: 'community_reports',
     syncRuns: 'sync_runs',
+    sciStudies: 'scientific_studies',
   },
 };
 
@@ -942,36 +987,209 @@ loadAlerts();
    coliform data) — anything not peer-reviewed or publicly released
    stays off this public page until its authors publish it.
    ============================================================ */
-const SCI_TIMELINE = [
-  { year: 1993, badge: 'Programa', title: 'POAL — DIRECTEMAR', stat: null, desc: 'Inicio del monitoreo bianual de agua, sedimento y biota en el litoral chileno, incluyendo Quintero-Puchuncaví.' },
-  { year: 2017, badge: 'Metodología', title: 'Quiebre en el monitoreo', stat: null, desc: 'Los indicadores de aguas servidas (coliformes fecales, oxígeno disuelto) dejan de medirse en la bahía; los metales pesados continúan.' },
-  { year: 2024, badge: 'Norma', title: 'D.S. 43/2023', stat: null, desc: 'Norma Secundaria de Calidad Ambiental para la bahía, publicada el 2 de octubre. El monitoreo que exige aún no ha comenzado.' },
-  { year: 2026, badge: 'Estudio', title: 'Curaz-Leiva et al.', stat: '144 muestras · 8 metales · 10 especies', desc: 'Metales pesados en biota, comparando Quintero-Puchuncaví con el sitio control de Quintay.' },
+const SCI_CATEGORIES = [
+  { key: 'heavy_metals',            label: 'Metales pesados',                color: '#EA580C' },
+  { key: 'coliforms',                label: 'Coliformes / microbiología',     color: '#0891B2' },
+  { key: 'biodiversity_ecotox',      label: 'Biodiversidad / ecotoxicología', color: '#059669' },
+  { key: 'sediment_geochronology',   label: 'Geocronología de sedimentos',    color: '#CA8A04' },
+  { key: 'hydrocarbons_spill',       label: 'Hidrocarburos / derrame',        color: '#DC2626' },
 ];
 
-(function renderSciTimeline() {
-  const years = SCI_TIMELINE.map(t => t.year);
-  const minY = Math.min(...years), maxY = Math.max(...years);
-  const span = Math.max(maxY - minY, 1);
-  const points = SCI_TIMELINE.map((t, i) => {
-    const pct = ((t.year - minY) / span) * 100;
-    const side = i % 2 === 0 ? 'above' : 'below';
-    return `
-      <div class="sci-point" style="left:${pct}%">
-        <div class="sci-dot"></div>
-        <div class="sci-card ${side}">
-          <span class="sci-badge">${t.badge}</span>
-          <div class="sci-year">${t.year}</div>
-          <div class="sci-title">${t.title}</div>
-          ${t.stat ? `<div class="sci-stat">${t.stat}</div>` : ''}
-          <div class="sci-desc">${t.desc}</div>
-        </div>
-      </div>
+/* Demo fallback — the same real, filtered set now in Supabase: year_pub
+   >= 2010 AND marine = true (direct ocean measurements only). Shown
+   only if scientific_studies isn't reachable. The live copy lives in
+   Supabase, not here — see scientific_studies_seed.sql. */
+const DEMO_SCI_STUDIES = [
+  { id: 6, year_pub: 2012, year_sampled: '2012', title: 'Análisis de metales pesados en mariscos y crustáceos, Bahía de Ventanas', authors: 'Oceana (encargo) / Laboratorio GCL, Fundación Chile', source_type: 'ngo-commissioned', journal: 'Commissioned lab analysis', category: 'heavy_metals', matrix: 'biota (clam, urchin, limpet, loco, crab)', location: 'La Virgen, La Churra, El Tebo, La Boca (Ventanas)', marine: true, verified: 'secondary', finding: '100% of samples contaminated with Cu, As and Cd, at levels far above national/international norms.' },
+  { id: 7, year_pub: 2012, year_sampled: '2011 (Sept, Nov)', title: 'Fiscalización RILES — Fundición Ventanas CODELCO', authors: 'Gobernación Marítima de Valparaíso', source_type: 'government-report', journal: 'Enforcement inspection', category: 'heavy_metals', matrix: 'industrial effluent (marine discharge)', location: 'Ventanas outfall', marine: true, verified: 'secondary', finding: 'Selenium (Se) in RILES effluent up to 40x the D.S. 90/2000 emission limit.' },
+  { id: 8, year_pub: 2012, year_sampled: 'pre-2012', title: 'Environmental assessment in a shallow subtidal rocky habitat: coupling chemical and ecological tools', authors: 'Sáez, Pérez-Matus, Lobos, Oliva, Vásquez & Bravo', source_type: 'peer-reviewed', journal: 'Chemistry and Ecology 28', category: 'heavy_metals', matrix: 'water + sediment + biota', location: 'Quintero–Puchuncaví Bay', marine: true, verified: 'secondary', finding: 'Coupled chemical/ecological indicators establishing subtidal impact of QP industrial discharge.' },
+  { id: 9, year_pub: 2012, year_sampled: 'pre-2012', title: 'Variation in patterns of metal accumulation in thallus parts of Lessonia trabeculata: implications for biomonitoring', authors: 'Sáez, Lobos, Macaya, Oliva, Quiroz & Brown', source_type: 'peer-reviewed', journal: 'PLoS ONE 7(11)', category: 'biodiversity_ecotox', matrix: 'kelp (biota)', location: 'Quintero–Puchuncaví Bay', marine: true, verified: 'secondary', finding: 'Established kelp (L. trabeculata) as a validated biomonitoring tool for metal accumulation in the bay.' },
+  { id: 11, year_pub: 2013, year_sampled: '2013', title: 'Análisis de riesgo ecológico por sustancias potencialmente contaminantes en el aire, suelo y agua, comunas de Concón, Quintero y Puchuncaví', authors: 'Centro de Ecología Aplicada (para MMA)', source_type: 'government-report', journal: 'Final report, 380pp', category: 'heavy_metals', matrix: 'water + sediment + biota + soil + air', location: 'Quintero and Concón bays', marine: true, verified: 'secondary', finding: 'Bioaccumulation confirmed in algae, mussels, crabs, fish; most RILES discharges exceeded D.S. 90/2000; Cu identified as the metal with highest chronic ecological risk probability (>89.9%).' },
+  { id: 14, year_pub: 2015, year_sampled: 'not specified in text', title: 'Distribution and pollution assessment of trace elements in marine sediments in the Quintero Bay (Chile)', authors: 'Parra, Bravo, Quiroz, Querol & Paipa', source_type: 'peer-reviewed', journal: 'Marine Pollution Bulletin 99', category: 'heavy_metals', matrix: 'sediment', location: 'Quintero Bay (14 sites, incl. reference)', marine: true, verified: 'full-text', finding: 'Extreme Cu enrichment factor (up to ~28x) near Puerto Ventanas / smelter-adjacent sites (002, SA, S4); SEM/EDX confirmed anthropogenic Cu-Zn-As-Pb particles and Pb-sulfide grains from the copper smelter.' },
+  { id: 15, year_pub: 2016, year_sampled: '2014-09-24 (spill) + post-spill campaign', title: 'Determinación de los impactos en los recursos hidrobiológicos y ecosistemas marinos en el área de influencia del derrame de hidrocarburo de Bahía Quintero', authors: 'Instituto de Fomento Pesquero (IFOP)', source_type: 'government-report', journal: 'Final report, 697pp', category: 'hydrocarbons_spill', matrix: 'water + sediment + biota', location: 'Quintero Bay', marine: true, verified: 'full-text', finding: 'As reached ~118 µg/g in crabs and ~189 µg/g in locos; Farellones de Quintero was the most contaminated station; AMERB banks and marine mammals largely unaffected but penguins (S. magellanicus) were; estimated fisher losses ~CLP 631 million.' },
+  { id: 21, year_pub: 2020, year_sampled: '2018-07 (in situ) + in vitro follow-up', title: 'Coastal pollution from the industrial park Quintero bay of central Chile: effects on abundance, morphology and development of the kelp Lessonia spicata', authors: 'Oyarzo-Miranda, Latorre, Meynard, Rivas, Bulboa & Contreras-Porcia', source_type: 'peer-reviewed', journal: 'PLOS ONE 15(10)', category: 'biodiversity_ecotox', matrix: 'water + sediment + kelp', location: 'Ventanas, Horcón, Cachagua (up to 40km from QB)', marine: true, verified: 'full-text', finding: 'Cu/As in seawater exceeded EPA acute limits at ALL three sites, including the presumed-clean control Cachagua (Cu 859 µg/L, As 1,484 µg/L); Ventanas kelp had 0% adult sporophytes and the smallest holdfasts/blades — evidence of pollution expansion along the coast since 2000.' },
+  { id: 23, year_pub: 2021, year_sampled: 'paleo (Late Pleistocene + historical layers)', title: 'A multi-proxy reconstruction of depositional environment of a Late Pleistocene submerged site from the Central Coast of Chile (32°S)', authors: 'Flores-Aqueveque, V. et al.', source_type: 'peer-reviewed', journal: 'Quaternary International 601', category: 'sediment_geochronology', matrix: 'sediment core', location: 'GNL Quintero 1 site', marine: true, verified: 'secondary', finding: 'Most recent historical sediment layer carries anthropogenic Cr, V, Cu, Zn, Zr, Y signature tied to smelting and coal thermoelectric activity.' },
+  { id: 24, year_pub: 2021, year_sampled: '2020-11-27 to 2020-11-29', title: 'Evaluación temporal y espacial del contenido de metales pesados en sedimentos de la Bahía de Quintero-Puchuncaví', authors: 'Laboratorio de Oceanografía Química, Universidad de Concepción (para MMA)', source_type: 'government-report', journal: 'Final report, 103pp', category: 'sediment_geochronology', matrix: 'sediment cores (3) + surface sediment (12 sites)', location: 'Quintero-Puchuncaví Bay', marine: true, verified: 'full-text', finding: '210Pb/226Ra dating established 3 historical horizons — Pre-Industrial (1860–1948), Industrialización Inicial (1959–2003), Industrialización Moderna (2005–2020) — with local pre-industrial reference values. Modern surface layer shows Cu +75%, Hg +81%, Pb +6%, As +4% vs. the pre-industrial baseline (Al-normalized).' },
+  { id: 27, year_pub: 2023, year_sampled: 'pre-2023', title: 'Metal(loid) content in Concholepas concholepas and human health assessment in a coastal environmental sacrifice zone, central Chile', authors: 'Castillo, A. et al.', source_type: 'peer-reviewed', journal: 'Marine Pollution Bulletin 197', category: 'heavy_metals', matrix: 'biota (loco)', location: 'Quintero-Puchuncaví (\'sacrifice zone\')', marine: true, verified: 'secondary', finding: 'Human health risk assessment from loco consumption in the impacted bay.' },
+  { id: 28, year_pub: 2023, year_sampled: '2022 (Sept 6 subtidal; Oct 28 coastal)', title: 'Análisis de metales en recursos pesqueros de la bahía Quintero-Puchuncaví', authors: 'HUB AMBIENTAL UPLA + Lab. Química Analítica y Ambiental, Universidad de Valparaíso', source_type: 'research-center-report', journal: 'Technical report, July 2023', category: 'coliforms', matrix: 'water + sediment + biota (10 species)', location: 'Ventanas Norte (incl. illegal outfall), Loncura, Puerto Ventanas, Playa Ventanas, vs. Quintay control', marine: true, verified: 'full-text', finding: 'Fecal coliforms at VN1 (site with an illegal sewage outfall) reached 35,000 NMP/100mL — 35x the D.S. 90 general limit (1,000) and 500x the managed-area limit (70). Cu and V in sediment exceeded NSCA Q-P; Cd and Pb in fish/crab/mollusk tissue exceeded EU 1881/2006 and CODEX limits. This is the primary dataset behind Curaz-Leiva et al. 2026.' },
+  { id: 32, year_pub: 2024, year_sampled: 'not specified', title: 'Metals and metaloids preserved in marine sediments of an industrial complex in central Chile', authors: 'Valdés-Saavedra, J. & Quiroga, E.', source_type: 'peer-reviewed', journal: 'Environmental Sustainability Indicators 22', category: 'heavy_metals', matrix: 'sediment', location: 'Quintero-Puchuncaví', marine: true, verified: 'secondary', finding: 'Reassessed sediment background values for the bay using updated methodology.' },
+  { id: 33, year_pub: 2025, year_sampled: 'historical trend', title: 'Historical trend of ecological risk caused by copper sediment in Quintero Bay, associated with a copper smelter and refinery', authors: 'Encina-Montoya, F. et al.', source_type: 'peer-reviewed', journal: 'Marine Pollution Bulletin 211', category: 'sediment_geochronology', matrix: 'sediment', location: 'Quintero Bay', marine: true, verified: 'secondary', finding: 'Long-term Cu ecological-risk trend confirms sustained smelter/refinery-linked contamination; source of the \'1993 declared saturated zone\' citation used by later papers.' },
+  { id: 35, year_pub: 2026, year_sampled: '2022 (spring)', title: 'Heavy Metal Contamination in Edible Species from Quintero-Puchuncaví Bay: Risks Associated with the Icon Industrial Complex in Central Chile', authors: 'Curaz-Leiva, S., Díaz, M.J., Sola, I., Ruiz, J., Pérez, M., González-Labra, D., Paredes-Ocaranza, B., Lobos, M.G., Lavergne, C., Klarian, S.A., Molina, V. & Sáez, C.A.', source_type: 'peer-reviewed', journal: 'Toxics 14(5), 397', category: 'heavy_metals', matrix: 'sediment + biota (10 species)', location: 'Quintero-Puchuncaví Bay (7 sites) vs. Quintay control', marine: true, verified: 'full-text', finding: 'Flagship, most comprehensive study to date. Cd and Pb exceeded food-safety limits in crabs, fish and mussels; THQ≥1 for Cd in R. setosum and A. purpuratus; Chile has no Cd limit for seafood at all — a regulatory gap.' },
+  { id: 36, year_pub: 2019, year_sampled: 'multi-year (station record)', title: 'Inter-annual variability of oceanographic conditions and phytoplankton in Valparaíso Bay (~33°S), central Chile', authors: 'Aparicio-Rizzo, P. & Masotti, I.', source_type: 'peer-reviewed', journal: 'Rev. Biología Marina y Oceanografía 54', category: 'biodiversity_ecotox', matrix: 'water (oceanographic)', location: 'Valparaíso Bay', marine: true, verified: 'secondary', finding: 'Physical oceanography / phytoplankton baseline for Valparaíso Bay — genuinely distinct from Quintero-Puchuncaví, useful circulation context.' },
+  { id: 37, year_pub: 2021, year_sampled: 'pre-2021', title: 'Transfer of pollutants from Macrocystis pyrifera to Tetrapygus niger in a highly impacted coastal zone of Chile', authors: 'Latorre-Padilla, N., Meynard, A., Rivas, J. & Contreras-Porcia, L.', source_type: 'peer-reviewed', journal: 'Toxics 9, 244', category: 'biodiversity_ecotox', matrix: 'kelp + sea urchin', location: 'Caleta Horcón (5km N of Quintero-Puchuncaví)', marine: true, verified: 'secondary', finding: 'Documented trophic transfer of Cu, Cd, As and naphthalene from kelp to grazing sea urchin.' }
+];
+
+try {
+
+(async function initSciTimeline() {
+  let studies = await sbSelect(CONFIG.TABLES.sciStudies, 'id, year_pub, year_sampled, title, authors, source_type, journal, category, matrix, location, marine, verified, finding');
+  if (!studies || studies.length === 0) studies = DEMO_SCI_STUDIES;
+
+  const svg = document.getElementById('sci-chart');
+  const tooltip = document.getElementById('sci-tooltip');
+  let activeCats = new Set(SCI_CATEGORIES.map(c => c.key));
+  let marineOnly = false;
+
+  function colorOf(key) { return (SCI_CATEGORIES.find(c => c.key === key) || {}).color || '#8598A8'; }
+  function labelOf(key) { return (SCI_CATEGORIES.find(c => c.key === key) || {}).label || key; }
+
+  function renderStats() {
+    const el = document.getElementById('sci-stats');
+    const total = studies.length;
+    const marine = studies.filter(d => d.marine).length;
+    const years = studies.map(d => d.year_pub);
+    const span = Math.max(...years) - Math.min(...years);
+    const fulltext = studies.filter(d => d.verified === 'full-text').length;
+    el.innerHTML = `
+      <div class="glass sci-stat-card"><div class="n">${total}</div><div class="l">Estudios identificados</div></div>
+      <div class="glass sci-stat-card"><div class="n">${marine}</div><div class="l">Mediciones marinas directas</div></div>
+      <div class="glass sci-stat-card"><div class="n">${span}</div><div class="l">Años de cobertura (${Math.min(...years)}–${Math.max(...years)})</div></div>
+      <div class="glass sci-stat-card"><div class="n">${fulltext}</div><div class="l">Verificados en texto completo</div></div>
     `;
-  }).join('');
-  document.getElementById('sci-timeline').innerHTML =
-    `<div class="sci-timeline-track"><div class="sci-timeline-line"></div>${points}</div>`;
+  }
+
+  function renderToolbar() {
+    const bar = document.getElementById('sci-toolbar');
+    const usedCats = SCI_CATEGORIES.filter(c => studies.some(d => d.category === c.key));
+    usedCats.forEach(c => {
+      const chip = document.createElement('div');
+      chip.className = 'sci-chip active';
+      chip.innerHTML = `<span class="sci-chip-dot" style="background:${c.color}"></span>${c.label}`;
+      chip.onclick = () => {
+        if (activeCats.has(c.key)) { activeCats.delete(c.key); chip.classList.remove('active'); }
+        else { activeCats.add(c.key); chip.classList.add('active'); }
+        draw();
+      };
+      bar.appendChild(chip);
+    });
+    const right = document.createElement('div');
+    right.className = 'sci-toolbar-right';
+    right.innerHTML = `<div class="sci-toggle" id="sci-marine-toggle"><div class="sci-switch" id="sci-switch"></div><span>Solo mediciones marinas</span></div>`;
+    bar.appendChild(right);
+    document.getElementById('sci-marine-toggle').onclick = () => {
+      marineOnly = !marineOnly;
+      document.getElementById('sci-switch').classList.toggle('on', marineOnly);
+      draw();
+    };
+  }
+
+  const MARGIN = { top: 26, right: 20, bottom: 34, left: 150 };
+  const ROW_H = 40;
+
+  function draw() {
+    const rows = SCI_CATEGORIES.filter(c => studies.some(d => d.category === c.key));
+    const w = svg.parentElement.clientWidth - 40;
+    const h = MARGIN.top + MARGIN.bottom + rows.length * ROW_H;
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    svg.setAttribute('height', h);
+    svg.innerHTML = '';
+
+    const years = studies.map(d => d.year_pub);
+    const yearMin = Math.min(...years) - 2, yearMax = Math.max(...years) + 1;
+    const plotW = w - MARGIN.left - MARGIN.right;
+    const x = year => MARGIN.left + ((year - yearMin) / (yearMax - yearMin)) * plotW;
+
+    const ns = 'http://www.w3.org/2000/svg';
+    const g = document.createElementNS(ns, 'g');
+    svg.appendChild(g);
+
+    rows.forEach((r, i) => {
+      const y = MARGIN.top + i * ROW_H;
+      if (i % 2 === 0) {
+        const band = document.createElementNS(ns, 'rect');
+        band.setAttribute('x', MARGIN.left); band.setAttribute('y', y);
+        band.setAttribute('width', plotW); band.setAttribute('height', ROW_H);
+        band.setAttribute('class', 'sci-row-band');
+        g.appendChild(band);
+      }
+      const dot = document.createElementNS(ns, 'circle');
+      dot.setAttribute('cx', MARGIN.left - 135); dot.setAttribute('cy', y + ROW_H / 2);
+      dot.setAttribute('r', 4); dot.setAttribute('fill', r.color);
+      g.appendChild(dot);
+      const label = document.createElementNS(ns, 'text');
+      label.setAttribute('x', MARGIN.left - 122); label.setAttribute('y', y + ROW_H / 2 + 3.5);
+      label.setAttribute('class', 'sci-row-label'); label.textContent = r.label;
+      g.appendChild(label);
+    });
+
+    const step = Math.max(5, Math.round((yearMax - yearMin) / 8 / 5) * 5);
+    for (let yr = Math.ceil(yearMin / step) * step; yr <= yearMax; yr += step) {
+      const gx = x(yr);
+      const line = document.createElementNS(ns, 'line');
+      line.setAttribute('x1', gx); line.setAttribute('x2', gx);
+      line.setAttribute('y1', MARGIN.top - 6); line.setAttribute('y2', MARGIN.top + rows.length * ROW_H);
+      line.setAttribute('class', 'sci-gridline');
+      g.appendChild(line);
+      const t = document.createElementNS(ns, 'text');
+      t.setAttribute('x', gx); t.setAttribute('y', MARGIN.top + rows.length * ROW_H + 18);
+      t.setAttribute('text-anchor', 'middle'); t.setAttribute('class', 'sci-axis-year');
+      t.textContent = yr;
+      g.appendChild(t);
+    }
+
+    const byRowYear = {};
+    studies.forEach(d => {
+      const key = d.category + '-' + d.year_pub;
+      (byRowYear[key] = byRowYear[key] || []).push(d);
+    });
+
+    studies.forEach(d => {
+      const rowIdx = rows.findIndex(r => r.key === d.category);
+      if (rowIdx < 0) return;
+      const y0 = MARGIN.top + rowIdx * ROW_H + ROW_H / 2;
+      const siblings = byRowYear[d.category + '-' + d.year_pub];
+      const idx = siblings.indexOf(d);
+      const jitter = siblings.length > 1 ? (idx - (siblings.length - 1) / 2) * 8 : 0;
+      const isDim = (!activeCats.has(d.category)) || (marineOnly && !d.marine);
+
+      const c = document.createElementNS(ns, 'circle');
+      c.setAttribute('cx', x(d.year_pub)); c.setAttribute('cy', y0 + jitter);
+      const scope = (d.source_type === 'government-report' || d.source_type === 'research-center-report') ? 6 : 4.6;
+      c.setAttribute('r', scope);
+      c.setAttribute('fill', colorOf(d.category));
+      c.setAttribute('fill-opacity', isDim ? 0.12 : 0.9);
+      if (d.marine) { c.setAttribute('stroke', '#0F2438'); c.setAttribute('stroke-width', 1.3); }
+      c.setAttribute('class', 'sci-pt' + (isDim ? ' dim' : ''));
+      if (isDim) c.style.pointerEvents = 'none';
+      c.addEventListener('mouseenter', ev => showTooltip(ev, d));
+      c.addEventListener('mousemove', positionTooltip);
+      c.addEventListener('mouseleave', () => tooltip.classList.remove('show'));
+      g.appendChild(c);
+    });
+  }
+
+  function showTooltip(ev, d) {
+    tooltip.innerHTML = `
+      <div class="t-year">${d.year_pub}${d.year_sampled ? ' · muestreo: ' + d.year_sampled : ''}</div>
+      <div class="t-title">${d.title}</div>
+      <div class="t-meta">${d.authors || ''}${d.journal ? ' — ' + d.journal : ''}</div>
+      <div class="t-finding">${d.finding || ''}</div>
+      <span class="t-tag">${labelOf(d.category)}</span>
+      <span class="t-tag">${d.marine ? 'marino' : 'terrestre/aéreo'}</span>
+      <span class="t-tag">${d.verified === 'full-text' ? 'texto completo verificado' : 'fuente secundaria'}</span>
+    `;
+    tooltip.classList.add('show');
+    positionTooltip(ev);
+  }
+  function positionTooltip(ev) {
+    const pad = 16;
+    let left = ev.clientX + pad, top = ev.clientY + pad;
+    if (left + 350 > window.innerWidth) left = ev.clientX - 350 - pad;
+    if (top + 220 > window.innerHeight) top = ev.clientY - 220;
+    tooltip.style.left = left + 'px'; tooltip.style.top = top + 'px';
+  }
+
+  renderStats();
+  renderToolbar();
+  draw();
+  window.addEventListener('resize', draw);
 })();
+
+} catch (e) {
+  console.error('Scientific timeline failed to initialize:', e);
+  const el = document.getElementById('sci-stats');
+  if (el && el.parentElement) el.parentElement.innerHTML = '<div style="padding:24px;color:#DC2626;font-size:13px;">No se pudo cargar el panel científico (' + e.message + ').</div>';
+}
 
 /* ============================================================
    EXPLAINER ACCORDION
