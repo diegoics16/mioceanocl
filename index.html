@@ -506,12 +506,12 @@ const CONFIG = {
 const DEMO_MODE = CONFIG.SUPABASE_URL.includes('YOUR-PROJECT-REF');
 if (DEMO_MODE) document.getElementById('demo-banner').style.display = 'block';
 
-let supabase = null;
+let sb = null;
 let SUPABASE_CLIENT_ERROR = null;
 if (!DEMO_MODE) {
   try {
     if (!window.supabase) throw new Error('window.supabase is undefined — the Supabase CDN script did not load or did not attach its global.');
-    supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+    sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
   } catch (e) {
     SUPABASE_CLIENT_ERROR = e.message;
     console.error('Supabase client failed to initialize — every live query below will fall back to demo data:', e);
@@ -551,9 +551,9 @@ const DEMO_EVENTS_RECENT = [
 
 /* ---------- tiny fetch helper with graceful fallback ---------- */
 async function sbSelect(table, query = '*', extra = (q) => q) {
-  if (DEMO_MODE || !supabase) return null;
+  if (DEMO_MODE || !sb) return null;
   try {
-    let q = supabase.from(table).select(query);
+    let q = sb.from(table).select(query);
     q = extra(q);
     const { data, error } = await q;
     if (error) throw error;
@@ -570,9 +570,9 @@ async function sbSelect(table, query = '*', extra = (q) => q) {
    Postgres for an exact count without transferring any rows at all, so
    it's both correct at any table size and cheaper than sbSelect. */
 async function sbCount(table, extra = (q) => q) {
-  if (DEMO_MODE || !supabase) return null;
+  if (DEMO_MODE || !sb) return null;
   try {
-    let q = supabase.from(table).select('*', { count: 'exact', head: true });
+    let q = sb.from(table).select('*', { count: 'exact', head: true });
     q = extra(q);
     const { count, error } = await q;
     if (error) throw error;
@@ -906,7 +906,7 @@ document.getElementById('report-form').addEventListener('submit', async (e) => {
   }
 
   try {
-    const { error } = await supabase.from(CONFIG.TABLES.reports).insert([payload]);
+    const { error } = await sb.from(CONFIG.TABLES.reports).insert([payload]);
     if (error) throw error;
     statusEl.textContent = 'Reporte enviado. Gracias — aparecerá en el mapa como no verificado.';
     statusEl.className = 'ok';
