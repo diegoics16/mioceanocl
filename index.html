@@ -630,43 +630,33 @@ const DEMO_FACILITIES = [
   { id: 'demo-5', razon_social: 'Puerto Ventanas S.A.', comuna: 'Puchuncaví', categoria: 'Infraestructura Portuaria', lat: -32.7455, lon: -71.4935, sanction_count: 2, event_count: 11 },
 ];
 const DEMO_POAL_READINGS = [
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Cadmio', year: 2015, valor_numeric: 0.021, location: 'Puchuncaví', source: 'legado', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Cadmio', year: 2018, valor_numeric: 0.030, location: 'Puchuncaví', source: 'legado', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Cadmio', year: 2021, valor_numeric: 0.041, location: 'Puchuncaví', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Cadmio', year: 2024, valor_numeric: 0.052, location: 'Puchuncaví', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Cadmio', year: 2015, valor_numeric: 0.015, location: 'Quintero', source: 'legado', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Cadmio', year: 2018, valor_numeric: 0.018, location: 'Quintero', source: 'legado', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Cadmio', year: 2021, valor_numeric: 0.022, location: 'Quintero', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Cadmio', year: 2024, valor_numeric: 0.026, location: 'Quintero', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio', year: 2015, valor_numeric: 0.006, location: 'Zapallar', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio', year: 2018, valor_numeric: 0.007, location: 'Zapallar', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio', year: 2021, valor_numeric: 0.006, location: 'Zapallar', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio', year: 2024, valor_numeric: 0.008, location: 'Zapallar', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Agua', parametro: 'Coliformes fecales', year: 2014, valor_numeric: 800, location: 'Quintero', source: 'legado', unidad: 'NMP/100ml' },
-  { estacion: 'Muelle ENAP', matriz: 'Agua', parametro: 'Coliformes fecales', year: 2017, valor_numeric: 650, location: 'Quintero', source: 'legado', unidad: 'NMP/100ml' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Agua', parametro: 'Coliformes fecales', year: 2014, valor_numeric: 1200, location: 'Puchuncaví', source: 'legado', unidad: 'NMP/100ml' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Agua', parametro: 'Coliformes fecales', year: 2017, valor_numeric: 980, location: 'Puchuncaví', source: 'legado', unidad: 'NMP/100ml' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Plomo', year: 2020, valor_numeric: 0.070, location: 'Puchuncaví', source: 'estandarizado', unidad: 'mg/kg', match_status: 'value_mismatch' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Plomo', year: 2024, valor_numeric: 0.090, location: 'Puchuncaví', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Plomo', year: 2020, valor_numeric: 0.050, location: 'Quintero', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Plomo', year: 2024, valor_numeric: 0.060, location: 'Quintero', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Mercurio', year: 2018, valor_numeric: 0.09, location: 'Puchuncaví', source: 'legado', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Mercurio', year: 2024, valor_numeric: 0.15, location: 'Puchuncaví', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Mercurio', year: 2018, valor_numeric: 0.03, location: 'Zapallar', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Mercurio', year: 2024, valor_numeric: 0.02, location: 'Zapallar', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Cadmio', year: 2018, valor_numeric: 0.09, location: 'Puchuncaví', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Cadmio', year: 2024, valor_numeric: 0.14, location: 'Puchuncaví', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Cadmio', year: 2018, valor_numeric: 0.04, location: 'Quintero', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Cadmio', year: 2024, valor_numeric: 0.06, location: 'Quintero', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Biota', parametro: 'Cadmio', year: 2018, valor_numeric: 0.01, location: 'Zapallar', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Biota', parametro: 'Cadmio', year: 2024, valor_numeric: 0.01, location: 'Zapallar', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Plomo', year: 2020, valor_numeric: 0.22, location: 'Puchuncaví', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Plomo', year: 2024, valor_numeric: 0.38, location: 'Puchuncaví', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Plomo', year: 2020, valor_numeric: 0.12, location: 'Quintero', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Plomo', year: 2024, valor_numeric: 0.19, location: 'Quintero', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Desembocadura Aconcagua', matriz: 'Sedimento', parametro: 'Cadmio', year: 2017, valor_numeric: 0.012, location: 'Concón', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Desembocadura Aconcagua', matriz: 'Sedimento', parametro: 'Cadmio', year: 2023, valor_numeric: 0.017, location: 'Concón', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Desembocadura Aconcagua', matriz: 'Agua', parametro: 'Coliformes fecales', year: 2017, valor_numeric: 210, location: 'Concón', source: 'legado', unidad: 'NMP/100ml' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Cadmio', year: 2021, valor_numeric: 0.041, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Cadmio', year: 2024, valor_numeric: 0.052, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Cadmio', year: 2021, valor_numeric: 0.022, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Cadmio', year: 2024, valor_numeric: 0.026, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio', year: 2015, valor_numeric: 0.006, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio', year: 2018, valor_numeric: 0.007, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio', year: 2021, valor_numeric: 0.006, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio', year: 2024, valor_numeric: 0.008, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Plomo', year: 2020, valor_numeric: 0.070, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Plomo', year: 2024, valor_numeric: 0.090, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Plomo', year: 2020, valor_numeric: 0.050, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Plomo', year: 2024, valor_numeric: 0.060, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Mercurio', year: 2024, valor_numeric: 0.15, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Mercurio', year: 2018, valor_numeric: 0.03, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Mercurio', year: 2024, valor_numeric: 0.02, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Cadmio', year: 2018, valor_numeric: 0.09, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Cadmio', year: 2024, valor_numeric: 0.14, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Cadmio', year: 2018, valor_numeric: 0.04, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Cadmio', year: 2024, valor_numeric: 0.06, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Biota', parametro: 'Cadmio', year: 2018, valor_numeric: 0.01, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Biota', parametro: 'Cadmio', year: 2024, valor_numeric: 0.01, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Plomo', year: 2020, valor_numeric: 0.22, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Plomo', year: 2024, valor_numeric: 0.38, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Plomo', year: 2020, valor_numeric: 0.12, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Plomo', year: 2024, valor_numeric: 0.19, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Desembocadura Aconcagua', matriz: 'Sedimento', parametro: 'Cadmio', year: 2017, valor_numeric: 0.012, location: 'Concón', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Desembocadura Aconcagua', matriz: 'Sedimento', parametro: 'Cadmio', year: 2023, valor_numeric: 0.017, location: 'Concón', source: 'standardized', unidad: 'mg/kg' },
   { estacion: 'Desembocadura Aconcagua', matriz: 'Agua', parametro: 'Coliformes fecales', year: 2023, valor_numeric: 340, location: 'Concón', source: 'estandarizado', unidad: 'NMP/100ml' },
   { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Cadmio', year: 2016, valor_numeric: 0.019, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
   { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Cadmio', year: 2023, valor_numeric: 0.024, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
@@ -920,7 +910,7 @@ function canonicalMatriz(raw) {
 }
 
 (async function initPoalGrid() {
-  let rows = await sbSelect(CONFIG.TABLES.poal, 'estacion, matriz, parametro, valor_numeric, year, location, match_status, source, unidad');
+  let rows = await sbSelect(CONFIG.TABLES.poal, 'estacion, matriz, parametro, valor_numeric, year, location, source, unidad');
   if (!rows || rows.length === 0) rows = DEMO_POAL_READINGS;
   rows = rows.map(r => ({ ...r, matriz: canonicalMatriz(r.matriz) }));
   // DIRECTEMAR (Armada) authorized only the standardized dataset for public
@@ -1016,11 +1006,9 @@ function canonicalMatriz(raw) {
         `).join('') +
         (ref ? `<div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:#DC2626"></span>Referencia</div>` : '');
 
-      const mismatches = filtered.filter(r => r.match_status === 'value_mismatch').length;
       const footParts = [];
       if (ref) footParts.push(`Línea de referencia: ${ref.value} ${ref.unit} (${ref.source}) — no es un límite legal chileno.`);
       if (!ref) footParts.push('Sin valor de referencia confirmado para este parámetro y matriz.');
-      if (mismatches > 0) footParts.push(`${mismatches} lectura(s) con discrepancia entre fuentes.`);
       document.getElementById(`poal-cardfoot-${cssSafe(param)}`).textContent = footParts.join(' ');
     });
   }
