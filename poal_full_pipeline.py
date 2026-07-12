@@ -1,47 +1,42 @@
 """
-POAL full pipeline: legacy archive scraper + standardized dataset + comparison + centralization.
+POAL pipeline: standardized national dataset only.
+
+DIRECTEMAR (Armada de Chile) confirmed by email that only the standardized
+dataset ("DATA ESTANDARIZADA POAL 1993-2024") is authorized for public
+display. An earlier version of this script also crawled DIRECTEMAR's legacy
+per-location archive (Isla de Pascua, Quintero, Concon, Valparaiso, Playa
+Ancha — ~312 individual Excel/HTML files) to cross-check the standardized
+file against it. That comparison is gone now, not just filtered out at the
+end — there is no reason left to scrape pages DIRECTEMAR asked not to be
+shown, even if the result was only used internally.
 
 WHAT THIS DOES
-  1. Crawls DIRECTEMAR's legacy per-location/per-matrix listing pages and downloads
-     every yearly file it finds (Isla de Pascua, Quintero, Concon, Valparaiso, Playa Ancha).
-  2. Parses each file defensively: tries real Excel (xlrd for .xls, openpyxl for .xlsx),
-     falls back to HTML-table parsing (many gov "xls" files are actually HTML), and if
-     both fail, logs it as unparseable instead of guessing. Nothing is silently dropped.
-  3. Auto-detects the header row per file by keyword search (ESTACION, PARAMETRO, VALOR,
-     FECHA, etc.) rather than assuming header=0, and normalizes column names into a
-     canonical schema.
-  4. Downloads + parses the standardized national ZIP (same logic as build_poal_dataset.py).
-  5. Compares legacy vs standardized for the overlap (same location/matriz/year/estacion/
-     parametro) and reports matches, value mismatches, and coverage gaps in each direction.
-  6. Writes a centralized dataset with a `source` column (legacy / standardized / both)
-     so nothing is silently deduplicated in a way you can't audit later.
+  1. Downloads the standardized national ZIP (cached to disk — re-running
+     to fix a bug downstream doesn't re-hit DIRECTEMAR's server).
+  2. Maps its columns onto a canonical schema (fecha/estacion/parametro/
+     valor/unidad/matriz/location).
+  3. Filters the NATIONAL file down to this bay + the Zapallar/Quintay
+     comparison sites (KEEP_LOCATION_KEYWORDS) — without this the dataset
+     is ~300k rows for water bodies nationwide, not just this project's.
+  4. Canonicalizes matriz ('AGUA DE MAR' -> 'Agua', etc.) so the same real
+     category doesn't show up as two options in the frontend dropdown.
+  5. Pushes to Supabase with a deterministic id (source+location+matriz+
+     estacion+parametro+fecha+source_file+valor hashed) so re-running
+     updates existing rows via upsert instead of duplicating them.
 
-WHAT THIS DOES NOT DO
-  - It does not assume the legacy file structure is stable across 30 years of files.
-    Different years almost certainly have different column layouts. That's expected —
-    check parsing_manifest.csv after the run for anything flagged needs_review.
-  - Pagination detection on the listing pages is best-effort (looks for common Spanish
-    "next page" markers). If a location/matriz shows suspiciously few files, that's the
-    first thing to check manually in a browser.
+WHAT THIS DOES NOT DO ANYMORE
+  - No legacy archive scraping, no Excel/HTML per-file parsing, no
+    legacy-vs-standardized comparison report. If you need that history,
+    it's in prior commits — this version doesn't touch DIRECTEMAR's
+    legacy listing pages at all.
 
 RUN
-    python -m pip install requests beautifulsoup4 pandas xlrd openpyxl lxml
+    python -m pip install requests pandas
     python poal_full_pipeline.py
 
-    SAMPLE_MODE (below, default True) parses only ~3 files per location/matriz
-    (oldest/middle/newest, to catch format drift across eras) instead of all ~312.
-    Use this while iterating on parsing bugs — full run takes 15+ min, sample
-    mode takes ~2 min. Set SAMPLE_MODE = False once parsing looks solid and you
-    want the real, complete dataset. Files are cached to ./poal_output/cache/
-    either way, so switching from sample to full mode only downloads the files
-    not already fetched — it won't re-download the sample.
-
-OUTPUT (all in ./poal_output/)
-    parsing_manifest.csv       — one row per file attempted, with outcome
-    poal_legacy_long.csv       — everything successfully parsed from the legacy archive
-    poal_standardized_long.csv — the standardized national dataset, filtered to these 5 locations
-    poal_comparison_report.csv — row-level match/mismatch/gap report for the overlap
-    poal_centralized.csv       — merged dataset with a `source` provenance column
+OUTPUT (in ./poal_output/)
+    poal_standardized_long.csv — the standardized dataset, filtered to this bay
+    poal_centralized.csv       — same data, with id/source columns added (what gets pushed)
 """
 
 import hashlib
@@ -52,30 +47,23 @@ import re
 import time
 import zipfile
 import unicodedata
-import threading
 from datetime import datetime, timezone
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import requests
 import pandas as pd
 import numpy as np
-from bs4 import BeautifulSoup
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) research-script/1.0"}
 
 # ---------------------------------------------------------------------------
-# Supabase — added so this pipeline's output actually lands somewhere a
-# public dashboard can query, instead of staying as local-only CSVs.
-# Same pattern as snifa_scraper.py: service key, upsert via on_conflict,
-# local backup written BEFORE the network call so a credentials/network
-# failure can't lose an hour of parsing.
+# Supabase — service key, upsert via on_conflict, local backup written
+# BEFORE the network call so a credentials/network failure can't lose a run.
 # ---------------------------------------------------------------------------
 SUPABASE_URL = (os.environ.get("SUPABASE_URL") or "").rstrip("/")
 SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
 SUPABASE_TABLE = "poal_readings"
-SUPABASE_CHUNK_SIZE = 500  # rows per POST — centralized dataset can run into the
-                            # thousands of rows; one giant payload risks a timeout
+SUPABASE_CHUNK_SIZE = 500  # rows per POST — thousands of rows total; one giant payload risks a timeout
 
 
 def check_credentials():
@@ -154,7 +142,7 @@ def supabase_write(table, rows, on_conflict=None):
         "Content-Type": "application/json",
         "Prefer": ("resolution=merge-duplicates,return=minimal" if on_conflict else "return=minimal"),
     }
-    # NOTE: deliberately NOT using requests' json=rows here — see _sanitize()
+    # Deliberately NOT using requests' json=rows here — see _sanitize()
     # docstring for why that silently produced bad payloads (not just threw
     # exceptions) for exactly the kind of values real POAL data contains.
     # default=str is a last-resort net for anything _sanitize() didn't think of.
@@ -165,16 +153,14 @@ def supabase_write(table, rows, on_conflict=None):
 
 
 def supabase_write_chunked(table, rows, on_conflict=None, label=""):
-    """Same as supabase_write but in batches, with progress printed — the
-    centralized POAL dataset is long-format and can easily be 5,000+ rows
-    once legacy + standardized are both included.
+    """Same as supabase_write but in batches, with progress printed.
 
-    Returns (written, failed, first_error) — NOT just len(rows). A previous
+    Returns (written, failed, first_error) — NOT just len(rows). An earlier
     version of this function returned len(rows) unconditionally, so a run
     where every single chunk failed still logged status="success" with the
-    full attempted row count. That's the exact bug behind sync_runs showing
-    rows_written=83814 while poal_readings was empty: the number logged was
-    always "attempted," never "actually landed."
+    full attempted row count. That's the exact bug behind sync_runs once
+    showing rows_written=83814 while poal_readings was empty: the number
+    logged was always "attempted," never "actually landed."
     """
     if not rows:
         return 0, 0, None
@@ -210,71 +196,38 @@ def log_sync_run(source, started_at, finished_at, status, rows_written, error=No
 
 
 def make_row_id(*parts):
-    """Deterministic id for upsert on_conflict. There's no natural primary key
-    across two independently-sourced datasets, so hash the identifying fields.
-    Same inputs always produce the same id — re-running the pipeline updates
-    existing rows instead of duplicating them."""
+    """Deterministic id for upsert on_conflict. Same inputs always produce
+    the same id — re-running the pipeline updates existing rows instead of
+    duplicating them. 'valor' (the actual measured value, not just
+    valor_numeric) is one of the hashed parts: two rows sharing the same
+    station/parameter/date but different depths or replicates are DIFFERENT
+    measurements, not duplicates, and need different ids."""
     key = "|".join("" if p is None else str(p) for p in parts)
     return hashlib.sha1(key.encode("utf-8")).hexdigest()[:24]
 
 
 OUT_DIR = Path("./poal_output")
 OUT_DIR.mkdir(exist_ok=True)
-SLEEP_BETWEEN_REQUESTS = 1.0  # seconds per worker — be polite, this is a government site
-MAX_WORKERS = 5               # concurrent downloads. ~5 req/s aggregate at 1s/worker sleep.
-
-SAMPLE_MODE = False         # False = full archive, every file, nothing sampled away
-SAMPLE_PER_LISTING = 3      # only used if you flip SAMPLE_MODE to True for a quick debug run
-
-# Confirmed-live listing pages as of 2026-07-10. Each maps to a "matriz" (water/biota/sediment).
-LOCATIONS = {
-    "Isla de Pascua": {
-        "Agua": "https://www.directemar.cl/directemar/site/tax/port/fid_adjunto/taxport_45_149_387_1.html",
-        "Sedimento": "https://www.directemar.cl/directemar/site/tax/port/fid_adjunto/taxport_45_149_389_1.html",
-    },
-    "Quintero": {
-        "Agua": "https://www.directemar.cl/directemar/site/tax/port/fid_adjunto/taxport_45_150_390_1.html",
-        "Biota": "https://www.directemar.cl/directemar/site/tax/port/fid_adjunto/taxport_45_150_391_1.html",
-        "Sedimento": "https://www.directemar.cl/directemar/site/tax/port/fid_adjunto/taxport_45_150_392_1.html",
-    },
-    "Concon": {
-        "Agua": "https://www.directemar.cl/directemar/site/tax/port/fid_adjunto/taxport_45_151_393_1.html",
-        "Biota": "https://www.directemar.cl/directemar/site/tax/port/fid_adjunto/taxport_45_151_394_1.html",
-        "Sedimento": "https://www.directemar.cl/directemar/site/tax/port/fid_adjunto/taxport_45_151_395_1.html",
-    },
-    "Valparaiso": {
-        "Agua": "https://www.directemar.cl/directemar/site/tax/port/fid_adjunto/taxport_45_152_396_1.html",
-        "Biota": "https://www.directemar.cl/directemar/site/tax/port/fid_adjunto/taxport_45_152_397_1.html",
-        "Sedimento": "https://www.directemar.cl/directemar/site/tax/port/fid_adjunto/taxport_45_152_398_1.html",
-    },
-    "Playa Ancha": {
-        "Agua": "https://www.directemar.cl/directemar/site/tax/port/fid_adjunto/taxport_45_153_399_1.html",
-        "Biota": "https://www.directemar.cl/directemar/site/tax/port/fid_adjunto/taxport_45_153_400_1.html",
-        "Sedimento": "https://www.directemar.cl/directemar/site/tax/port/fid_adjunto/taxport_45_153_401_1.html",
-    },
-}
+SLEEP_BETWEEN_REQUESTS = 1.0  # be polite, this is a government site
+CACHE_DIR = OUT_DIR / "cache"
+CACHE_DIR.mkdir(exist_ok=True)
 
 STANDARDIZED_ZIP_URL = "https://www.directemar.cl/directemar/site/docs/20260114/20260114164231/poal_estandarizado_2024.zip"
 
-# The standardized file is NATIONAL — every water body DIRECTEMAR monitors, not just
-# these five. Unlike the legacy archive (which only has these five locations because
-# that's all we pointed the scraper at), the standardized file needs an explicit
-# filter or it centralizes ~300k irrelevant rows. Keyword match (not exact match)
-# because the actual column value spelling isn't confirmed yet — see the printed
-# "Guessed location column(s)" output on the first real run, and adjust this list
-# if it turns out DIRECTEMAR spells something differently than expected.
-# Zapallar and Quintay are IN here even though they're not in LOCATIONS above —
-# they're the clean-water comparison sites for the Ventanas-vs-Zapallar contrast,
-# and only the standardized file might carry them (the legacy archive's listing
-# pages were never scraped for them, so this is the one chance to catch them).
+# The standardized file is NATIONAL — every water body DIRECTEMAR monitors,
+# not just this project's. Needs an explicit filter or it centralizes
+# ~300k irrelevant rows. Keyword match (not exact match) because the actual
+# column value spelling can vary — see the printed "Guessed location
+# column(s)" output on a real run, and adjust this list if DIRECTEMAR
+# spells something differently than expected.
+# Zapallar and Quintay are the clean-water comparison sites for the
+# Ventanas-vs-Zapallar contrast — kept in even though they're outside the
+# bay itself.
 KEEP_LOCATION_KEYWORDS = [
     "QUINTERO", "PUCHUNCAVI", "PUCHUNCAVÍ", "VENTANAS", "CONCON", "CONCÓN",
     "VALPARAISO", "VALPARAÍSO", "PLAYA ANCHA", "ISLA DE PASCUA",
     "ZAPALLAR", "QUINTAY",
 ]
-
-# Canonical column names we're trying to map every legacy file's messy headers onto.
-HEADER_KEYWORDS = ["ESTACION", "ESTACIÓN", "PARAMETRO", "PARÁMETRO", "VALOR", "FECHA", "UNIDAD"]
 
 COLUMN_MAP = {
     "fecha": ["FECHA", "FECHA MUESTREO", "FECHA DE MUESTREO", "FECHA CAMPAÑA"],
@@ -285,29 +238,6 @@ COLUMN_MAP = {
     "latitud": ["LATITUD", "LAT"],
     "longitud": ["LONGITUD", "LONG", "LON"],
 }
-
-manifest_rows = []
-manifest_lock = threading.Lock()
-
-CACHE_DIR = OUT_DIR / "cache"
-CACHE_DIR.mkdir(exist_ok=True)
-
-
-def dedupe_columns(columns):
-    """Guarantee unique column labels. Merged/blank header cells in old government
-    Excel exports commonly produce repeated or empty labels, which breaks pd.concat
-    later with InvalidIndexError. Never silently drops a column — just renames dupes."""
-    seen = {}
-    result = []
-    for col in columns:
-        key = "BLANK" if pd.isna(col) or str(col).strip() == "" else str(col).strip()
-        if key not in seen:
-            seen[key] = 0
-            result.append(key)
-        else:
-            seen[key] += 1
-            result.append(f"{key}__dup{seen[key]}")
-    return result
 
 
 def strip_accents(s):
@@ -326,8 +256,9 @@ def get(url, binary=False):
 
 
 def get_binary_cached(url):
-    """Binary downloads are cached to disk. Once a file is fetched once, re-running
-    the script to fix a parsing bug reads from disk instead of re-hitting the site."""
+    """Binary downloads are cached to disk. Once fetched once, re-running
+    the script to fix a bug downstream reads from disk instead of
+    re-hitting DIRECTEMAR's server."""
     cache_path = CACHE_DIR / (re.sub(r"[^A-Za-z0-9]+", "_", url)[-180:] + ".cache")
     if cache_path.exists():
         return cache_path.read_bytes()
@@ -336,67 +267,11 @@ def get_binary_cached(url):
     return content
 
 
-# ---------------------------------------------------------------------------
-# STEP 1: discover every yearly file per location/matriz
-# ---------------------------------------------------------------------------
-
-def discover_year_files(listing_url, max_pages=10):
-    """Follow best-effort pagination on a taxport listing page, collecting .xls/.xlsx links."""
-    files = []
-    seen_pages = set()
-    url = listing_url
-    for _ in range(max_pages):
-        if not url or url in seen_pages:
-            break
-        seen_pages.add(url)
-        try:
-            html = get(url)
-        except Exception as e:
-            print(f"  [WARN] could not load listing page {url}: {e}")
-            break
-        soup = BeautifulSoup(html, "html.parser")
-
-        for a in soup.find_all("a", href=True):
-            href = a["href"]
-            if re.search(r"\.xlsx?$", href, re.IGNORECASE):
-                full = href if href.startswith("http") else "https://www.directemar.cl" + href
-                if full not in files:
-                    files.append(full)
-
-        # best-effort "next page" detection — adjust if this misses real pagination
-        next_href = None
-        for a in soup.find_all("a", href=True):
-            text = norm(a.get_text())
-            if text in (">", "»", "SIGUIENTE", "NEXT") or "pagina" in a["href"].lower():
-                next_href = a["href"]
-                break
-        url = (next_href if not next_href or next_href.startswith("http")
-               else "https://www.directemar.cl" + next_href) if next_href else None
-
-    return files
-
-
-# ---------------------------------------------------------------------------
-# STEP 2: defensive parsing of one legacy file
-# ---------------------------------------------------------------------------
-
-def find_header_row(df_raw, max_scan=25):
-    """Scan the first rows for the one that looks most like a real header."""
-    best_row, best_score = None, 0
-    for i in range(min(max_scan, len(df_raw))):
-        row_vals = [norm(v) for v in df_raw.iloc[i].tolist()]
-        score = sum(1 for kw in HEADER_KEYWORDS if any(kw in v for v in row_vals))
-        if score > best_score:
-            best_score, best_row = score, i
-    return best_row if best_score >= 2 else None
-
-
 def map_columns(columns):
-    """Map raw column labels to canonical names. Only the first raw column matching a
-    given canonical name gets renamed — if a file has e.g. both 'VALOR' and 'VALOR
-    CORREGIDO', collapsing them into one 'valor' column would silently discard one of
-    two genuinely different measurements. Later matches keep their original (deduped)
-    label so the data survives and shows up in columns_found for manual review."""
+    """Map raw column labels to canonical names. Only the first raw column
+    matching a given canonical name gets renamed — if a file has e.g. both
+    'VALOR' and 'VALOR CORREGIDO', collapsing them into one 'valor' column
+    would silently discard one of two genuinely different measurements."""
     mapped = {}
     used_canonical = set()
     for col in columns:
@@ -411,105 +286,9 @@ def map_columns(columns):
     return mapped
 
 
-def parse_excel_bytes(content, engine):
-    xl = pd.ExcelFile(io.BytesIO(content), engine=engine)
-    frames = []
-    for sheet in xl.sheet_names:
-        raw = xl.parse(sheet, header=None)
-        hdr_idx = find_header_row(raw)
-        if hdr_idx is None:
-            continue
-        df = raw.iloc[hdr_idx + 1:].copy()
-        df.columns = dedupe_columns(raw.iloc[hdr_idx].tolist())
-        frames.append(df)
-    if not frames:
-        raise ValueError("no sheet had a detectable header row")
-    return pd.concat(frames, ignore_index=True)
-
-
-def parse_html_table_bytes(content):
-    tables = pd.read_html(io.BytesIO(content))
-    frames = []
-    for raw in tables:
-        hdr_idx = find_header_row(raw)
-        if hdr_idx is not None:
-            df = raw.iloc[hdr_idx + 1:].copy()
-            df.columns = dedupe_columns(raw.iloc[hdr_idx].tolist())
-            frames.append(df)
-    if not frames:
-        # maybe the table already has a sane header from read_html itself
-        frames = [t for t in tables if len(t.columns) >= 3]
-    if not frames:
-        raise ValueError("no HTML table had a detectable header row")
-    return pd.concat(frames, ignore_index=True)
-
-
-def log_manifest(entry):
-    with manifest_lock:
-        manifest_rows.append(entry)
-
-
-def parse_legacy_file(url, location, matriz):
-    entry = {"url": url, "location": location, "matriz": matriz, "status": None,
-             "method": None, "rows": 0, "columns_found": None, "note": ""}
-    try:
-        content = get_binary_cached(url)
-    except Exception as e:
-        entry["status"] = "download_failed"
-        entry["note"] = str(e)
-        log_manifest(entry)
-        return None
-
-    engine = "xlrd" if url.lower().endswith(".xls") else "openpyxl"
-    df = None
-    for method, fn in [
-        (engine, lambda: parse_excel_bytes(content, engine)),
-        ("html_table", lambda: parse_html_table_bytes(content)),
-    ]:
-        try:
-            df = fn()
-            entry["method"] = method
-            break
-        except Exception as e:
-            entry["note"] += f"{method} failed: {e}; "
-
-    if df is None:
-        entry["status"] = "unparseable"
-        log_manifest(entry)
-        return None
-
-    col_map = map_columns(df.columns)
-    df = df.rename(columns=col_map)
-    entry["columns_found"] = list(df.columns)
-
-    required = {"estacion", "parametro", "valor"}
-    if not required.issubset(set(df.columns)):
-        entry["status"] = "needs_review_missing_columns"
-        entry["rows"] = len(df)
-        log_manifest(entry)
-        return None
-
-    df.columns = dedupe_columns(df.columns.tolist())  # belt-and-suspenders after rename
-    df["location"] = location
-    df["matriz"] = matriz
-    df["source_file"] = url
-    entry["status"] = "ok"
-    entry["rows"] = len(df)
-    log_manifest(entry)
-    return df
-
-
-# ---------------------------------------------------------------------------
-# STEP 3: standardized dataset (same approach as build_poal_dataset.py)
-# ---------------------------------------------------------------------------
-
 def process_standardized():
-    """Download the national ZIP, map its columns onto the same canonical schema
-    the legacy archive uses, then filter it down to the bay + comparison sites.
-    The old version of this function just downloaded and returned the raw
-    national file — every water body DIRECTEMAR monitors, unfiltered. That's
-    not usable for centralization: it needs the same fecha/estacion/parametro/
-    valor/matriz/location shape as the legacy dataframe before a join is possible."""
+    """Download the national ZIP, map its columns onto the canonical schema,
+    then filter it down to the bay + comparison sites."""
     print("Downloading standardized ZIP...")
     content = get_binary_cached(STANDARDIZED_ZIP_URL)
     z = zipfile.ZipFile(io.BytesIO(content))
@@ -539,9 +318,8 @@ def process_standardized():
     df["location"] = raw[loc_col]
     df["matriz"] = raw[matriz_col] if matriz_col else None
     if matriz_col is None:
-        print("  [FLAG] no matriz column auto-detected — every standardized row will have a blank "
-              "matriz (water/sediment/biota unknown). Check the column list above; the panel-shift "
-              "story (coliforms stop ~2017, metals continue) depends on matriz being right.")
+        print("  [FLAG] no matriz column auto-detected — every row will have a blank matriz "
+              "(water/sediment/biota unknown). Check the column list above.")
 
     mask = df["location"].astype(str).map(norm).apply(lambda v: any(kw in v for kw in KEEP_LOCATION_KEYWORDS))
     kept = df[mask].copy()
@@ -555,12 +333,7 @@ def process_standardized():
     return kept
 
 
-# ---------------------------------------------------------------------------
-# STEP 4: orchestration
-# ---------------------------------------------------------------------------
-
 YEAR_RE = re.compile(r"(19|20)\d{2}")
-JOIN_KEYS = ["location_norm", "matriz_norm", "estacion_norm", "parametro_norm", "year"]
 
 
 def extract_year(fecha_val):
@@ -571,11 +344,10 @@ def extract_year(fecha_val):
 
 
 def canonical_location(raw_location):
-    """Legacy uses bare names ('Quintero'); the standardized file uses fuller
-    names ('BAHIA QUINTERO', possibly 'BAHIA DE QUINTERO' etc). Exact-string
-    matching after normalization fails on this every time. Bucket both onto
-    whichever KEEP_LOCATION_KEYWORDS entry appears as a substring instead —
-    coarser, but it's what actually lets the two sources agree on "same place"."""
+    """The standardized file uses fuller names ('BAHIA QUINTERO', possibly
+    'BAHIA DE QUINTERO' etc) than a simple bay name. Bucket onto whichever
+    KEEP_LOCATION_KEYWORDS entry appears as a substring instead of an exact
+    match, which fails on this every time."""
     if raw_location is None or (isinstance(raw_location, float) and pd.isna(raw_location)):
         return None
     v = norm(raw_location)
@@ -596,14 +368,11 @@ MATRIZ_KEYWORDS = [
 
 
 def canonical_matriz(raw_matriz):
-    """The legacy archive scraper hardcodes matriz as our own labels ('Agua',
-    'Sedimento', 'Biota' — literally the LOCATIONS dict keys). The
-    standardized national file instead carries DIRECTEMAR's own MATRIZ
-    column verbatim, and their real vocabulary is more specific — e.g.
-    'AGUA DE MAR' for seawater. That's a real value, not a typo, but left
-    unmapped it becomes a second dropdown option instead of merging with
-    'Agua'. Bucket by keyword the same way canonical_location() already
-    does for locations."""
+    """DIRECTEMAR's standardized MATRIZ column uses fuller labels than a
+    simple three-way split — e.g. 'AGUA DE MAR' for seawater. That's a real
+    value, not a typo, but left unmapped it becomes a second dropdown
+    option instead of merging with 'Agua'. Bucket by keyword the same way
+    canonical_location() does for locations."""
     if raw_matriz is None or (isinstance(raw_matriz, float) and pd.isna(raw_matriz)):
         return None
     v = norm(raw_matriz)
@@ -614,18 +383,16 @@ def canonical_matriz(raw_matriz):
 
 
 def add_join_keys(df):
-    """Normalize whatever's in location/matriz/estacion/parametro/fecha into join-safe
-    keys. Station name and parameter spelling will NOT match character-for-character
-    between a 1990s Excel export and a 2024 standardized CSV — this is the best
-    reasonably achievable join without a hand-built station name crosswalk, which is
-    a real limitation worth stating in the presentation, not hiding."""
+    """Normalize location/matriz/estacion/parametro/fecha and derive year +
+    valor_numeric. The name is a holdover from when this also built join
+    keys for a legacy-vs-standardized comparison; kept because 'year' and
+    'valor_numeric' are still needed downstream."""
     df = df.copy()
     for col in ("location", "matriz", "estacion", "parametro"):
         if col not in df.columns:
             df[col] = None
-    df["matriz"] = df["matriz"].map(canonical_matriz)  # fix BEFORE join keys are derived
+    df["matriz"] = df["matriz"].map(canonical_matriz)
     df["location_norm"] = df["location"].map(canonical_location)
-    df["matriz_norm"] = df["matriz"].map(lambda v: norm(v) if pd.notna(v) else None)
     df["estacion_norm"] = df["estacion"].map(lambda v: norm(v) if pd.notna(v) else None)
     df["parametro_norm"] = df["parametro"].map(lambda v: norm(v) if pd.notna(v) else None)
     df["year"] = df["fecha"].map(extract_year) if "fecha" in df.columns else None
@@ -633,76 +400,27 @@ def add_join_keys(df):
     return df
 
 
-def build_comparison_report(legacy_kw, std_kw):
-    """One row per (location, matriz, estacion, parametro, year) bucket, classified
-    as matched/mismatched/only-in-one-source. This is the actual Phase 3 the
-    docstring promised and the old version of this script never built."""
-    if legacy_kw.empty and std_kw.empty:
+def build_centralized(std_kw):
+    """Tag every standardized row with its source and a deterministic id.
+    Kept as its own function (rather than inlining into main()) since
+    push_centralized_to_supabase() and main()'s logging both key off its
+    output shape."""
+    if std_kw.empty:
         return pd.DataFrame()
-    l = (legacy_kw.groupby(JOIN_KEYS, dropna=False)["valor_numeric"]
-         .agg(legacy_mean="mean", legacy_count="count").reset_index())
-    s = (std_kw.groupby(JOIN_KEYS, dropna=False)["valor_numeric"]
-         .agg(standardized_mean="mean", standardized_count="count").reset_index())
-    merged = l.merge(s, on=JOIN_KEYS, how="outer", indicator=True)
-
-    def classify(row):
-        if row["_merge"] == "left_only":
-            return "only_in_legacy"
-        if row["_merge"] == "right_only":
-            return "only_in_standardized"
-        if pd.isna(row["legacy_mean"]) or pd.isna(row["standardized_mean"]):
-            return "both_present_no_numeric_value"
-        denom = max(abs(row["standardized_mean"]), 1e-9)
-        rel_diff = abs(row["legacy_mean"] - row["standardized_mean"]) / denom
-        return "match" if rel_diff <= 0.01 else "value_mismatch"
-
-    merged["match_status"] = merged.apply(classify, axis=1)
-    return merged.drop(columns=["_merge"])
-
-
-def build_centralized(legacy_kw, std_kw, comparison_df):
-    """Every row from BOTH sources, kept — never silently deduplicated — each
-    tagged with its own source and with the match_status of the bucket it
-    belongs to, so a bucket marked value_mismatch can be traced back to the
-    exact rows on each side that disagree."""
-    status_lookup = {}
-    if not comparison_df.empty:
-        status_lookup = comparison_df.set_index(JOIN_KEYS)["match_status"].to_dict()
-
-    def finalize(df, source_name):
-        df = df.copy()
-        df["source"] = source_name
-        df["match_status"] = df[JOIN_KEYS].apply(lambda r: status_lookup.get(tuple(r), "unknown"), axis=1)
-        # 'valor' (not just valor_numeric) is part of the id on purpose: two
-        # rows with the same station/parameter/date but different depths or
-        # replicates are DIFFERENT measurements, and previously hashed to the
-        # same id — which is exactly what caused "ON CONFLICT DO UPDATE
-        # cannot affect row a second time" when both landed in one chunk.
-        # Genuinely identical rows (same value too) still collapse to one id,
-        # which is correct — that's the same measurement, not two.
-        df["id"] = df.apply(lambda r: make_row_id(
-            source_name, r.get("location"), r.get("matriz"), r.get("estacion"),
-            r.get("parametro"), r.get("fecha"), r.get("source_file"), r.get("valor")), axis=1)
-        return df
-
-    parts = []
-    if not legacy_kw.empty:
-        parts.append(finalize(legacy_kw, "legacy"))
-    if not std_kw.empty:
-        parts.append(finalize(std_kw, "standardized"))
-    if not parts:
-        return pd.DataFrame()
-    return pd.concat(parts, ignore_index=True, sort=False)
+    df = std_kw.copy()
+    df["source"] = "standardized"
+    df["id"] = df.apply(lambda r: make_row_id(
+        "standardized", r.get("location"), r.get("matriz"), r.get("estacion"),
+        r.get("parametro"), r.get("fecha"), r.get("source_file"), r.get("valor")), axis=1)
+    return df
 
 
 def _clean_int(v):
     """Coerce anything year-like (int, float, '2005', '2005.0', numpy scalar,
-    NaN/None) into a plain Python int or None. Applied right before export
-    rather than fixed further upstream: pandas silently upcasts an
-    int-with-nulls column to float64 on concat (legacy_kw + std_kw merging in
-    build_centralized), and there's more than one place that could happen —
-    validating at the system boundary, right before the external write,
-    catches all of them instead of chasing each one individually."""
+    NaN/None) into a plain Python int or None. Applied right before export:
+    pandas can silently upcast an int-with-nulls column to float64, and
+    Postgres' integer parser rejects '2005.0' outright even though it's a
+    whole number."""
     if v is None:
         return None
     try:
@@ -717,40 +435,27 @@ def _clean_int(v):
 
 
 def push_centralized_to_supabase(centralized_df):
-    # DIRECTEMAR (Armada de Chile) confirmed by email: only the standardized
-    # national dataset ("DATA ESTANDARIZADA POAL 1993-2024") is authorized
-    # for public display. The legacy per-location archive is still parsed
-    # and kept in poal_comparison_report.csv / poal_centralized.csv locally
-    # (useful for auditing source agreement) — it just never gets pushed to
-    # the public-facing table from here on.
-    before = len(centralized_df)
-    centralized_df = centralized_df[centralized_df["source"] == "standardized"]
-    dropped = before - len(centralized_df)
-    if dropped:
-        print(f"\n[{SUPABASE_TABLE}] Excluding {dropped} legacy-source rows from the public push "
-              f"per DIRECTEMAR's authorization — standardized-source only.")
-
     keep_cols = ["id", "source", "location", "matriz", "estacion", "parametro", "valor",
-                 "valor_numeric", "unidad", "fecha", "year", "latitud", "longitud",
-                 "source_file", "match_status"]
+                 "valor_numeric", "unidad", "fecha", "year", "latitud", "longitud", "source_file"]
     present_cols = [c for c in keep_cols if c in centralized_df.columns]
     export_df = centralized_df[present_cols].where(pd.notnull(centralized_df[present_cols]), None)
     if "year" in export_df.columns:
         # NOT export_df["year"].map(_clean_int) — pandas re-infers a numeric
         # dtype from the mapped output when the source column is float64,
         # silently turning the clean ints right back into floats (and None
-        # back into NaN). Confirmed by testing; costly to get wrong silently
-        # a second time. Explicit object dtype is what actually holds.
+        # back into NaN). Confirmed by testing. Explicit object dtype is
+        # what actually holds.
         export_df["year"] = pd.Series(
             [_clean_int(v) for v in export_df["year"]],
             index=export_df.index, dtype="object",
         )
     rows = export_df.to_dict("records")
 
-    # Belt-and-suspenders: 'valor' in the id hash (see finalize()) should
-    # make same-id rows genuinely identical content, so collapsing them is
-    # correct rather than lossy — but making that visible beats a silent
-    # overwrite if that assumption is ever wrong for some future data shape.
+    # Belt-and-suspenders: 'valor' in the id hash (see make_row_id call in
+    # build_centralized) should make same-id rows genuinely identical
+    # content, so collapsing them is correct rather than lossy — but making
+    # that visible beats a silent overwrite if that assumption is ever
+    # wrong for some future data shape.
     seen = {}
     deduped = []
     for r in rows:
@@ -764,82 +469,23 @@ def push_centralized_to_supabase(centralized_df):
     if dupe_count:
         print(f"\n[{SUPABASE_TABLE}] {dupe_count} rows had an id matching an earlier row in this "
               f"push and were skipped (first occurrence kept). If this number is large, the "
-              f"disambiguation in finalize()/make_row_id() needs another look — it should be near "
-              f"zero, since it now means truly identical (station, matriz, parametro, fecha, source, "
-              f"valor) rows, not just same-day/same-station replicates.")
+              f"disambiguation in build_centralized()/make_row_id() needs another look.")
     rows = deduped
 
-    print(f"\nPushing {len(rows)} centralized rows to Supabase table '{SUPABASE_TABLE}'...")
+    print(f"\nPushing {len(rows)} rows to Supabase table '{SUPABASE_TABLE}'...")
     written, failed, first_error = supabase_write_chunked(SUPABASE_TABLE, rows, on_conflict="id", label=SUPABASE_TABLE)
     print(f"\n[{SUPABASE_TABLE}] {written} rows actually written, {failed} rows failed"
           + (f" — first error: {first_error}" if first_error else ""))
     return written, failed, first_error
 
 
-def sample_files(files):
-    """Oldest/middle/newest — enough to catch format drift across eras without
-    downloading everything. Listing pages present files roughly chronologically."""
-    if not SAMPLE_MODE or len(files) <= SAMPLE_PER_LISTING:
-        return files
-    idx = sorted(set([0, len(files) // 2, len(files) - 1]))
-    return [files[i] for i in idx]
-
-
 def main():
     t0 = time.time()
     pipeline_started_at = datetime.now(timezone.utc)
     has_supabase = check_credentials()
-    if SAMPLE_MODE:
-        print(f"*** SAMPLE_MODE is ON — parsing ~{SAMPLE_PER_LISTING} files per listing for a fast test run. ***")
-        print("*** Set SAMPLE_MODE = False at the top of the script for the real full run. ***\n")
 
     print("=" * 80)
-    print("PHASE 1a — discovering files (serial — cheap, ~15 listing pages)")
-    print("=" * 80)
-    tasks = []  # (url, location, matriz) for every file to download+parse
-    for location, matrices in LOCATIONS.items():
-        for matriz, listing_url in matrices.items():
-            print(f"{location} / {matriz}", end="  ")
-            files = discover_year_files(listing_url)
-            print(f"-> {len(files)} candidate files")
-            if len(files) < 5:
-                print("  [FLAG] suspiciously few files — check this listing page manually in a browser")
-            files_to_parse = sample_files(files)
-            if SAMPLE_MODE and len(files_to_parse) < len(files):
-                print(f"  sampling {len(files_to_parse)} of {len(files)}")
-            tasks.extend((f, location, matriz) for f in files_to_parse)
-    print(f"\n[timing] discovery done at {time.time() - t0:.0f}s — {len(tasks)} files queued for download+parse")
-
-    print("\n" + "=" * 80)
-    print(f"PHASE 1b — downloading + parsing {len(tasks)} files ({MAX_WORKERS} concurrent workers)")
-    print("=" * 80)
-    legacy_frames = []
-    done = 0
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
-        futures = {pool.submit(parse_legacy_file, url, loc, mat): url for url, loc, mat in tasks}
-        for fut in as_completed(futures):
-            done += 1
-            if done % 25 == 0 or done == len(tasks):
-                print(f"  {done}/{len(tasks)} files processed ({time.time() - t0:.0f}s elapsed)")
-            try:
-                df = fut.result()
-                if df is not None:
-                    legacy_frames.append(df)
-            except Exception as e:
-                print(f"  [WARN] worker error on {futures[fut]}: {e}")
-    print(f"\n[timing] Phase 1 fully done at {time.time() - t0:.0f}s elapsed")
-
-    legacy_df = pd.concat(legacy_frames, ignore_index=True) if legacy_frames else pd.DataFrame()
-    manifest_df = pd.DataFrame(manifest_rows)
-    manifest_df.to_csv(OUT_DIR / "parsing_manifest.csv", index=False)
-    legacy_df.to_csv(OUT_DIR / "poal_legacy_long.csv", index=False)
-
-    ok_count = (manifest_df["status"] == "ok").sum() if len(manifest_df) else 0
-    print(f"\nLegacy parse summary: {ok_count} ok / {len(manifest_df)} attempted")
-    print(f"Status breakdown:\n{manifest_df['status'].value_counts() if len(manifest_df) else 'none'}")
-
-    print("\n" + "=" * 80)
-    print("PHASE 2 — standardized dataset")
+    print("PHASE 1 — standardized dataset (the only source DIRECTEMAR authorized for public display)")
     print("=" * 80)
     try:
         std_df = process_standardized()
@@ -849,27 +495,15 @@ def main():
         std_df = pd.DataFrame()
 
     print("\n" + "=" * 80)
-    print("PHASE 3 — comparison + centralization")
+    print("PHASE 2 — centralization (id assignment)")
     print("=" * 80)
-    legacy_kw = add_join_keys(legacy_df) if not legacy_df.empty else legacy_df
     std_kw = add_join_keys(std_df) if not std_df.empty else std_df
-
-    comparison_df = build_comparison_report(legacy_kw, std_kw)
-    comparison_df.to_csv(OUT_DIR / "poal_comparison_report.csv", index=False)
-    if not comparison_df.empty:
-        print(f"Comparison buckets: {len(comparison_df)}")
-        print(comparison_df["match_status"].value_counts().to_string())
-    else:
-        print("No comparison buckets — one or both of legacy/standardized came back empty this run.")
-
-    centralized_df = build_centralized(legacy_kw, std_kw, comparison_df)
+    centralized_df = build_centralized(std_kw)
     centralized_df.to_csv(OUT_DIR / "poal_centralized.csv", index=False)
-    print(f"Centralized dataset: {len(centralized_df)} rows "
-          f"({(centralized_df['source'] == 'legacy').sum() if not centralized_df.empty else 0} legacy, "
-          f"{(centralized_df['source'] == 'standardized').sum() if not centralized_df.empty else 0} standardized)")
+    print(f"Centralized dataset: {len(centralized_df)} rows (standardized-source only)")
 
     print("\n" + "=" * 80)
-    print("PHASE 4 — push centralized dataset to Supabase")
+    print("PHASE 3 — push to Supabase")
     print("=" * 80)
     push_error = None
     if not has_supabase:
@@ -907,11 +541,7 @@ def main():
 
     log_sync_run("poal_pipeline", pipeline_started_at, datetime.now(timezone.utc), log_status, rows_written, error=push_error)
 
-    print("\nDone. Check ./poal_output/parsing_manifest.csv first — that tells you how much of the")
-    print("legacy archive actually parsed cleanly before trusting anything downstream of it.")
-    print("Then check poal_comparison_report.csv for how much of the bay is corroborated by BOTH")
-    print("sources versus resting on just one — that's a real finding, not just a QA step.")
-    print(f"[timing] total elapsed: {time.time() - t0:.0f}s")
+    print(f"\nDone. [timing] total elapsed: {time.time() - t0:.0f}s")
 
 
 if __name__ == "__main__":
