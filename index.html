@@ -903,9 +903,30 @@ const REFERENCE_VALUES = {
 try {
   if (typeof Chart === 'undefined') throw new Error('Chart.js (Chart) is undefined — the Chart.js CDN script did not load.');
 
+/* Mirrors canonical_matriz() in poal_full_pipeline.py: the standardized
+   source's real MATRIZ column uses fuller labels ('AGUA DE MAR') than the
+   legacy archive's hardcoded ones ('Agua'), which split the dropdown into
+   two options for what's really one matrix. Applied here too so rows
+   already sitting in Supabase under the old unmapped label display
+   correctly immediately, without waiting on a pipeline rerun. */
+const MATRIZ_KEYWORDS = [['SEDIMENT', 'Sedimento'], ['BIOTA', 'Biota'], ['AGUA', 'Agua']];
+function canonicalMatriz(raw) {
+  if (raw == null) return raw;
+  const v = raw.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+  for (const [kw, canon] of MATRIZ_KEYWORDS) {
+    if (v.includes(kw)) return canon;
+  }
+  return raw; // unrecognized variant — keep visible, don't silently drop
+}
+
 (async function initPoalGrid() {
   let rows = await sbSelect(CONFIG.TABLES.poal, 'estacion, matriz, parametro, valor_numeric, year, location, match_status, source, unidad');
   if (!rows || rows.length === 0) rows = DEMO_POAL_READINGS;
+  rows = rows.map(r => ({ ...r, matriz: canonicalMatriz(r.matriz) }));
+  // DIRECTEMAR (Armada) authorized only the standardized dataset for public
+  // display — excludes both the real pipeline's 'legacy' label and the
+  // demo fallback data's Spanish 'legado' label.
+  rows = rows.filter(r => r.source !== 'legacy' && r.source !== 'legado');
   rows = rows.filter(r => r.valor_numeric != null && r.year != null && r.estacion && r.parametro && r.matriz);
 
   const matrizSel = document.getElementById('poal-matriz');
