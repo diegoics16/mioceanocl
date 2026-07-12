@@ -74,6 +74,7 @@
     font-family: var(--font-ui);
     line-height: 1.5;
     min-height: 100vh;
+    overflow-x: hidden;
   }
 
   a { color: var(--cyan); text-decoration: none; }
@@ -414,6 +415,12 @@
       background: linear-gradient(180deg, rgba(4,16,31,0.55) 0%, rgba(4,16,31,0.88) 55%, rgba(4,16,31,0.92) 100%);
     }
     .hero-overlay { align-items: flex-end; padding-bottom: 28px; }
+    /* .poal-charts-block's minmax(460px, 1fr) forces every track — including
+       a single one — to be at least 460px wide, wider than any phone
+       viewport, which is what was pushing the whole page into horizontal
+       scroll and throwing off the 100vw full-bleed math for the hero image
+       and map below. Dropping the minimum here is the actual fix. */
+    .poal-charts-block { grid-template-columns: 1fr; }
   }
 </style>
 </head>
