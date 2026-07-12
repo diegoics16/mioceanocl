@@ -276,6 +276,9 @@
   .poal-card-footnote { font-size: 10px; color: var(--ink-muted); margin-top: 8px; line-height: 1.5; }
   .poal-card-explainer { font-size: 12px; color: var(--ink-secondary); line-height: 1.55; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--hairline); }
   .poal-card-explainer strong { color: var(--ink); font-weight: 700; }
+  .poal-card-explainer p { margin: 0; }
+  .poal-explainer-label { display: block; font-family: var(--font-data); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ocean); margin: 10px 0 3px; }
+  .poal-explainer-label:first-child { margin-top: 0; }
   .poal-card-status { display: inline-block; font-family: var(--font-data); font-size: 10.5px; font-weight: 500; padding: 2px 8px; border-radius: 999px; margin-top: 8px; }
   .poal-card-status.over { background: rgba(220,38,38,0.1); color: var(--crimson); }
   .poal-card-status.ok { background: rgba(5,150,105,0.1); color: var(--mint); }
@@ -495,37 +498,79 @@
       <div class="glass poal-chart-card">
         <h3>Coliformes fecales en agua de mar – Región de Valparaíso</h3>
         <div id="poal-plot-coliformes" class="poal-plot"></div>
-        <p class="poal-card-explainer">Línea punteada (200 NMP/100 ml): referencia cercana al estándar de calidad para aguas recreativas según OMS y EPA. Cuando los valores máximos anuales están sobre esta línea, aumentan los riesgos de diarreas e infecciones asociadas al contacto con el agua y problemas de higiene en zonas de cultivo de mariscos. La medición dejó de hacerse de forma consistente después de 2017 — no hay datos más recientes en este archivo.</p>
+        <div class="poal-card-explainer">
+          <span class="poal-explainer-label">Estándar internacional</span>
+          <p>Línea punteada (200 NMP/100 ml): referencia cercana al estándar de calidad para aguas recreativas según OMS y EPA.</p>
+          <span class="poal-explainer-label">Qué significa esto</span>
+          <p>Cuando los valores máximos anuales están sobre esta línea, aumentan los riesgos de diarreas e infecciones asociadas al contacto con el agua y problemas de higiene en zonas de cultivo de mariscos.</p>
+          <span class="poal-explainer-label">Mediciones</span>
+          <p>La medición dejó de hacerse de forma consistente después de 2017 — no hay datos más recientes en este archivo.</p>
+        </div>
       </div>
 
       <div class="glass poal-chart-card">
         <h3>Cobre total en sedimento marino – Región de Valparaíso</h3>
         <div id="poal-plot-cobre_sed" class="poal-plot"></div>
-        <p class="poal-card-explainer">Línea punteada (18,7 mg/kg): nivel umbral (TEL) de cobre en sedimentos marinos según las guías CCME, por debajo del cual los efectos tóxicos sobre la fauna del fondo son poco probables. Valores repetidamente superiores a este nivel indican sedimentos enriquecidos en metales y posibles efectos crónicos en invertebrados y peces demersales. El valor de Valparaíso en 2024 (12.017 mg/kg, estación Dique Flotante) es un caso extremo frente al resto de la serie de esa misma estación (7 mg/kg en 2023) — vale la pena verificarlo contra la fuente original antes de citarlo en la presentación.</p>
+        <div class="poal-card-explainer">
+          <span class="poal-explainer-label">Estándar internacional</span>
+          <p>Línea punteada (18,7 mg/kg): nivel umbral (TEL) de cobre en sedimentos marinos según las guías CCME, por debajo del cual los efectos tóxicos sobre la fauna del fondo son poco probables.</p>
+          <span class="poal-explainer-label">Qué significa esto</span>
+          <p>Valores repetidamente por encima de esta línea indican sedimentos enriquecidos en metales, donde los invertebrados bentónicos pueden sufrir efectos crónicos y acumular cobre en sus tejidos, afectando también a peces demersales.</p>
+          <span class="poal-explainer-label">Mediciones</span>
+          <p>En este gráfico se muestran los valores máximos anuales por cuerpo de agua entre 2014 y 2024 — el tramo reciente donde se observan los mayores incrementos. Valparaíso registra el valor más alto de toda la serie: 12.017 mg/kg en 2024 (estación Dique Flotante), frente a 7 mg/kg en la misma estación un año antes — más de 600 veces el umbral y un salto de 1.700x en un solo año. Vale la pena verificarlo contra la fuente original antes de citarlo.</p>
+        </div>
       </div>
 
       <div class="glass poal-chart-card">
         <h3>Mercurio total en sedimento marino – Región de Valparaíso</h3>
         <div id="poal-plot-hg_sed" class="poal-plot"></div>
-        <p class="poal-card-explainer">Línea punteada (0,13 mg/kg): umbral TEL para mercurio en sedimentos marinos (CCME). Superar esta referencia implica mayor probabilidad de bioacumulación y biomagnificación del mercurio en la cadena trófica, aumentando la exposición de peces y la de las personas que los consumen.</p>
+        <div class="poal-card-explainer">
+          <span class="poal-explainer-label">Estándar internacional</span>
+          <p>Línea punteada (0,13 mg/kg): umbral TEL para mercurio en sedimentos marinos (CCME).</p>
+          <span class="poal-explainer-label">Qué significa esto</span>
+          <p>Superar esta referencia implica mayor probabilidad de bioacumulación y biomagnificación del mercurio en la cadena trófica, aumentando la exposición de peces y la de las personas que los consumen.</p>
+          <span class="poal-explainer-label">Mediciones</span>
+          <p>Se muestran los valores máximos anuales por cuerpo de agua entre 2014 y 2024.</p>
+        </div>
       </div>
 
       <div class="glass poal-chart-card">
         <h3>Benzo(a)pireno en agua de mar – Región de Valparaíso</h3>
         <div id="poal-plot-bap_agua" class="poal-plot"></div>
-        <p class="poal-card-explainer">Línea punteada (0,01 µg/L): referencia basada en criterios internacionales para hidrocarburos aromáticos policíclicos cancerígenos en agua de mar. Concentraciones por encima de este nivel reflejan contaminación por combustión o hidrocarburos que puede afectar la fauna marina y, a largo plazo, la seguridad alimentaria. Se excluyó un valor de 225 µg/L reportado de forma idéntica en tres bahías distintas en 2023 y 2024 — miles de veces por sobre el resto de la serie y repetido en ubicaciones no relacionadas, la misma firma que en el resto del sitio se trata como límite de detección de laboratorio, no como medición real.</p>
+        <div class="poal-card-explainer">
+          <span class="poal-explainer-label">Estándar internacional</span>
+          <p>Línea punteada (0,01 µg/L): referencia basada en criterios internacionales para hidrocarburos aromáticos policíclicos cancerígenos en agua de mar.</p>
+          <span class="poal-explainer-label">Qué significa esto</span>
+          <p>Concentraciones por encima de este nivel reflejan contaminación por combustión o hidrocarburos que puede afectar la fauna marina y, a largo plazo, la seguridad alimentaria.</p>
+          <span class="poal-explainer-label">Mediciones</span>
+          <p>Se excluyó un valor de 225 µg/L reportado de forma idéntica en tres bahías distintas en 2023 y 2024 — miles de veces por sobre el resto de la serie y repetido en ubicaciones no relacionadas, la misma firma que en el resto del sitio se trata como límite de detección de laboratorio, no como medición real.</p>
+        </div>
       </div>
 
       <div class="glass poal-chart-card">
         <h3>Mercurio total en biota – Región de Valparaíso</h3>
         <div id="poal-plot-hg_biota" class="poal-plot"></div>
-        <p class="poal-card-explainer">Línea punteada (0,5 mg/kg): valor cercano a los límites máximos para mercurio en productos de la pesca según Codex y la Unión Europea. Si las concentraciones en tejidos de peces o mariscos superan esta línea, aumenta el riesgo de efectos neurotóxicos en consumidores frecuentes, especialmente niños y embarazadas. Solo hay 4 mediciones en toda la región desde 2022 — muy poco para hablar de una tendencia.</p>
+        <div class="poal-card-explainer">
+          <span class="poal-explainer-label">Estándar internacional</span>
+          <p>Línea punteada (0,5 mg/kg): valor cercano a los límites máximos para mercurio en productos de la pesca según Codex y la Unión Europea.</p>
+          <span class="poal-explainer-label">Qué significa esto</span>
+          <p>Si las concentraciones en tejidos de peces o mariscos superan esta línea, aumenta el riesgo de efectos neurotóxicos en consumidores frecuentes, especialmente niños y embarazadas.</p>
+          <span class="poal-explainer-label">Mediciones</span>
+          <p>El gráfico muestra los valores máximos anuales por cuerpo de agua entre 2014 y 2024, el rango real presente en la hoja para este parámetro. Quintero tiene mediciones en 2014, 2015 y 2017, un vacío entre 2018 y 2021, y datos nuevamente desde 2022 — insuficiente continuidad para hablar de una tendencia sostenida.</p>
+        </div>
       </div>
 
       <div class="glass poal-chart-card">
         <h3>Fósforo total en agua de mar – Región de Valparaíso</h3>
         <div id="poal-plot-fosforo" class="poal-plot"></div>
-        <p class="poal-card-explainer">Línea punteada: mediana histórica 1993–2019 de fósforo total en cada cuerpo de agua — no es un límite legal, es el propio historial local de cada bahía. Valores muy superiores a esa mediana reflejan enriquecimiento de nutrientes que favorece floraciones de algas y pérdida de oxígeno, afectando la salud del ecosistema costero.</p>
+        <div class="poal-card-explainer">
+          <span class="poal-explainer-label">Estándar internacional</span>
+          <p>Línea punteada: mediana histórica 1993–2019 de fósforo total en cada cuerpo de agua; se usa como referencia local, no como estándar internacional.</p>
+          <span class="poal-explainer-label">Qué significa esto</span>
+          <p>Valores muy superiores a esa mediana reflejan enriquecimiento de nutrientes que favorece floraciones de algas y pérdida de oxígeno, afectando la salud del ecosistema costero.</p>
+          <span class="poal-explainer-label">Mediciones</span>
+          <p>El gráfico muestra los valores máximos anuales por cuerpo de agua entre 2014 y 2024 — pero casi no hay nada que mostrar: el monitoreo de fósforo total dejó de hacerse en Quintero después de 2011, y lo mismo ocurre en el resto de la región salvo Isla de Pascua. Se excluyó además un valor de 635 mg/L reportado de forma idéntica en siete estaciones distintas de Isla de Pascua en 2023 y 2024 — la misma firma de límite de detección que en Benzo(a)pireno. Tras esa exclusión, Isla de Pascua queda con un solo punto real (2015). El vacío en sí es un hallazgo: sugiere que el monitoreo de nutrientes en la bahía quedó discontinuado hace más de una década.</p>
+        </div>
       </div>
 
     </div>
@@ -1076,21 +1121,41 @@ function stationLabel(code) {
    (Cuerpo.de.Agua, AÑO) — the worst reading recorded anywhere in
    each bay each year, not an average and not per-station.
 
-   ONE exclusion was applied before taking the max, and only one:
-   Benzo(a)pireno en Agua de Mar had a value of 225 µg/L reported
-   identically across three unrelated bays (Quintero, San Antonio,
-   Isla de Pascua) in exactly 2023 and 2024 — a jump of roughly
-   4,000-10,000x over every other value in that series, repeated
-   across independent locations in the same two years. That's the
-   same signature (identical value, multiple independent stations,
-   same year) this site already treats elsewhere as a lab
-   detection-limit substitution, not a real reading, so those points
-   were dropped before computing the max. No other value was touched,
-   however extreme — see the Cobre total caption for one that's real
-   but worth double-checking against the source before it goes in a
-   deck.
+   Year windows: Coliformes Fecales is filtered to 2006-2017 before
+   aggregating (source data doesn't continue past 2017 anyway); every
+   other chart is filtered to 2014-2024 before aggregating. Fósforo
+   Total's baseline (the per-Cuerpo.de.Agua local median) is computed
+   separately on its own fixed 1993-2019 window regardless — that
+   window is a baseline-definition choice, not a display range, so it
+   doesn't move when the chart's displayed years change.
+
+   `log` and `xrange` per chart drive the y-axis type and the fixed
+   x-axis window in the renderer below.
+
+   TWO exclusions were applied before taking the max, and only two —
+   both follow the same rule already used elsewhere on this site:
+   an identical value repeated across independent stations in the
+   same year is a lab detection-limit substitution, not a real
+   reading, so it's dropped before the max is computed.
+     - Benzo(a)pireno en Agua de Mar: 225 µg/L, repeated identically
+       across three unrelated bays (Quintero, San Antonio, Isla de
+       Pascua) in exactly 2023 and 2024 — 4,000-10,000x every other
+       value in the series.
+     - Fósforo Total en Agua de Mar: 635 mg/L, repeated identically
+       across seven different stations within Isla de Pascua in both
+       2023 and 2024 — thousands of times the historical baseline.
+       Excluding it leaves Isla de Pascua with exactly one point in
+       the 2014-2024 window (2015) and every other Cuerpo.de.Agua,
+       Quintero included, with zero: Quintero's last real Fósforo
+       Total reading in this file is from 2011. That's a real,
+       citable finding in its own right (nutrient monitoring in this
+       bay appears to have lapsed for over a decade), not a rendering
+       bug — see the caption under that chart.
+   No other value was touched, however extreme — see the Cobre total
+   caption for one that's real but worth double-checking against the
+   source before it goes in a deck.
    ============================================================ */
-const POAL_CHART_DATA = {"coliformes":{"title":"Coliformes fecales en agua de mar – Región de Valparaíso","data":{"ALGARROBO":[[2013,0.9],[2014,7.8],[2015,2.0],[2016,6.8],[2017,94.0]],"CONCON":[[1994,22.0],[1995,1100.0],[1996,5400.0],[1997,130.0],[1998,350.0],[1999,2400.0],[2000,490.0],[2001,2.0],[2002,900.0],[2003,50.0],[2004,14.0],[2005,9.0],[2006,130.0],[2007,130.0],[2008,49.0],[2009,220.0],[2010,240.0],[2011,130.0],[2013,49.0],[2014,280.0],[2015,240.0],[2016,540.0],[2017,170.0]],"ISLA DE PASCUA":[[2005,2.0],[2006,230.0],[2007,2.0],[2008,0.9],[2009,33.0],[2010,22.0],[2011,4.0],[2013,9.3],[2014,130.0],[2015,0.9],[2016,0.9],[2017,920.0]],"PLAYA ANCHA":[[1993,220.0],[1994,16000.0],[1995,920.0],[1996,16000.0],[1997,2400.0],[1998,2400.0],[1999,1600.0],[2000,1300.0],[2001,2.0],[2002,900.0],[2003,900.0],[2004,30000.0],[2005,2800.0],[2006,22.0],[2007,2300.0],[2008,1600.0],[2009,1600.0],[2010,920.0],[2011,800.0],[2013,800.0],[2014,920.0],[2015,540.0],[2016,350.0],[2017,5400.0]],"QUINTERO":[[1993,2.0],[1994,540.0],[1995,920.0],[1996,790.0],[1997,23.0],[1998,5.5],[1999,15.0],[2000,2.0],[2001,5.0],[2002,4.0],[2003,4.0],[2004,17.0],[2005,80.0],[2006,11.0],[2007,2.0],[2008,26.0],[2009,130.0],[2010,11.0],[2011,2.0],[2013,0.9],[2014,27.0],[2015,79.0],[2016,170.0],[2017,2.0]],"SAN ANTONIO":[[1993,5400.0],[1994,5400.0],[1995,9200.0],[1996,16000.0],[1997,21.0],[1998,2400.0],[1999,1600.0],[2000,460.0],[2001,193.0],[2002,1600.0],[2003,170.0],[2004,2.0],[2005,17.0],[2006,24000.0],[2007,79.0],[2008,170.0],[2009,170.0],[2010,79.0],[2011,79.0],[2013,11.0],[2014,240.0],[2015,33.0],[2016,26.0],[2017,23.0]],"VALPARAISO":[[1993,16000.0],[1994,16000.0],[1995,16000.0],[1996,16000.0],[1997,540.0],[1998,2400.0],[1999,2400.0],[2000,490.0],[2001,81.0],[2002,1600.0],[2003,300.0],[2004,50000.0],[2005,500.0],[2006,35000.0],[2007,3300.0],[2008,1600.0],[2009,1600.0],[2010,1600.0],[2011,920.0],[2013,6.8],[2014,540.0],[2015,79.0],[2016,540.0],[2017,920.0]]},"unit":"NMP/100 ml","baseline":200,"baseline_label":"OMS/EPA (agua recreativa)"},"cobre_sed":{"title":"Cobre total en sedimento marino – Región de Valparaíso","data":{"ALGARROBO":[[2013,3.8],[2014,3.2],[2015,3.7],[2016,5.0],[2017,3.9]],"CONCON":[[1994,53.9],[1995,44.7],[1996,57.1],[1997,63.734],[1998,115.978],[1999,95.083],[2000,1469.0],[2001,95.7],[2002,187.0],[2003,81.5],[2004,54.7],[2005,66.8],[2006,180.0],[2007,560.593],[2008,120.0],[2009,214.0],[2010,231.0],[2011,67.6],[2013,54.0],[2014,61.0],[2015,54.0],[2016,70.0],[2017,60.9],[2019,53.98],[2021,188.36],[2022,37.8],[2023,313.0],[2024,494.0]],"ISLA DE PASCUA":[[2005,14.2],[2006,16.4],[2007,144.561],[2008,25.6],[2009,32.8],[2010,13.9],[2011,51.4],[2013,11.0],[2014,16.0],[2015,15.0],[2016,17.5],[2017,17.2],[2019,13.38],[2022,18.4],[2023,492.0],[2024,171.0]],"PLAYA ANCHA":[[1994,607.0],[1995,219.0],[1996,1068.0],[1997,501.34],[1998,97.798],[1999,129.66],[2000,125.0],[2001,61.5],[2002,91.0],[2003,36.7],[2004,32.2],[2005,29.3],[2006,322.0],[2007,629.473],[2008,219.0],[2009,47.1],[2010,43.7],[2011,32.5],[2013,65.0],[2014,171.0],[2015,95.0],[2016,49.2],[2017,78.1]],"QUINTERO":[[1993,83.9],[1994,109.0],[1997,371.67],[1998,247.879],[1999,600.59],[2000,117.0],[2001,175.73],[2002,156.0],[2003,73.5],[2004,297.0],[2005,207.0],[2006,169.0],[2007,142.0],[2008,178.0],[2009,319.0],[2010,47.3],[2011,141.0],[2013,215.0],[2014,202.0],[2015,76.9],[2016,88.9],[2017,73.0],[2019,274.57],[2021,2215.41],[2022,102.1],[2023,549.0],[2024,1256.0]],"SAN ANTONIO":[[1993,24.8],[1994,42.1],[1997,345.4],[1998,160.196],[1999,249.82],[2000,160.0],[2001,150.33],[2002,100.0],[2003,120.0],[2004,139.0],[2005,183.0],[2006,108.0],[2007,125.0],[2008,149.0],[2009,101.0],[2010,99.6],[2011,61.8],[2013,101.0],[2014,97.0],[2015,142.0],[2016,146.0],[2017,89.2],[2019,103.13],[2021,193.08],[2022,76.6],[2023,625.0],[2024,698.0]],"VALPARAISO":[[1993,16.0],[1994,28.2],[1997,848.64],[1998,781.677],[1999,813.82],[2000,516.3],[2001,9527.69],[2002,440.0],[2003,290.0],[2004,2952.0],[2005,1048.0],[2006,14304.0],[2007,12733.0],[2008,4282.0],[2009,3339.0],[2010,7257.0],[2011,3547.0],[2013,285.0],[2014,929.0],[2015,421.0],[2016,436.0],[2017,281.9],[2019,391.43],[2021,495.0],[2022,419.0],[2023,2322.0],[2024,12017.0]]},"unit":"mg/kg","baseline":18.7,"baseline_label":"CCME TEL"},"hg_sed":{"title":"Mercurio total en sedimento marino – Región de Valparaíso","data":{"ALGARROBO":[[2013,0.005],[2014,0.005],[2015,0.01],[2016,0.005],[2017,0.005]],"CONCON":[[1994,0.05],[1995,0.09],[1996,0.07],[1997,0.492],[1998,0.13],[1999,0.182],[2000,0.001],[2001,0.12],[2002,0.25],[2003,0.05],[2004,0.05],[2005,0.05],[2006,0.05],[2007,0.05],[2008,0.07],[2009,0.005],[2010,0.005],[2011,0.005],[2013,0.005],[2014,0.05],[2015,0.27],[2016,0.03],[2017,0.2],[2019,0.005],[2021,0.005],[2022,0.01],[2023,5.0],[2024,5.0]],"ISLA DE PASCUA":[[2005,0.05],[2006,0.05],[2007,0.05],[2008,0.06],[2009,0.005],[2010,0.005],[2011,0.005],[2013,0.005],[2014,0.02],[2015,0.02],[2016,0.03],[2017,0.07],[2022,0.005],[2023,5.0],[2024,5.0]],"PLAYA ANCHA":[[1994,0.04],[1995,0.15],[1996,0.2],[1997,0.08],[1998,1.495],[1999,0.13],[2000,0.001],[2001,0.12],[2002,0.1],[2003,0.1],[2004,0.1],[2005,0.1],[2006,0.1],[2007,0.17],[2008,0.02],[2009,0.05],[2010,0.005],[2011,0.2],[2013,0.005],[2014,0.03],[2015,0.23],[2016,0.04],[2017,0.12]],"QUINTERO":[[1993,0.22],[1994,0.04],[1997,2.141],[1998,0.695],[1999,0.186],[2000,0.001],[2001,0.209],[2002,0.05],[2003,0.05],[2004,0.05],[2005,0.05],[2006,0.2],[2007,0.15],[2008,0.07],[2009,0.03],[2010,0.005],[2011,0.4],[2013,0.08],[2014,0.12],[2015,0.14],[2016,0.12],[2017,0.06],[2021,0.08],[2022,0.06],[2023,5.0],[2024,14.0]],"SAN ANTONIO":[[1993,0.01],[1994,0.03],[1997,0.318],[1998,0.104],[1999,0.11],[2000,0.001],[2001,0.12],[2002,0.05],[2003,0.3],[2004,0.05],[2005,0.05],[2006,0.05],[2007,0.1],[2008,0.04],[2009,0.005],[2010,0.005],[2011,0.08],[2013,0.01],[2014,0.05],[2015,0.07],[2016,0.04],[2017,0.25],[2019,0.02],[2021,0.03],[2022,0.47],[2023,5.0],[2024,45.0]],"VALPARAISO":[[1993,0.8],[1994,0.03],[1997,0.84],[1998,3.504],[1999,0.733],[2000,0.001],[2001,1.37],[2002,0.1],[2003,0.1],[2004,0.1],[2005,0.18],[2006,0.1],[2007,1.93],[2008,0.4],[2009,0.36],[2010,0.005],[2011,0.05],[2013,0.06],[2014,0.06],[2015,0.42],[2016,0.53],[2017,1.84],[2019,0.31],[2021,0.005],[2022,0.83],[2023,64.0],[2024,52.0]]},"unit":"mg/kg","baseline":0.13,"baseline_label":"CCME TEL"},"bap_agua":{"title":"Benzo(a)pireno en agua de mar – Región de Valparaíso","data":{"ALGARROBO":[[2013,0.05],[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05]],"CONCON":[[2013,0.05],[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05]],"ISLA DE PASCUA":[[2013,0.05],[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05],[2022,0.0225]],"PLAYA ANCHA":[[2013,0.05],[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05]],"QUINTERO":[[2013,0.05],[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05],[2019,0.0225],[2021,0.0225],[2022,0.0225],[2023,162.0]],"SAN ANTONIO":[[2013,0.05],[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05],[2019,0.0225],[2021,0.0225],[2022,0.0225]],"VALPARAISO":[[2013,0.05],[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05]]},"unit":"ug/L","baseline":0.01,"baseline_label":"referencia crónica internacional"},"hg_biota":{"title":"Mercurio total en biota – Región de Valparaíso","data":{"QUINTERO":[[2022,3.56],[2023,2.0],[2024,7.0]],"SAN ANTONIO":[[2022,1.16]]},"unit":"mg/kg","baseline":0.5,"baseline_label":"Codex/UE/FDA"},"fosforo":{"title":"Fósforo total en agua de mar – Región de Valparaíso","data":{"CONCON":[[1994,0.16],[1995,0.16],[1996,0.32],[1997,0.64],[1998,0.184],[1999,0.088],[2000,0.005],[2001,0.13],[2002,0.23],[2003,0.1],[2004,0.1],[2005,0.1],[2006,0.1],[2007,0.2],[2008,0.01],[2009,0.09],[2010,0.46],[2011,0.05]],"ISLA DE PASCUA":[[2005,0.1],[2006,0.1],[2007,0.2],[2008,0.01],[2009,0.05],[2010,0.07],[2011,0.01],[2015,0.066],[2023,635.0],[2024,635.0]],"PLAYA ANCHA":[[1993,0.17],[1994,0.25],[1995,0.48],[1996,0.32],[1997,0.41],[1998,0.11],[1999,0.227],[2000,0.54],[2001,0.12],[2002,0.1],[2003,0.1],[2004,0.1],[2005,0.1],[2006,0.1],[2007,0.2],[2008,0.01],[2009,0.08],[2010,0.14],[2011,0.01]],"QUINTERO":[[1993,0.17],[1994,0.56],[1995,0.43],[1996,0.34],[1997,0.38],[1998,0.191],[1999,0.174],[2000,0.04],[2001,0.597],[2002,0.2],[2003,0.2],[2004,0.2],[2005,0.2],[2006,0.2],[2007,0.2],[2008,0.01],[2009,0.09],[2010,0.08],[2011,0.07]],"SAN ANTONIO":[[1993,0.24],[1994,0.47],[1995,0.34],[1996,0.32],[1997,0.42],[1998,0.216],[1999,0.3],[2000,0.005],[2001,0.49],[2002,0.2],[2003,0.2],[2004,0.2],[2005,0.2],[2006,0.2],[2007,0.2],[2008,0.01],[2009,0.09],[2010,0.03],[2011,0.4]],"VALPARAISO":[[1993,0.33],[1994,1.03],[1995,1.12],[1996,0.49],[1997,0.43],[1998,0.128],[1999,0.28],[2000,0.54],[2001,0.11],[2002,0.2],[2003,0.2],[2004,0.2],[2005,0.2],[2006,0.2],[2007,0.2],[2008,0.01],[2009,0.09],[2010,0.13],[2011,0.06]]},"unit":"mg/L","baseline":{"CONCON":0.09,"ISLA DE PASCUA":0.01,"PLAYA ANCHA":0.1,"QUINTERO":0.1,"SAN ANTONIO":0.15,"VALPARAISO":0.16},"baseline_label":"mediana histórica local 1993-2019"}};
+const POAL_CHART_DATA = {"coliformes":{"title":"Coliformes fecales en agua de mar – Región de Valparaíso","data":{"ALGARROBO":[[2013,0.9],[2014,7.8],[2015,2.0],[2016,6.8],[2017,94.0]],"CONCON":[[2006,130.0],[2007,130.0],[2008,49.0],[2009,220.0],[2010,240.0],[2011,130.0],[2013,49.0],[2014,280.0],[2015,240.0],[2016,540.0],[2017,170.0]],"ISLA DE PASCUA":[[2006,230.0],[2007,2.0],[2008,0.9],[2009,33.0],[2010,22.0],[2011,4.0],[2013,9.3],[2014,130.0],[2015,0.9],[2016,0.9],[2017,920.0]],"PLAYA ANCHA":[[2006,22.0],[2007,2300.0],[2008,1600.0],[2009,1600.0],[2010,920.0],[2011,800.0],[2013,800.0],[2014,920.0],[2015,540.0],[2016,350.0],[2017,5400.0]],"QUINTERO":[[2006,11.0],[2007,2.0],[2008,26.0],[2009,130.0],[2010,11.0],[2011,2.0],[2013,0.9],[2014,27.0],[2015,79.0],[2016,170.0],[2017,2.0]],"SAN ANTONIO":[[2006,24000.0],[2007,79.0],[2008,170.0],[2009,170.0],[2010,79.0],[2011,79.0],[2013,11.0],[2014,240.0],[2015,33.0],[2016,26.0],[2017,23.0]],"VALPARAISO":[[2006,35000.0],[2007,3300.0],[2008,1600.0],[2009,1600.0],[2010,1600.0],[2011,920.0],[2013,6.8],[2014,540.0],[2015,79.0],[2016,540.0],[2017,920.0]]},"unit":"NMP/100 ml","baseline":200,"baseline_label":"OMS/EPA (agua recreativa)","log":false,"xrange":[2006,2017]},"cobre_sed":{"title":"Cobre total en sedimento marino – Región de Valparaíso","data":{"ALGARROBO":[[2014,3.2],[2015,3.7],[2016,5.0],[2017,3.9]],"CONCON":[[2014,61.0],[2015,54.0],[2016,70.0],[2017,60.9],[2019,53.98],[2021,188.36],[2022,37.8],[2023,313.0],[2024,494.0]],"ISLA DE PASCUA":[[2014,16.0],[2015,15.0],[2016,17.5],[2017,17.2],[2019,13.38],[2022,18.4],[2023,492.0],[2024,171.0]],"PLAYA ANCHA":[[2014,171.0],[2015,95.0],[2016,49.2],[2017,78.1]],"QUINTERO":[[2014,202.0],[2015,76.9],[2016,88.9],[2017,73.0],[2019,274.57],[2021,2215.41],[2022,102.1],[2023,549.0],[2024,1256.0]],"SAN ANTONIO":[[2014,97.0],[2015,142.0],[2016,146.0],[2017,89.2],[2019,103.13],[2021,193.08],[2022,76.6],[2023,625.0],[2024,698.0]],"VALPARAISO":[[2014,929.0],[2015,421.0],[2016,436.0],[2017,281.9],[2019,391.43],[2021,495.0],[2022,419.0],[2023,2322.0],[2024,12017.0]]},"unit":"mg/kg","baseline":18.7,"baseline_label":"CCME TEL","log":true,"xrange":[2014,2024]},"hg_sed":{"title":"Mercurio total en sedimento marino – Región de Valparaíso","data":{"ALGARROBO":[[2014,0.005],[2015,0.01],[2016,0.005],[2017,0.005]],"CONCON":[[2014,0.05],[2015,0.27],[2016,0.03],[2017,0.2],[2019,0.005],[2021,0.005],[2022,0.01],[2023,5.0],[2024,5.0]],"ISLA DE PASCUA":[[2014,0.02],[2015,0.02],[2016,0.03],[2017,0.07],[2022,0.005],[2023,5.0],[2024,5.0]],"PLAYA ANCHA":[[2014,0.03],[2015,0.23],[2016,0.04],[2017,0.12]],"QUINTERO":[[2014,0.12],[2015,0.14],[2016,0.12],[2017,0.06],[2021,0.08],[2022,0.06],[2023,5.0],[2024,14.0]],"SAN ANTONIO":[[2014,0.05],[2015,0.07],[2016,0.04],[2017,0.25],[2019,0.02],[2021,0.03],[2022,0.47],[2023,5.0],[2024,45.0]],"VALPARAISO":[[2014,0.06],[2015,0.42],[2016,0.53],[2017,1.84],[2019,0.31],[2021,0.005],[2022,0.83],[2023,64.0],[2024,52.0]]},"unit":"mg/kg","baseline":0.13,"baseline_label":"CCME TEL","log":true,"xrange":[2014,2024]},"bap_agua":{"title":"Benzo(a)pireno en agua de mar – Región de Valparaíso","data":{"ALGARROBO":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05]],"CONCON":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05]],"ISLA DE PASCUA":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05],[2022,0.0225]],"PLAYA ANCHA":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05]],"QUINTERO":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05],[2019,0.0225],[2021,0.0225],[2022,0.0225],[2023,162.0]],"SAN ANTONIO":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05],[2019,0.0225],[2021,0.0225],[2022,0.0225]],"VALPARAISO":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05]]},"unit":"ug/L","baseline":0.01,"baseline_label":"referencia crónica internacional","log":true,"xrange":[2014,2024]},"hg_biota":{"title":"Mercurio total en biota – Región de Valparaíso","data":{"CONCON":[[2014,2.15],[2015,0.04],[2017,0.01]],"PLAYA ANCHA":[[2014,3.56],[2015,0.01],[2017,0.01]],"QUINTERO":[[2014,1.32],[2015,0.1],[2017,0.2],[2022,3.56],[2023,2.0],[2024,7.0]],"SAN ANTONIO":[[2015,0.005],[2016,0.01],[2017,0.01],[2019,0.0619],[2022,1.16]],"VALPARAISO":[[2014,3.4],[2015,0.04],[2017,0.01]]},"unit":"mg/kg","baseline":0.5,"baseline_label":"Codex/UE/FDA","log":true,"xrange":[2014,2024]},"fosforo":{"title":"Fósforo total en agua de mar – Región de Valparaíso","data":{"ISLA DE PASCUA":[[2015,0.066]]},"unit":"mg/L","baseline":{"CONCON":0.09,"ISLA DE PASCUA":0.01,"PLAYA ANCHA":0.1,"QUINTERO":0.1,"SAN ANTONIO":0.15,"VALPARAISO":0.16},"baseline_label":"mediana histórica local 1993-2019","log":true,"xrange":[2014,2024]}};
 
 const POAL_CUERPO_COLORS = {
   QUINTERO: '#DC2626',
@@ -1121,27 +1186,33 @@ try {
       };
     });
 
-    // Baseline is either one flat reference number (most charts) or a
-    // per-Cuerpo.de.Agua object (Fósforo Total's local historical median).
+    // Baseline spans the full fixed x-range (not just where data exists) so
+    // it reads as a constant backdrop. Linear charts (only Coliformes) get a
+    // thick, strong-red line since 200 sits close to the axis floor next to
+    // values in the tens of thousands; log charts get a thinner line since
+    // log space already keeps the baseline visually legible.
+    const annotations = [];
+    const [xMin, xMax] = chart.xrange;
     if (typeof chart.baseline === 'number') {
-      const allYears = traces.flatMap(t => t.x);
-      if (allYears.length) {
-        traces.push({
-          x: [Math.min(...allYears), Math.max(...allYears)],
-          y: [chart.baseline, chart.baseline],
-          name: `Referencia (${chart.baseline_label})`,
-          mode: 'lines',
-          line: { color: '#DC2626', dash: 'dash', width: 1.5 },
-          hoverinfo: 'name+y',
-        });
-      }
+      traces.push({
+        x: [xMin, xMax],
+        y: [chart.baseline, chart.baseline],
+        name: `Referencia (${chart.baseline_label})`,
+        mode: 'lines',
+        line: { color: '#DC2626', dash: 'dash', width: chart.log ? 2 : 3.5 },
+        hoverinfo: 'name+y',
+      });
+      annotations.push({
+        x: xMax, y: chart.baseline, xanchor: 'left', yanchor: 'middle',
+        text: `  ${chart.baseline} ${chart.unit}`,
+        showarrow: false,
+        font: { family: 'IBM Plex Mono', size: 10, color: '#DC2626' },
+      });
     } else if (chart.baseline && typeof chart.baseline === 'object') {
       Object.entries(chart.baseline).forEach(([cuerpo, val]) => {
-        const cData = chart.data[cuerpo];
-        if (!cData || !cData.length) return;
-        const years = cData.map(p => p[0]);
+        if (!chart.data[cuerpo]) return;
         traces.push({
-          x: [Math.min(...years), Math.max(...years)],
+          x: [xMin, xMax],
           y: [val, val],
           name: `Mediana histórica – ${cuerpo}`,
           mode: 'lines',
@@ -1153,11 +1224,21 @@ try {
       });
     }
 
+    const yAxisTitle = chart.log ? `${chart.unit} — escala logarítmica` : chart.unit;
+
     Plotly.newPlot(divId, traces, {
-      margin: { l: 55, r: 16, t: 8, b: 36 },
+      margin: { l: 55, r: 70, t: 8, b: 36 },
       font: { family: 'Plus Jakarta Sans, sans-serif', size: 11, color: '#4B5F73' },
-      xaxis: { tickfont: { family: 'IBM Plex Mono', size: 10 }, gridcolor: 'rgba(15,36,56,0.06)', dtick: 2 },
-      yaxis: { title: chart.unit, tickfont: { family: 'IBM Plex Mono', size: 10 }, gridcolor: 'rgba(15,36,56,0.06)' },
+      xaxis: {
+        tickfont: { family: 'IBM Plex Mono', size: 10 }, gridcolor: 'rgba(15,36,56,0.06)',
+        dtick: 1, range: chart.xrange,
+      },
+      yaxis: {
+        title: { text: yAxisTitle, font: { size: 10 } },
+        type: chart.log ? 'log' : 'linear',
+        tickfont: { family: 'IBM Plex Mono', size: 10 }, gridcolor: 'rgba(15,36,56,0.06)',
+      },
+      annotations: annotations,
       legend: { orientation: 'h', y: -0.22, font: { size: 9.5 } },
       plot_bgcolor: 'rgba(0,0,0,0)',
       paper_bgcolor: 'rgba(0,0,0,0)',
