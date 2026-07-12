@@ -135,7 +135,7 @@
   }
   .hero-overlay h1 em { font-style: italic; color: var(--coral); }
   .hero-overlay p.lede {
-    font-size: 17px; color: rgba(255,255,255,0.88); margin-bottom: 8px;
+    font-size: 17px; color: rgba(255,255,255,0.88); max-width: 560px; margin-bottom: 8px;
   }
   .hero-overlay .trust-strip {
     display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
@@ -166,7 +166,7 @@
     font-family: var(--font-head); font-size: 28px; font-weight: 700; margin-bottom: 6px;
   }
   section.panel p.section-lede {
-    color: var(--ink-secondary); font-size: 14px; margin-bottom: 24px;
+    color: var(--ink-secondary); font-size: 14px; margin-bottom: 24px; max-width: 640px;
   }
 
   /* ---------- thesis (the narrative "stem") ---------- */
@@ -177,6 +177,7 @@
   }
   .thesis-text {
     font-family: var(--font-head); font-size: 21px; line-height: 1.45; color: var(--ink);
+    max-width: 760px;
   }
 
   /* ---------- map + alerts zone ---------- */
@@ -236,7 +237,7 @@
 
   .map-disclaimer {
     font-size: 11px; line-height: 1.5; color: var(--ink-muted); font-style: italic;
-    padding: 10px 2px 0;
+    padding: 10px 2px 0; max-width: 640px;
   }
 
   .popup-facility { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12.5px; line-height: 1.4; }
@@ -340,21 +341,6 @@
     font-family: var(--font-head); font-size: 19px; font-weight: 700; margin-bottom: 14px;
     display: flex; align-items: center; gap: 8px;
   }
-
-  /* explainer accordion */
-  .acc-item { border-bottom: 1px solid var(--hairline); }
-  .acc-item:last-child { border-bottom: none; }
-  .acc-trigger {
-    width: 100%; text-align: left; background: none; border: none; color: var(--ink);
-    font-family: var(--font-ui); font-size: 13px; font-weight: 600; padding: 12px 0;
-    cursor: pointer; display: flex; justify-content: space-between; align-items: center;
-  }
-  .acc-trigger .chevron { transition: transform 0.2s ease; color: var(--ink-muted); }
-  .acc-item.open .acc-trigger .chevron { transform: rotate(180deg); }
-  .acc-panel { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; }
-  .acc-item.open .acc-panel { max-height: 300px; }
-  .acc-panel p { font-size: 12px; color: var(--ink-secondary); line-height: 1.6; padding-bottom: 14px; }
-  .acc-panel .src { font-size: 10px; color: var(--ink-muted); font-style: italic; }
 
   /* citizen report form */
   #report-form { display: flex; flex-direction: column; gap: 10px; }
@@ -571,10 +557,7 @@
           <p>El gráfico muestra los valores máximos anuales de plomo en tejidos de biota por cuerpo de agua entre 2014 y 2024. En algunas bahías — en particular sectores de Quintero (Rocas Loncura, Rocas Estrella) — las concentraciones de 2023-2024 se sitúan cientos de veces por sobre el nivel de referencia internacional; el resto de la región se mantiene en niveles moderados o cercanos al umbral.</p>
         </div>
       </div>
-    <div class="glass res-card" id="explainer-general" style="margin-top:24px;">
-      <h3>Más preguntas</h3>
-      <div id="explainer-acc"><!-- populated by JS --></div>
-    </div>
+
     </div>
   </section>
 
@@ -1255,43 +1238,6 @@ try {
   });
 }
 
-/* ============================================================
-   GENERAL EXPLAINER — only the questions that aren't tied to one
-   specific parameter (those now live inline in the POAL cards above).
-   ============================================================ */
-const EXPLAINER_ITEMS = [
-  {
-    q: '¿Por qué Chile no tiene un límite de cadmio para mariscos?',
-    a: 'A diferencia de la UE y Codex, la normativa chilena de seguridad alimentaria no fija un límite específico de cadmio para productos del mar — un vacío regulatorio que esta plataforma documenta, no resuelve.',
-    src: 'Hallazgo del equipo, ver Regulatory Gap Map.',
-  },
-  {
-    q: '¿Qué significa un punto gris en los gráficos?',
-    a: 'Indica que, ese año, todas las estaciones reportaron exactamente el mismo valor — la señal típica de que el laboratorio reportó "no detectado" usando su límite técnico como número, no una medición real de la bahía. Tratamos esos años como un vacío de monitoreo, no como evidencia de que el agua estaba limpia.',
-    src: 'Metodología del equipo — detección automática por coincidencia exacta entre estaciones.',
-  },
-  {
-    q: '¿Qué efectos tiene el cadmio y el plomo en la salud?',
-    a: 'El cadmio daña los riñones y debilita los huesos con exposición prolongada. El plomo es neurotóxico, especialmente dañino para el desarrollo del sistema nervioso en niños — la OMS no ha identificado un nivel de plomo en sangre considerado seguro.',
-    src: 'Consenso científico general — no reemplaza orientación médica.',
-  },
-];
-document.getElementById('explainer-acc').innerHTML = EXPLAINER_ITEMS.map((item, i) => `
-  <div class="acc-item" id="acc-${i}">
-    <button class="acc-trigger" onclick="toggleAcc(${i})">
-      <span>${item.q}</span>
-      <span class="chevron">⌄</span>
-    </button>
-    <div class="acc-panel">
-      <p>${item.a}</p>
-      <div class="src">${item.src}</div>
-    </div>
-  </div>
-`).join('');
-function toggleAcc(i) {
-  document.getElementById(`acc-${i}`).classList.toggle('open');
-}
-
 
 /* ============================================================
    SCIENTIFIC PANEL — curated, published sources only.
@@ -1371,12 +1317,36 @@ try {
     });
   }
 
-  const MARGIN = { top: 26, right: 20, bottom: 34, left: 150 };
   const ROW_H = 40;
 
   function draw() {
     const rows = SCI_CATEGORIES.filter(c => studies.some(d => d.category === c.key));
     const w = svg.parentElement.clientWidth - 40;
+    const ns = 'http://www.w3.org/2000/svg';
+    svg.innerHTML = '';
+
+    // Dynamic left margin: measure the widest row label so it never
+    // overlaps the plot area, regardless of container width or which
+    // categories are present. A fixed pixel margin only worked for the
+    // shortest label ("Metales pesados") — longer ones like "Biodiversidad
+    // / ecotoxicología" need much more room, and it got worse once the
+    // page's max-width shrank and left less room to visually absorb it.
+    function measureLabelWidth(text) {
+      const t = document.createElementNS(ns, 'text');
+      t.setAttribute('class', 'sci-row-label');
+      t.style.visibility = 'hidden';
+      t.textContent = text;
+      svg.appendChild(t);
+      const width = t.getBBox().width;
+      svg.removeChild(t);
+      return width;
+    }
+    const DOT_X = 12;
+    const LABEL_X = 24;
+    const LABEL_TO_PLOT_GAP = 16;
+    const maxLabelWidth = rows.length ? Math.max(...rows.map(r => measureLabelWidth(r.label))) : 0;
+    const MARGIN = { top: 26, right: 20, bottom: 34, left: LABEL_X + maxLabelWidth + LABEL_TO_PLOT_GAP };
+
     const h = MARGIN.top + MARGIN.bottom + rows.length * ROW_H;
     svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
     svg.setAttribute('height', h);
@@ -1387,7 +1357,6 @@ try {
     const plotW = w - MARGIN.left - MARGIN.right;
     const x = year => MARGIN.left + ((year - yearMin) / (yearMax - yearMin)) * plotW;
 
-    const ns = 'http://www.w3.org/2000/svg';
     const g = document.createElementNS(ns, 'g');
     svg.appendChild(g);
 
@@ -1401,11 +1370,11 @@ try {
         g.appendChild(band);
       }
       const dot = document.createElementNS(ns, 'circle');
-      dot.setAttribute('cx', MARGIN.left - 135); dot.setAttribute('cy', y + ROW_H / 2);
+      dot.setAttribute('cx', DOT_X); dot.setAttribute('cy', y + ROW_H / 2);
       dot.setAttribute('r', 4); dot.setAttribute('fill', r.color);
       g.appendChild(dot);
       const label = document.createElementNS(ns, 'text');
-      label.setAttribute('x', MARGIN.left - 122); label.setAttribute('y', y + ROW_H / 2 + 3.5);
+      label.setAttribute('x', LABEL_X); label.setAttribute('y', y + ROW_H / 2 + 3.5);
       label.setAttribute('class', 'sci-row-label'); label.textContent = r.label;
       g.appendChild(label);
     });
