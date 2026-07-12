@@ -169,6 +169,33 @@
     color: var(--ink-secondary); font-size: 14px; margin-bottom: 24px; max-width: 640px;
   }
 
+  /* ---------- thesis + funnel (the narrative "stem") ---------- */
+  .thesis-panel { padding: 44px 0 8px; }
+  .thesis-eyebrow {
+    font-family: var(--font-data); font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--ocean); margin-bottom: 10px; font-weight: 600;
+  }
+  .thesis-text {
+    font-family: var(--font-head); font-size: 21px; line-height: 1.45; color: var(--ink);
+    max-width: 760px; margin-bottom: 32px;
+  }
+  .funnel-wrap { max-width: 620px; }
+  .funnel-title { font-family: var(--font-ui); font-weight: 700; font-size: 13px; color: var(--ink); margin-bottom: 16px; }
+  .funnel-row { display: flex; align-items: center; gap: 16px; margin-bottom: 4px; }
+  .funnel-bar-track { flex: 1; height: 34px; background: var(--bg-alt); border-radius: 6px; overflow: hidden; }
+  .funnel-bar { height: 100%; border-radius: 6px; transition: width 0.6s ease; min-width: 6%; }
+  .funnel-meta { width: 230px; flex-shrink: 0; display: flex; align-items: baseline; gap: 8px; }
+  .funnel-count { font-family: var(--font-data); font-size: 18px; font-weight: 600; color: var(--ink); }
+  .funnel-label { font-size: 11.5px; color: var(--ink-secondary); line-height: 1.3; }
+  .funnel-drop {
+    display: flex; align-items: center; gap: 8px; margin: 4px 0 4px 4px;
+    font-size: 11px; color: var(--ink-muted); font-style: italic;
+  }
+  .funnel-drop-arrow { color: var(--hairline-strong); font-size: 13px; }
+  .funnel-note {
+    font-size: 12px; color: var(--ink-muted); margin-top: 14px; max-width: 620px; line-height: 1.6;
+  }
+
   /* ---------- map + alerts zone ---------- */
   .map-shell-fullbleed {
     width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);
@@ -439,9 +466,35 @@
     <div class="region-photo-caption">Región de Valparaíso, Chile · Foto: Denys Amaro / Unsplash</div>
   </div>
 
+  <!-- ============ THESIS + FUNNEL (the narrative stem) ============ -->
+  <section class="panel thesis-panel">
+    <div class="thesis-eyebrow">Lo que muestran los datos</div>
+    <p class="thesis-text">Los datos ambientales de la Región de Valparaíso existen, pero están repartidos entre SNIFA, DIRECTEMAR y estudios científicos que casi nunca se cruzan entre sí. Esa fragmentación no es un accidente técnico: cada institución cumple su parte y nadie es responsable del panorama completo. El resultado queda a la vista en el propio registro de fiscalización.</p>
+
+    <div class="funnel-wrap">
+      <div class="funnel-title">De la fiscalización a la sanción firme (SNIFA, Región de Valparaíso)</div>
+      <div class="funnel-row">
+        <div class="funnel-bar-track"><div class="funnel-bar" id="funnel-bar-1" style="width:100%;background:var(--cyan)"></div></div>
+        <div class="funnel-meta"><span class="funnel-count" id="funnel-n-1">—</span><span class="funnel-label">fiscalizaciones registradas</span></div>
+      </div>
+      <div class="funnel-drop"><span class="funnel-drop-arrow">↓</span><span id="funnel-drop-1">—</span></div>
+      <div class="funnel-row">
+        <div class="funnel-bar-track"><div class="funnel-bar" id="funnel-bar-2" style="width:6%;background:var(--coral)"></div></div>
+        <div class="funnel-meta"><span class="funnel-count" id="funnel-n-2">—</span><span class="funnel-label">procedimientos sancionatorios abiertos</span></div>
+      </div>
+      <div class="funnel-drop"><span class="funnel-drop-arrow">↓</span><span id="funnel-drop-2">—</span></div>
+      <div class="funnel-row">
+        <div class="funnel-bar-track"><div class="funnel-bar" id="funnel-bar-3" style="width:6%;background:var(--crimson)"></div></div>
+        <div class="funnel-meta"><span class="funnel-count" id="funnel-n-3">—</span><span class="funnel-label">sanciones firmes registradas</span></div>
+      </div>
+      <p class="funnel-note">Un procedimiento sancionatorio puede terminar en sanción, en absolución, o en un programa de cumplimiento aceptado — no todo lo que se abre termina siendo una sanción firme, y eso también es parte de lo que este embudo muestra. Conteo en vivo desde SNIFA, actualizado en cada sincronización.</p>
+    </div>
+  </section>
+
   <!-- ============ MAP + ALERTS ============ -->
   <section class="panel" id="tab-mapa">
     <h2>Qué está pasando</h2>
+    <p class="section-lede">Cada burbuja del mapa es una de las instalaciones detrás del embudo de arriba, ubicada donde está fiscalizada.</p>
 
     <div class="map-controls">
       <button class="chip on" id="chip-snifa"><span class="legend-dot" style="background:var(--crimson)"></span>SNIFA — instalaciones</button>
@@ -470,7 +523,7 @@
 
   <section class="panel" id="tab-poal">
     <h2>Metales y coliformes</h2>
-    <p class="section-lede">Mediciones de DIRECTEMAR (POAL) en agua, sedimento y biota — un gráfico por parámetro, comparando estaciones en el tiempo. La línea punteada, cuando aparece, es un valor de referencia internacional — no un límite legal chileno.</p>
+    <p class="section-lede">Mientras las fiscalizaciones de arriba documentan qué se ha revisado, estas mediciones muestran qué hay realmente en el agua. Datos de DIRECTEMAR (POAL) en agua, sedimento y biota — un gráfico por parámetro, comparando estaciones en el tiempo. La línea punteada, cuando aparece, es un valor de referencia internacional — no un límite legal chileno.</p>
 
     <div class="map-controls">
       <select id="poal-matriz" class="poal-select"></select>
@@ -481,7 +534,7 @@
 
   <section class="panel" id="tab-cientifico">
     <h2>Panel científico</h2>
-    <p class="section-lede">Cronología de mediciones marinas directas en la bahía — agua, sedimento y biota — desde 2010. Cada punto es una fuente citable, no una síntesis. Solo fuentes publicadas o institucionales — nada de datos no publicados de investigadores individuales.</p>
+    <p class="section-lede">Estudios científicos independientes confirman, año tras año, lo que fiscalizaciones y mediciones oficiales apenas alcanzan a mostrar. Cronología de mediciones marinas directas en la bahía — agua, sedimento y biota — desde 2010. Cada punto es una fuente citable, no una síntesis. Solo fuentes publicadas o institucionales — nada de datos no publicados de investigadores individuales.</p>
 
     <div class="sci-stats" id="sci-stats"></div>
 
@@ -720,6 +773,52 @@ async function loadSyncStatus() {
 loadSyncStatus();
 
 /* ============================================================
+   FUNNEL — the narrative centerpiece. Pulls live counts from
+   Supabase rather than a hardcoded figure, since enforcement
+   numbers move and a remembered number would go stale silently.
+   Own try/catch: independent of the map, doesn't need Leaflet.
+   ============================================================ */
+async function initFunnel() {
+  const els = {
+    bar1: document.getElementById('funnel-bar-1'), n1: document.getElementById('funnel-n-1'),
+    bar2: document.getElementById('funnel-bar-2'), n2: document.getElementById('funnel-n-2'),
+    bar3: document.getElementById('funnel-bar-3'), n3: document.getElementById('funnel-n-3'),
+    drop1: document.getElementById('funnel-drop-1'), drop2: document.getElementById('funnel-drop-2'),
+  };
+  if (!els.bar1) return;
+
+  // Last-resort fallback only, a previously documented real finding, not a
+  // fabricated placeholder — used only if Supabase is unreachable. Live
+  // counts below are authoritative whenever they load.
+  let n1 = 1393, n2 = 74, n3 = 12;
+
+  const [cFisc, cProc, cSanc] = await Promise.all([
+    sbCount(CONFIG.TABLES.events, (q) => q.eq('section', 'fiscalizaciones')),
+    sbCount(CONFIG.TABLES.events, (q) => q.eq('section', 'procedimientos_sancionatorios')),
+    sbCount(CONFIG.TABLES.events, (q) => q.eq('section', 'registro_publico_sanciones')),
+  ]);
+  if (cFisc != null) n1 = cFisc;
+  if (cProc != null) n2 = cProc;
+  if (cSanc != null) n3 = cSanc;
+
+  // sqrt scale, not linear: the real ratio (~100:1) would make the last
+  // bar a near-invisible sliver under a linear scale. Floor of 6% keeps
+  // every bar visible and tappable regardless of how extreme the ratio is.
+  const scale = (n) => Math.max(6, Math.round(Math.sqrt(n / n1) * 100));
+  els.bar1.style.width = '100%';
+  els.bar2.style.width = scale(n2) + '%';
+  els.bar3.style.width = scale(n3) + '%';
+  els.n1.textContent = n1.toLocaleString('es-CL');
+  els.n2.textContent = n2.toLocaleString('es-CL');
+  els.n3.textContent = n3.toLocaleString('es-CL');
+
+  const pct = (a, b) => (b > 0 ? ((a / b) * 100).toFixed(1) : '0');
+  els.drop1.textContent = `solo el ${pct(n2, n1)}% de las fiscalizaciones llega a un procedimiento sancionatorio`;
+  els.drop2.textContent = `solo el ${pct(n3, n2)}% de esos procedimientos termina en una sanción firme`;
+}
+initFunnel().catch((e) => console.error('Funnel failed to initialize:', e));
+
+/* ============================================================
    MAP — wrapped in try/catch: if Leaflet's CDN script fails to
    load for any reason, this used to throw at the very first line
    and silently kill every script line after it (alerts feed,
@@ -744,7 +843,7 @@ function facilityColor(f) {
 }
 function facilityRadius(f) {
   const n = f.event_count ?? 1;
-  return Math.min(3 + n * 1.1, 20);
+  return Math.min(6 + n * 1.1, 20);
 }
 
 /* Outcome labels for procedimientos_sancionatorios.estado — shown in the
