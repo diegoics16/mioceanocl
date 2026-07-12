@@ -736,7 +736,7 @@ function facilityColor(f) {
 }
 function facilityRadius(f) {
   const n = f.event_count ?? 1;
-  return Math.min(8 + n * 1.6, 28);
+  return Math.min(6 + n * 1.1, 20);
 }
 
 /* Outcome labels for procedimientos_sancionatorios.estado — shown in the
@@ -795,7 +795,7 @@ async function loadSnifaLayer() {
   const markers = [];
   facilities.forEach(f => {
     const marker = L.circleMarker([f.lat, f.lon], {
-      radius: facilityRadius(f), color: facilityColor(f), weight: 1.5,
+      radius: facilityRadius(f), color: facilityColor(f), weight: 1.2,
       fillColor: facilityColor(f), fillOpacity: 0.35,
     });
     marker.bindPopup(facilityPopupHTML(f), { maxWidth: 280 });
