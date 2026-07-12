@@ -585,6 +585,34 @@ def canonical_location(raw_location):
     return v  # fell outside the keyword list entirely — keep it visible, not silently dropped
 
 
+# Order matters: checked top to bottom, first match wins. AGUA is last
+# because 'SEDIMENTO'/'BIOTA' never contain 'AGUA' as a substring, but this
+# keeps the list honest about that being why the order is safe either way.
+MATRIZ_KEYWORDS = [
+    ("SEDIMENT", "Sedimento"),
+    ("BIOTA", "Biota"),
+    ("AGUA", "Agua"),  # covers 'AGUA', 'AGUA DE MAR', 'AGUA SUPERFICIAL', etc.
+]
+
+
+def canonical_matriz(raw_matriz):
+    """The legacy archive scraper hardcodes matriz as our own labels ('Agua',
+    'Sedimento', 'Biota' — literally the LOCATIONS dict keys). The
+    standardized national file instead carries DIRECTEMAR's own MATRIZ
+    column verbatim, and their real vocabulary is more specific — e.g.
+    'AGUA DE MAR' for seawater. That's a real value, not a typo, but left
+    unmapped it becomes a second dropdown option instead of merging with
+    'Agua'. Bucket by keyword the same way canonical_location() already
+    does for locations."""
+    if raw_matriz is None or (isinstance(raw_matriz, float) and pd.isna(raw_matriz)):
+        return None
+    v = norm(raw_matriz)
+    for kw, canonical in MATRIZ_KEYWORDS:
+        if kw in v:
+            return canonical
+    return raw_matriz  # unrecognized variant — keep visible, don't silently drop
+
+
 def add_join_keys(df):
     """Normalize whatever's in location/matriz/estacion/parametro/fecha into join-safe
     keys. Station name and parameter spelling will NOT match character-for-character
@@ -595,6 +623,7 @@ def add_join_keys(df):
     for col in ("location", "matriz", "estacion", "parametro"):
         if col not in df.columns:
             df[col] = None
+    df["matriz"] = df["matriz"].map(canonical_matriz)  # fix BEFORE join keys are derived
     df["location_norm"] = df["location"].map(canonical_location)
     df["matriz_norm"] = df["matriz"].map(lambda v: norm(v) if pd.notna(v) else None)
     df["estacion_norm"] = df["estacion"].map(lambda v: norm(v) if pd.notna(v) else None)
@@ -688,6 +717,19 @@ def _clean_int(v):
 
 
 def push_centralized_to_supabase(centralized_df):
+    # DIRECTEMAR (Armada de Chile) confirmed by email: only the standardized
+    # national dataset ("DATA ESTANDARIZADA POAL 1993-2024") is authorized
+    # for public display. The legacy per-location archive is still parsed
+    # and kept in poal_comparison_report.csv / poal_centralized.csv locally
+    # (useful for auditing source agreement) — it just never gets pushed to
+    # the public-facing table from here on.
+    before = len(centralized_df)
+    centralized_df = centralized_df[centralized_df["source"] == "standardized"]
+    dropped = before - len(centralized_df)
+    if dropped:
+        print(f"\n[{SUPABASE_TABLE}] Excluding {dropped} legacy-source rows from the public push "
+              f"per DIRECTEMAR's authorization — standardized-source only.")
+
     keep_cols = ["id", "source", "location", "matriz", "estacion", "parametro", "valor",
                  "valor_numeric", "unidad", "fecha", "year", "latitud", "longitud",
                  "source_file", "match_status"]
