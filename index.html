@@ -270,6 +270,14 @@
   .poal-card-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--ink-secondary); }
   .poal-card-legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .poal-card-footnote { font-size: 10px; color: var(--ink-muted); margin-top: 8px; line-height: 1.5; }
+  .poal-card-explainer { font-size: 12px; color: var(--ink-secondary); line-height: 1.55; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--hairline); }
+  .poal-card-explainer strong { color: var(--ink); font-weight: 700; }
+  .poal-card-status { display: inline-block; font-family: var(--font-data); font-size: 10.5px; font-weight: 500; padding: 2px 8px; border-radius: 999px; margin-top: 8px; }
+  .poal-card-status.over { background: rgba(220,38,38,0.1); color: var(--crimson); }
+  .poal-card-status.ok { background: rgba(5,150,105,0.1); color: var(--mint); }
+  .poal-card-status.nodata { background: rgba(133,152,168,0.12); color: var(--ink-muted); }
+  .poal-more-stations { font-size: 11px; color: var(--ocean); cursor: pointer; margin-top: 6px; background: none; border: none; font-family: var(--font-ui); padding: 0; text-decoration: underline; }
+  .poal-matriz-tabs { display: flex; gap: 8px; margin-bottom: 4px; }
 
   /* ---------- scientific timeline (SVG scatter, category rows x years) ---------- */
   .sci-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 20px 0 4px; }
@@ -415,7 +423,6 @@
       <button class="tab-btn active" data-tab="mapa">Fiscalizaciones</button>
       <button class="tab-btn" data-tab="poal">Contaminación en el agua</button>
       <button class="tab-btn" data-tab="cientifico">Investigacion Cientifica</button>
-      <button class="tab-btn" data-tab="explicador">¿Que significa esto?</button>
       <button class="tab-btn" data-tab="reportar">Reportar</button>
     </nav>
     <div class="sync-pill"><span class="sync-dot"></span><span id="sync-label">sincronizando…</span></div>
@@ -484,6 +491,11 @@
     </div>
 
     <div id="poal-grid" class="poal-grid"></div>
+
+    <div class="glass res-card" id="explainer-general" style="margin-top:24px;">
+      <h3>Más preguntas</h3>
+      <div id="explainer-acc"><!-- populated by JS --></div>
+    </div>
   </section>
 
   <section class="panel" id="tab-cientifico">
@@ -509,18 +521,12 @@
 
   <div id="sci-tooltip"></div>
 
-  <!-- ============ FOOTER: EXPLAINER / REPORT ============ -->
+  <!-- ============ FOOTER: REPORT ============ -->
   <section class="footer-zone">
     <div class="footer-grid footer-grid-2">
 
-      <!-- Explainer -->
-      <div class="glass res-card" id="tab-explicador">
-        <h3>Explicador</h3>
-        <div id="explainer-acc"><!-- populated by JS --></div>
-      </div>
-
       <!-- Citizen report -->
-      <div class="glass res-card" id="tab-reportar">
+      <div class="glass res-card" id="tab-reportar" style="grid-column: 1 / -1; max-width: 560px;">
         <h3>Reportar</h3>
         <form id="report-form">
           <div>
@@ -566,26 +572,18 @@
 
 <script>
 /* ============================================================
-   ERROR VISIBILITY — catches any uncaught error or promise
-   rejection anywhere on this page and shows it directly, on the
-   page itself, in plain sight. No F12 needed. This exists because
-   the last two rounds of debugging this page relied on browser
-   console output that was hard to get — this makes that step
-   unnecessary. If the page is broken, this WILL say why, at the
-   very top, in red.
+   ERROR VISIBILITY
    ============================================================ */
 (function () {
   var shown = false;
   function showError(msg) {
-    if (shown) return; // one banner is enough, don't stack duplicates
+    if (shown) return;
     shown = true;
     var el = document.createElement('div');
     el.style.cssText = 'background:#DC2626;color:#fff;padding:14px 20px;font-family:monospace;font-size:13px;text-align:left;white-space:pre-wrap;position:relative;z-index:9999;';
     el.textContent = 'ERROR EN LA PÁGINA: ' + msg;
     document.body.insertBefore(el, document.body.firstChild);
   }
-  // flush anything caught before this script even ran (e.g. a CDN <script>
-  // in <head> failing to load) — this is the gap a bottom-only handler misses
   if (window.__pageErrors && window.__pageErrors.length) {
     showError(window.__pageErrors[0]);
   }
@@ -602,12 +600,6 @@
   });
 })();
 
-/* ============================================================
-   CONFIG — edit these to connect to your real Supabase project.
-   Find both values in Supabase → Project Settings → API.
-   The anon/publishable key is safe to expose client-side as long
-   as Row Level Security policies are correctly set on every table.
-   ============================================================ */
 const CONFIG = {
   SUPABASE_URL: 'https://ugczsukaikjfymoqrzmi.supabase.co',
   SUPABASE_ANON_KEY: 'sb_publishable_630bq8efnVE3fopCyviaCA_6DiHak27',
@@ -636,7 +628,6 @@ if (!DEMO_MODE) {
   }
 }
 
-/* ---------- demo fallback data (shown if DEMO_MODE or a fetch fails) ---------- */
 const DEMO_FACILITIES = [
   { id: 'demo-1', razon_social: 'ENAP Refinerías — Terminal Quintero', comuna: 'Quintero', categoria: 'Instalación fabril', lat: -32.7767, lon: -71.5322, sanction_count: 3, event_count: 14 },
   { id: 'demo-2', razon_social: 'CODELCO Ventanas — Fundición', comuna: 'Puchuncaví', categoria: 'Minería', lat: -32.7433, lon: -71.4886, sanction_count: 1, event_count: 9 },
@@ -644,42 +635,7 @@ const DEMO_FACILITIES = [
   { id: 'demo-4', razon_social: 'ESVAL — Emisario Loma Larga', comuna: 'Concón', categoria: 'Saneamiento Ambiental', lat: -32.9280, lon: -71.5150, sanction_count: 0, event_count: 2 },
   { id: 'demo-5', razon_social: 'Puerto Ventanas S.A.', comuna: 'Puchuncaví', categoria: 'Infraestructura Portuaria', lat: -32.7455, lon: -71.4935, sanction_count: 2, event_count: 11 },
 ];
-const DEMO_POAL_READINGS = [
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Cadmio', year: 2021, valor_numeric: 0.041, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Cadmio', year: 2024, valor_numeric: 0.052, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Cadmio', year: 2021, valor_numeric: 0.022, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Cadmio', year: 2024, valor_numeric: 0.026, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio', year: 2015, valor_numeric: 0.006, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio', year: 2018, valor_numeric: 0.007, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio', year: 2021, valor_numeric: 0.006, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio', year: 2024, valor_numeric: 0.008, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Plomo', year: 2020, valor_numeric: 0.070, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Plomo', year: 2024, valor_numeric: 0.090, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Plomo', year: 2020, valor_numeric: 0.050, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Plomo', year: 2024, valor_numeric: 0.060, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Mercurio', year: 2024, valor_numeric: 0.15, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Mercurio', year: 2018, valor_numeric: 0.03, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Mercurio', year: 2024, valor_numeric: 0.02, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Cadmio', year: 2018, valor_numeric: 0.09, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Cadmio', year: 2024, valor_numeric: 0.14, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Cadmio', year: 2018, valor_numeric: 0.04, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Cadmio', year: 2024, valor_numeric: 0.06, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Biota', parametro: 'Cadmio', year: 2018, valor_numeric: 0.01, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Biota', parametro: 'Cadmio', year: 2024, valor_numeric: 0.01, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Plomo', year: 2020, valor_numeric: 0.22, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Plomo', year: 2024, valor_numeric: 0.38, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Plomo', year: 2020, valor_numeric: 0.12, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Plomo', year: 2024, valor_numeric: 0.19, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Desembocadura Aconcagua', matriz: 'Sedimento', parametro: 'Cadmio', year: 2017, valor_numeric: 0.012, location: 'Concón', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Desembocadura Aconcagua', matriz: 'Sedimento', parametro: 'Cadmio', year: 2023, valor_numeric: 0.017, location: 'Concón', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Desembocadura Aconcagua', matriz: 'Agua', parametro: 'Coliformes fecales', year: 2023, valor_numeric: 340, location: 'Concón', source: 'estandarizado', unidad: 'NMP/100ml' },
-  { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Cadmio', year: 2016, valor_numeric: 0.019, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Cadmio', year: 2023, valor_numeric: 0.024, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Plomo', year: 2016, valor_numeric: 12.4, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Plomo', year: 2023, valor_numeric: 15.8, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
-];
 
-/* ---------- tiny fetch helper with graceful fallback ---------- */
 async function sbSelect(table, query = '*', extra = (q) => q) {
   if (DEMO_MODE || !sb) return null;
   try {
@@ -694,11 +650,36 @@ async function sbSelect(table, query = '*', extra = (q) => q) {
   }
 }
 
-/* Counting via .select(query).length caps at Supabase's default 1000-row
-   page size — fine while tables are small, silently wrong once poal_readings
-   or snifa_events grow past 1000 rows (which they will). head:true asks
-   Postgres for an exact count without transferring any rows at all, so
-   it's both correct at any table size and cheaper than sbSelect. */
+/* PostgREST returns at most 1000 rows per request by default, silently —
+   no error, no warning, just a truncated result set. poal_readings has
+   40,000+ rows for this region alone, so a plain .select() was only ever
+   returning whatever ~1000 rows Postgres happened to return first (not
+   necessarily recent, not necessarily spread across stations), which is
+   why charts showed only 1-2 years per parameter. This pages through
+   with .range() until a page comes back with fewer than PAGE_SIZE rows. */
+async function sbSelectAll(table, query = '*', extra = (q) => q) {
+  if (DEMO_MODE || !sb) return null;
+  const PAGE_SIZE = 1000;
+  let all = [];
+  let from = 0;
+  try {
+    while (true) {
+      let q = sb.from(table).select(query).range(from, from + PAGE_SIZE - 1);
+      q = extra(q);
+      const { data, error } = await q;
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+      all = all.concat(data);
+      if (data.length < PAGE_SIZE) break;
+      from += PAGE_SIZE;
+    }
+    return all;
+  } catch (e) {
+    console.warn(`Supabase paginated read failed on ${table}:`, e.message);
+    return all.length ? all : null;
+  }
+}
+
 async function sbCount(table, extra = (q) => q) {
   if (DEMO_MODE || !sb) return null;
   try {
@@ -713,9 +694,6 @@ async function sbCount(table, extra = (q) => q) {
   }
 }
 
-/* ============================================================
-   HERO KPIs
-   ============================================================ */
 async function loadSyncStatus() {
   const lastSync = await sbSelect(CONFIG.TABLES.syncRuns, 'source, finished_at, status', (q) => q.order('finished_at', { ascending: false }).limit(1));
   if (lastSync && lastSync[0]) {
@@ -726,14 +704,6 @@ async function loadSyncStatus() {
 }
 loadSyncStatus();
 
-/* ============================================================
-   MAP — wrapped in try/catch: if Leaflet's CDN script fails to
-   load for any reason, this used to throw at the very first line
-   and silently kill every script line after it (alerts feed,
-   scientific panel, explainer, report form). Now a failure here
-   is contained, shows a visible message in the map area, and
-   everything else on the page still works.
-   ============================================================ */
 try {
   if (typeof L === 'undefined') throw new Error('Leaflet (L) is undefined — the Leaflet CDN script did not load or was blocked.');
 
@@ -754,11 +724,6 @@ function facilityRadius(f) {
   return Math.min(6 + n * 1.1, 20);
 }
 
-/* Outcome labels for procedimientos_sancionatorios.estado — shown in the
-   popup so "sanción" isn't flattened into one bucket. A procedure that
-   ended in "Absolución" or a completed compliance program ("PDC
-   Satisfactorio") is materially different from a upheld sanction, and
-   lumping them together would misrepresent what SNIFA's data says. */
 const ESTADO_LABELS = {
   'Terminado - Sanción':               { label: 'Sanción confirmada',          tone: 'crimson' },
   'Terminado - Absolución':            { label: 'Absuelto',                     tone: 'mint' },
@@ -772,7 +737,7 @@ const ESTADO_LABELS = {
 function parseRaw(e) {
   const r = e && e.raw;
   if (r == null) return {};
-  if (typeof r === 'object') return r; // jsonb column — PostgREST already parsed it, don't re-parse
+  if (typeof r === 'object') return r;
   try { return JSON.parse(r); } catch { return {}; }
 }
 
@@ -793,8 +758,6 @@ async function loadSnifaLayer() {
           estado: e.estado, expediente: r['Expediente'] || null, anio: e.anio,
         });
       }
-      // Facility name is missing for ~1 in 4 rows in the current scrape —
-      // fall back to whatever name the events themselves carry.
       if (!c.fallback_name) {
         const r = parseRaw(e);
         c.fallback_name = r['Nombre razón social'] || r['Nombre Razon Social']
@@ -814,16 +777,11 @@ async function loadSnifaLayer() {
       fillColor: facilityColor(f), fillOpacity: 0.35,
     });
     marker.bindPopup(facilityPopupHTML(f), { maxWidth: 280 });
-    // click opens/closes on any device; mouseover is a bonus on desktop
-    // (no-op on touch, since touch devices never fire mouseover).
     marker.on('mouseover', () => marker.openPopup());
     marker.addTo(layers.snifa);
     markers.push(marker);
   });
 
-  // Region-wide data, region-wide view: fit to every marker instead of a
-  // fixed bay-only zoom, so San Antonio / Petorca / Zapallar etc. aren't
-  // scraped and stored but invisible on load.
   if (markers.length > 0) {
     map.fitBounds(L.featureGroup(markers).getBounds().pad(0.15));
   }
@@ -831,8 +789,6 @@ async function loadSnifaLayer() {
 
 loadSnifaLayer();
 
-/* ---------- info badge: hover works on desktop, but touch devices never
-   fire :hover at all, so the panel needs an explicit tap-to-open too. ---------- */
 (function () {
   const badge = document.getElementById('map-info-badge');
   if (!badge) return;
@@ -843,7 +799,6 @@ loadSnifaLayer();
   document.addEventListener('click', () => badge.classList.remove('open'));
 })();
 
-/* ---------- popup content (was a below-map side panel; now lives on the marker itself) ---------- */
 function facilityPopupHTML(f) {
   const name = f.razon_social || f.fallback_name || 'Instalación no identificada';
   const procs = f.procedures || [];
@@ -872,41 +827,271 @@ function facilityPopupHTML(f) {
   if (mapEl) mapEl.innerHTML = '<div style="padding:24px;color:#DC2626;font-size:13px;font-family:\'Plus Jakarta Sans\',sans-serif;">No se pudo cargar el mapa (' + e.message + '). El resto de la página sigue funcionando — revisa la consola (F12) para más detalle.</div>';
 }
 
-/* ============================================================
-   POAL TRENDS — a card per parameter, not one chart with a
-   dropdown. Wrapped in its own try/catch so a Chart.js hiccup
-   can't take down the scientific panel, explainer, or report
-   form that come after it.
 
-   REFERENCE_VALUES — real, cited thresholds, matched carefully
-   to the right matrix. This matters: WHO sets food-safety limits
-   for BIOTA (what people eat), not for sediment or raw water.
-   Putting a fish-safety number on a sediment chart would be a
-   real factual error, not just a design choice, so sediment
-   metals use CCME's Interim Sediment Quality Guideline (ISQG)
-   instead — the correct, internationally-recognized framework
-   for that matrix — clearly labeled as such, not mislabeled as
-   WHO. Only parameters with a real, checkable source get a line;
-   everything else renders without one rather than a guess.
+const DEMO_POAL_READINGS = [
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2021, valor_numeric: 0.041, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2024, valor_numeric: 0.052, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2021, valor_numeric: 0.022, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2024, valor_numeric: 0.026, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2015, valor_numeric: 0.006, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2018, valor_numeric: 0.007, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2021, valor_numeric: 0.006, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2024, valor_numeric: 0.008, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Plomo Total', year: 2020, valor_numeric: 0.070, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Plomo Total', year: 2024, valor_numeric: 0.090, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Plomo Total', year: 2020, valor_numeric: 0.050, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Plomo Total', year: 2024, valor_numeric: 0.060, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Mercurio Total', year: 2024, valor_numeric: 0.15, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Mercurio Total', year: 2018, valor_numeric: 0.03, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Mercurio Total', year: 2024, valor_numeric: 0.02, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Cadmio Total', year: 2018, valor_numeric: 0.09, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Cadmio Total', year: 2024, valor_numeric: 0.14, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Cadmio Total', year: 2018, valor_numeric: 0.04, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Cadmio Total', year: 2024, valor_numeric: 0.06, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Biota', parametro: 'Cadmio Total', year: 2018, valor_numeric: 0.01, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Zapallar Referencia', matriz: 'Biota', parametro: 'Cadmio Total', year: 2024, valor_numeric: 0.01, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Plomo Total', year: 2020, valor_numeric: 0.22, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Plomo Total', year: 2024, valor_numeric: 0.38, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Plomo Total', year: 2020, valor_numeric: 0.12, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Plomo Total', year: 2024, valor_numeric: 0.19, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Desembocadura Aconcagua', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2017, valor_numeric: 0.012, location: 'Concón', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Desembocadura Aconcagua', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2023, valor_numeric: 0.017, location: 'Concón', source: 'standardized', unidad: 'mg/kg' },
+  { estacion: 'Desembocadura Aconcagua', matriz: 'Agua', parametro: 'Coliformes Fecales', year: 2023, valor_numeric: 340, location: 'Concón', source: 'estandarizado', unidad: 'NMP/100 ml' },
+  { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2016, valor_numeric: 0.019, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2023, valor_numeric: 0.024, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Plomo Total', year: 2016, valor_numeric: 12.4, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
+  { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Plomo Total', year: 2023, valor_numeric: 15.8, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
+];
+const STATION_NAMES = {
+  "005-A-Rn": "A la cuadra frente Tahai",
+  "005-S-Rn": "A la cuadra frente Tahai",
+  "007-A-Qu": "Caleta El Tebo",
+  "007-B-Qu": "Playa El Tebo",
+  "008-A-Qu": "Control Norte Pta. Ventanilla",
+  "008-S-Qu": "Control Norte Pta. Ventanilla",
+  "010-A-Pa": "Caleta Torpederas",
+  "010-A-Rn": "Hánga Roa Otái",
+  "010-A-Vp": "Montemar",
+  "010-S-Cc": "Frente Playa Concón",
+  "010-S-Qu": "Punta Ventanilla",
+  "010-S-Rn": "Hánga Roa Otái",
+  "011-A-Qu": "Pesquera Quintero",
+  "011-S-Qu": "Pesquera Quintero",
+  "012-A-Qu": "Playa Las Conchitas",
+  "012-B-Qu": "Las Conchitas",
+  "012-S-Qu": "Control playa Las Conchitas",
+  "020-A-Cc": "Frente playa Concón",
+  "020-A-Pa": "Caleta El Membrillo",
+  "020-A-Qu": "Caleta Ventana",
+  "020-A-Rn": "Frente hotel Hánga Roa",
+  "020-B-Qu": "Playa Caleta Ventanas",
+  "020-S-Qu": "Caleta Ventana",
+  "020-S-Rn": "Frente hotel Hánga Roa",
+  "020-S-Vp": "Montemar",
+  "030-A-Qu": "Punta Ventanilla",
+  "030-A-Rn": "Punta Roa",
+  "030-B-Pa": "Norte Torpederas",
+  "030-B-Vp": "Reñaca",
+  "030-S-Cc": "Exterior Bahía",
+  "030-S-Rn": "Punta Roa",
+  "034-S-Qu": "Frente CT Nueva Ventanas",
+  "038-S-Qu": "NW Muelle Ventanas",
+  "040-A-Cc": "Exterior punta Blanca",
+  "040-A-Qu": "Sur Muelle Ventanas",
+  "040-A-Rn": "Hánga Piko",
+  "040-B-Vp": "Norte estero Renaca",
+  "040-S-Pa": "Avenida Altamirano",
+  "040-S-Rn": "Hánga Piko",
+  "050-A-Cc": "Desembocadura Río Aconcagua",
+  "050-A-Pa": "Torpederas",
+  "050-A-Rn": "Entre punta Hánga Piko y punta Te Pú",
+  "050-A-Vp": "Punta Osas",
+  "050-B-Pa": "Torpederas",
+  "050-S-Pa": "Torpederas",
+  "050-S-Qu": "Lado Sur Muelle Ventanas",
+  "050-S-Rn": "Entre punta Hánga Piko y punta Te Pú",
+  "060-A-Cc": "Punta Blanca",
+  "060-A-Rn": "Cerca boya descarga terminal petrolero",
+  "060-S-Cc": "Punta Blanca",
+  "060-S-Pa": "Weste de Torpederas",
+  "060-S-Qu": "Centro Norte",
+  "060-S-Rn": "Cerca boya descarga terminal petrolero",
+  "060-S-Vp": "Punta Osas",
+  "070-A-Cc": "Cuadra Club de Yates Higuerillas",
+  "070-A-Qu": "Superboya (RPC)",
+  "070-A-Rn": "Frente islote Motu Tapu",
+  "070-S-Pa": "Caleta Membrillo",
+  "070-S-Qu": "Monoboya ENAP",
+  "070-S-Rn": "Frente Islote Motu Tapu",
+  "070-S-Vp": "Playa Los Marineros",
+  "071-A-Pa": "Faro Punta Ángeles",
+  "071-S-Pa": "Estación 11",
+  "072-S-Pa": "Sector Weste Punta Ángeles",
+  "080-A-Qu": "Cueva del Pirata",
+  "080-A-Rn": "Mar afuera",
+  "080-A-Vp": "Playa Los Marineros",
+  "080-B-Pa": "Caleta Membrillo",
+  "080-S-Cc": "Caleta San Pedro",
+  "080-S-Rn": "Mar afuera",
+  "090-A-Qu": "Muelle ENAP (RPC)",
+  "090-A-Vp": "Muelle Vergara",
+  "090-B-Cc": "Emisario San Pedro",
+  "090-S-Pa": "Control Noreste Playa San Mateo",
+  "090-S-Qu": "Muelle ENAP (RPC)",
+  "091-A-Qu": "Las Conchillas",
+  "100-A-Cc": "Playa Amarilla",
+  "100-B-Pa": "Asmar Valparaíso",
+  "100-S-Cc": "Playa Amarilla",
+  "100-S-Vp": "Muelle Vergara",
+  "110-A-Pa": "Punta Cardones",
+  "110-A-Vp": "Centro Norte Bahía Valparaíso",
+  "110-S-Cc": "Sector Pata del Diablo",
+  "110-S-Pa": "Punta Cardones",
+  "110-S-Qu": "Rocas Estrella",
+  "111-S-Vp": "Estero Marga-Marga",
+  "120-A-Pa": "Cuadra punta Cardones",
+  "120-B-Qu": "Sector Rocas Estrella",
+  "120-B-Vp": "Norte Marga-Marga",
+  "120-S-Cc": "Club de Yates Higuerillas",
+  "122-S-Qu": "Frente muelle GNL",
+  "126-S-Qu": "Bajo Cochrane Loncura",
+  "130-A-Qu": "Rocas de Loncura",
+  "130-B-Cc": "Sector Playa Negra",
+  "130-B-Qu": "Playa Loncura",
+  "130-S-Pa": "Túnel Bustamante",
+  "130-S-Vp": "Caleta Abarca",
+  "140-A-Qu": "El Bato",
+  "140-A-Vp": "Desembocadura Marga-Marga",
+  "140-S-Vp": "Desembocadura Marga-Marga",
+  "150-A-Pa": "Túnel Bustamante",
+  "150-B-Vp": "Sector Club Árabe",
+  "150-S-Pa": "Sur Túnel Bustamante",
+  "150-S-Qu": "Rocas de Loncura",
+  "160-A-Vp": "Escuela Industrial",
+  "160-B-Qu": "Sector Rocas Loncura",
+  "161-B-Vp": "Escuela Industrial",
+  "170-S-Qu": "Caleta Quintero",
+  "170-S-Vp": "Escuela Industrial",
+  "180-A-Qu": "Caleta Quintero",
+  "180-A-Vp": "Poza de abrigo",
+  "181-S-Vp": "Molo (costado sitio 8)",
+  "190-S-Qu": "El Bato",
+  "190-S-Vp": "Poza de abrigo",
+  "200-A-Vp": "Punta espigón",
+  "210-S-Vp": "Sector Dique",
+  "220-A-Vp": "Bellavista",
+  "230-S-Vp": "Dique Flotante",
+  "250-S-Vp": "Bellavista",
+  "300-S-Vp": "Muelle Barón"
+};
+/* ============================================================
+   REFERENCE_VALUES — same principle as before: match the framework
+   to the matrix (CCME dissolved-marine for water metals, CCME
+   TEL/ISQG for sediment metals, Codex/EU food-safety MLs for biota —
+   never a food-safety number on a sediment chart). Parameters with
+   no defensible matrix-specific number get `null` and render
+   without a line rather than a guess.
    ============================================================ */
 const REFERENCE_VALUES = {
-  'Cadmio':   { sedimento: { value: 0.7,  unit: 'mg/kg',    source: 'CCME ISQG, sedimento marino' },
-                biota:     { value: 0.05, unit: 'mg/kg',    source: 'UE (CE) 488/2014, la mayoría de peces' } },
-  'Plomo':    { sedimento: { value: 30.2, unit: 'mg/kg',    source: 'CCME ISQG, sedimento marino' },
-                biota:     { value: 0.3,  unit: 'mg/kg',    source: 'UE (CE) 488/2014, músculo de pez' } },
-  'Mercurio': { sedimento: { value: 0.13, unit: 'mg/kg',    source: 'CCME ISQG, sedimento marino' } },
-  'Coliformes fecales': { agua: { value: 14, unit: 'NMP/100ml', source: 'NSSP, aguas de cultivo de mariscos (EE.UU.)' } },
+  'Arsénico Disuelto':   { agua: { value: 12.5,   unit: 'ug/L',    source: 'CCME (marino, crónico, disuelto)' } },
+  'Cadmio Disuelto':     { agua: { value: 0.12,   unit: 'ug/L',    source: 'CCME (marino, crónico, disuelto)' } },
+  'Mercurio Disuelto':   { agua: { value: 0.016,  unit: 'ug/L',    source: 'CCME (marino, crónico, Hg inorgánico)' } },
+  'Cromo Disuelto':      { agua: { value: 1.5,    unit: 'ug/L',    source: 'CCME (Cr VI, marino crónico)' } },
+  'Coliformes Fecales':  { agua: { value: 14,     unit: 'NMP/100mL', source: 'US FDA NSSP (aguas de cultivo de moluscos)' } },
+  'Nitrato':             { agua: { value: 16,     unit: 'mg/L',    source: 'CCME (marino, largo plazo)' } },
+  'Oxigeno Disuelto':    { agua: { value: 8.0,    unit: 'mg/L',    source: 'CCME (mínimo marino)', direction: 'min' } },
+  'Benzo(a)pireno':      { agua:      { value: 0.01,   unit: 'ug/L',    source: 'BC MOE (largo plazo)' },
+                           sedimento: { value: 0.0888, unit: 'mg/kg',   source: 'CCME TEL/ISQG' } },
+  'Naftaleno':           { agua:      { value: 1.0,    unit: 'ug/L',    source: 'BC MOE (largo plazo)' },
+                           sedimento: { value: 0.0346, unit: 'mg/kg',   source: 'CCME TEL/ISQG' } },
+  'Antraceno':           { agua:      { value: 0.05,   unit: 'ug/L',    source: 'US EPA (fototoxicidad)' },
+                           sedimento: { value: 0.0469, unit: 'mg/kg',   source: 'CCME TEL/ISQG' } },
+  'Arsénico Total':      { sedimento: { value: 7.24,  unit: 'mg/kg', source: 'CCME TEL/ISQG' } },
+  'Cadmio Total':        { sedimento: { value: 0.70,  unit: 'mg/kg', source: 'CCME TEL/ISQG' },
+                           biota:     { value: 1.0,   unit: 'mg/kg', source: 'Codex/UE 2023/915 (bivalvos)' } },
+  'Cobre Total':         { sedimento: { value: 18.7,  unit: 'mg/kg', source: 'CCME TEL/ISQG' } },
+  'Cromo Total':         { sedimento: { value: 52.3,  unit: 'mg/kg', source: 'CCME TEL/ISQG' } },
+  'Mercurio Total':      { sedimento: { value: 0.13,  unit: 'mg/kg', source: 'CCME TEL/ISQG' },
+                           biota:     { value: 0.5,   unit: 'mg/kg', source: 'Codex/UE/Chile RSA' } },
+  'Plomo Total':         { sedimento: { value: 30.2,  unit: 'mg/kg', source: 'CCME TEL/ISQG' },
+                           biota:     { value: 1.5,   unit: 'mg/kg', source: 'UE 2023/915 (bivalvos)' } },
+  'Zinc Total':          { sedimento: { value: 124,   unit: 'mg/kg', source: 'CCME TEL/ISQG' } },
+  'PCBs':                { sedimento: { value: 21.5,  unit: 'ug/kg', source: 'CCME TEL/ISQG' } },
 };
 
+/* Parameters with NO defensible reference line, and why — shown in the
+   footnote instead of a silent blank, so "sin valor de referencia" always
+   comes with a reason rather than looking like an oversight. */
+const NO_REFERENCE_REASON = {
+  'Plomo Disuelto': 'Sin valor CCME marino defendible para plomo disuelto.',
+  'Cobre Disuelto': 'Sin valor CCME marino defendible para cobre disuelto.',
+  'Zinc Disuelto': 'Sin valor CCME marino defendible para zinc disuelto.',
+  'Arsénico Total (Biota)': 'El límite regulatorio (0.2 mg/kg) aplica solo a arsénico inorgánico (~10% del total en mariscos). Este dato es arsénico total — usar ese límite aquí sobreestimaría el hallazgo.',
+  'Materia Orgánica': 'Variable de normalización, no un contaminante.',
+  'Carbono Orgánico Total': 'Variable de normalización, no un contaminante.',
+};
+
+/* ============================================================
+   EXPLAINER_BY_PARAM — what the number means and why it matters,
+   shown directly under each chart instead of in a separate
+   disconnected accordion.
+   ============================================================ */
+const EXPLAINER_BY_PARAM = {
+  'Cadmio Total': '<strong>Qué es:</strong> un metal que los mariscos filtran del agua y acumulan sin eliminarlo. <strong>Riesgo:</strong> no causa síntomas inmediatos, pero se acumula en los riñones con el consumo repetido a lo largo de los años. Chile no tiene un límite legal propio para cadmio en mariscos.',
+  'Mercurio Total': '<strong>Qué es:</strong> neurotóxico que se concentra a medida que sube en la cadena alimentaria — de sedimento a molusco a pez a persona. <strong>Riesgo:</strong> especialmente dañino para el desarrollo del sistema nervioso en niños y en embarazo.',
+  'Mercurio Disuelto': '<strong>Qué es:</strong> mercurio disuelto directamente en la columna de agua, antes de acumularse en sedimento o tejido. <strong>Nota:</strong> este parámetro tiene años marcados como "no detectado" (ver abajo) — el laboratorio reporta el mismo valor en todas las estaciones, lo que indica un límite técnico de detección, no necesariamente agua limpia.',
+  'Cadmio Disuelto': '<strong>Qué es:</strong> cadmio disuelto directamente en el agua. <strong>Nota:</strong> mismo problema de detección que el mercurio disuelto — revisar los puntos marcados antes de leer esto como una tendencia real.',
+  'Cobre Total': '<strong>Qué es:</strong> se usa como anti-incrustante en pinturas de barcos y como fungicida industrial. <strong>Riesgo:</strong> en sedimento afecta a los organismos que viven enterrados en el fondo — almejas, gusanos, poliquetos — la base de la cadena alimentaria de la bahía.',
+  'Plomo Total': '<strong>Qué es:</strong> metal pesado de uso industrial histórico. <strong>Riesgo:</strong> neurotóxico, especialmente dañino para el desarrollo del sistema nervioso en niños — la OMS no ha identificado un nivel de plomo en sangre considerado seguro.',
+  'Arsénico Total': '<strong>Qué es:</strong> en mariscos, la mayoría del arsénico total es una forma orgánica inofensiva. <strong>Nota:</strong> este dato no distingue arsénico orgánico de inorgánico (la forma tóxica), así que no se puede comparar directamente contra un límite de seguridad alimentaria.',
+  'Coliformes Fecales': '<strong>Qué es:</strong> bacterias indicadoras de contaminación con aguas servidas sin tratar. <strong>Riesgo:</strong> indica presencia de patógenos que pueden causar enfermedades gastrointestinales por consumo de mariscos crudos o contacto con el agua.',
+  'Benzo(a)pireno': '<strong>Qué es:</strong> hidrocarburo que se forma por combustión — de carbón, petróleo, procesos industriales. <strong>Riesgo:</strong> cancerígeno comprobado. Si aparece elevado en agua y sedimento a la vez, sugiere una fuente activa, no un residuo antiguo.',
+  'Naftaleno': '<strong>Qué es:</strong> hidrocarburo aromático asociado a combustión y derrames de petróleo. <strong>Riesgo:</strong> tóxico para organismos acuáticos incluso en concentraciones bajas.',
+  'Oxigeno Disuelto': '<strong>Qué es:</strong> el oxígeno disponible para la vida marina. <strong>Riesgo:</strong> a diferencia de los demás parámetros, aquí el peligro es un valor bajo, no alto — por eso la línea de referencia marca un piso mínimo, no un techo.',
+  'Zinc Total': '<strong>Qué es:</strong> metal esencial en dosis bajas, tóxico en exceso — compite con el transporte de calcio en organismos acuáticos.',
+  'Cromo Total': '<strong>Qué es:</strong> este dato no distingue cromo trivalente (poco tóxico) de hexavalente (cancerígeno) — la comparación usa el valor más conservador disponible.',
+  'PCBs': '<strong>Qué es:</strong> compuestos industriales prohibidos desde los años 80 en la mayoría de los países, pero extremadamente persistentes — se siguen acumulando en sedimento y tejido décadas después de su uso.',
+  'Nitrato': '<strong>Qué es:</strong> nutriente asociado a descargas de aguas servidas y agrícolas. <strong>Riesgo:</strong> en exceso, alimenta floraciones de algas que consumen el oxígeno del agua.',
+};
+const EXPLAINER_GENERIC = 'Sin explicación específica todavía para este parámetro — el equipo la está redactando.';
+
+/* ============================================================
+   Non-detect / detection-limit flatline detector — the pattern that
+   motivated this rewrite: when >=3 stations report the EXACT same
+   value for the same parameter in the same year, that is almost
+   always a lab reporting "below detection limit" as a substituted
+   number, not a real reading. Flagged points render as small hollow
+   gray markers instead of solid colored ones, and the line segment
+   into them is dashed, so the chart doesn't imply a real trend
+   through a non-measurement.
+   ============================================================ */
+function computeFlatlineYears(filteredRows) {
+  const byYear = {};
+  filteredRows.forEach(r => { (byYear[r.year] = byYear[r.year] || []).push(r); });
+  const flagged = new Set();
+  Object.entries(byYear).forEach(([year, rows]) => {
+    const stations = new Set(rows.map(r => r.estacion));
+    const values = new Set(rows.map(r => r.valor_numeric));
+    if (stations.size >= 3 && values.size === 1) flagged.add(Number(year));
+  });
+  return flagged;
+}
+
+function stationLabel(code) {
+  return STATION_NAMES[code] || code;
+}
+
+/* ============================================================
+   POAL TRENDS + EXPLAINER (merged section) — a card per parameter,
+   full yearly series (paginated fetch, not the first-1000-rows
+   default), real station names, a matrix-appropriate reference line,
+   non-detect points visually distinguished, and a two-line
+   explainer baked into the same card instead of a disconnected
+   accordion elsewhere on the page.
+   ============================================================ */
 try {
   if (typeof Chart === 'undefined') throw new Error('Chart.js (Chart) is undefined — the Chart.js CDN script did not load.');
 
-/* Mirrors canonical_matriz() in poal_full_pipeline.py: the standardized
-   source's real MATRIZ column uses fuller labels ('AGUA DE MAR') than the
-   legacy archive's hardcoded ones ('Agua'), which split the dropdown into
-   two options for what's really one matrix. Applied here too so rows
-   already sitting in Supabase under the old unmapped label display
-   correctly immediately, without waiting on a pipeline rerun. */
 const MATRIZ_KEYWORDS = [['SEDIMENT', 'Sedimento'], ['BIOTA', 'Biota'], ['AGUA', 'Agua']];
 function canonicalMatriz(raw) {
   if (raw == null) return raw;
@@ -914,16 +1099,15 @@ function canonicalMatriz(raw) {
   for (const [kw, canon] of MATRIZ_KEYWORDS) {
     if (v.includes(kw)) return canon;
   }
-  return raw; // unrecognized variant — keep visible, don't silently drop
+  return raw;
 }
 
+const MAX_STATIONS_SHOWN = 6;
+
 (async function initPoalGrid() {
-  let rows = await sbSelect(CONFIG.TABLES.poal, 'estacion, matriz, parametro, valor_numeric, year, location, source, unidad');
+  let rows = await sbSelectAll(CONFIG.TABLES.poal, 'estacion, matriz, parametro, valor_numeric, year, location, source, unidad');
   if (!rows || rows.length === 0) rows = DEMO_POAL_READINGS;
   rows = rows.map(r => ({ ...r, matriz: canonicalMatriz(r.matriz) }));
-  // DIRECTEMAR (Armada) authorized only the standardized dataset for public
-  // display — excludes both the real pipeline's 'legacy' label and the
-  // demo fallback data's Spanish 'legado' label.
   rows = rows.filter(r => r.source !== 'legacy' && r.source !== 'legado');
   rows = rows.filter(r => r.valor_numeric != null && r.year != null && r.estacion && r.parametro && r.matriz);
 
@@ -938,7 +1122,7 @@ function canonicalMatriz(raw) {
   const matrices = [...new Set(rows.map(r => r.matriz))].sort();
   matrizSel.innerHTML = matrices.map(m => `<option value="${m}">${m}</option>`).join('');
 
-  const STATION_COLORS = ['#0891B2', '#059669', '#EA580C', '#DC2626', '#7C3AED', '#0F2438', '#CA8A04'];
+  const STATION_COLORS = ['#0891B2', '#EA580C', '#059669', '#DC2626', '#7C3AED', '#CA8A04'];
   let charts = [];
 
   function render() {
@@ -961,34 +1145,64 @@ function canonicalMatriz(raw) {
         </div>
         <div class="poal-card-chart"><canvas id="poal-chart-${cssSafe(p)}"></canvas></div>
         <div class="poal-card-legend" id="poal-cardlegend-${cssSafe(p)}"></div>
+        <div id="poal-status-${cssSafe(p)}"></div>
         <div class="poal-card-footnote" id="poal-cardfoot-${cssSafe(p)}"></div>
+        <div class="poal-card-explainer" id="poal-explainer-${cssSafe(p)}"></div>
       </div>
     `).join('');
 
     parametros.forEach(param => {
       const filtered = inMatriz.filter(r => r.parametro === param);
-      const byStation = {};
-      filtered.forEach(r => { (byStation[r.estacion] = byStation[r.estacion] || []).push(r); });
-      const stationNames = Object.keys(byStation);
-      const allYears = [...new Set(filtered.map(r => r.year))].sort((a, b) => a - b);
+      const flatlineYears = computeFlatlineYears(filtered);
 
-      const datasets = stationNames.map((name, i) => {
+      // rank stations by how many real observations they have, keep the
+      // top N so the legend and chart stay readable — a 15-code legend
+      // with no context is worse than fewer, clearly-labeled lines.
+      const countByStation = {};
+      filtered.forEach(r => { countByStation[r.estacion] = (countByStation[r.estacion] || 0) + 1; });
+      const stationNames = Object.keys(countByStation).sort((a, b) => countByStation[b] - countByStation[a]);
+      const shownStations = stationNames.slice(0, MAX_STATIONS_SHOWN);
+      const hiddenCount = stationNames.length - shownStations.length;
+
+      const byStation = {};
+      filtered.forEach(r => { if (shownStations.includes(r.estacion)) (byStation[r.estacion] = byStation[r.estacion] || []).push(r); });
+      const allYears = [...new Set(filtered.filter(r => shownStations.includes(r.estacion)).map(r => r.year))].sort((a, b) => a - b);
+
+      const datasets = shownStations.map((code, i) => {
         const color = STATION_COLORS[i % STATION_COLORS.length];
         const byYear = {};
-        byStation[name].forEach(r => { byYear[r.year] = r.valor_numeric; });
+        (byStation[code] || []).forEach(r => { byYear[r.year] = r.valor_numeric; });
+        const pointColors = allYears.map(y => flatlineYears.has(y) ? '#C7D2DA' : color);
+        const pointRadii = allYears.map(y => (byYear[y] == null) ? 0 : (flatlineYears.has(y) ? 3 : 3.5));
         return {
-          label: name, data: allYears.map(y => byYear[y] ?? null),
-          borderColor: color, backgroundColor: color + '22', spanGaps: true, tension: 0.3, pointRadius: 3,
+          label: stationLabel(code), data: allYears.map(y => byYear[y] ?? null),
+          borderColor: color, backgroundColor: color + '22', spanGaps: true, tension: 0.25,
+          pointRadius: pointRadii, pointBackgroundColor: pointColors, pointBorderColor: pointColors,
+          borderWidth: 1.6,
         };
       });
 
       const matrizKey = matriz.toLowerCase();
       const ref = REFERENCE_VALUES[param]?.[matrizKey];
+      let statusHTML = '';
       if (ref && allYears.length) {
         datasets.push({
           label: `Referencia (${ref.source})`, data: allYears.map(() => ref.value),
           borderColor: '#DC2626', borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0, fill: false,
         });
+        // status pill: compare the most recent real (non-flatline) value to the reference
+        const lastRealYear = [...allYears].reverse().find(y => !flatlineYears.has(y) &&
+          shownStations.some(code => (byStation[code] || []).some(r => r.year === y)));
+        if (lastRealYear != null) {
+          const valsThatYear = shownStations.map(code => (byStation[code] || []).find(r => r.year === lastRealYear)?.valor_numeric).filter(v => v != null);
+          const maxVal = valsThatYear.length ? Math.max(...valsThatYear) : null;
+          if (maxVal != null) {
+            const over = ref.direction === 'min' ? maxVal < ref.value : maxVal > ref.value;
+            statusHTML = `<span class="poal-card-status ${over ? 'over' : 'ok'}">${lastRealYear}: ${over ? (ref.direction === 'min' ? 'bajo el mínimo' : (maxVal / ref.value).toFixed(1) + 'x sobre referencia') : 'dentro de referencia'}</span>`;
+          }
+        }
+      } else {
+        statusHTML = `<span class="poal-card-status nodata">sin línea de referencia</span>`;
       }
 
       const ctx = document.getElementById(`poal-chart-${cssSafe(param)}`).getContext('2d');
@@ -999,7 +1213,7 @@ function canonicalMatriz(raw) {
           responsive: true, maintainAspectRatio: false,
           plugins: { legend: { display: false } },
           scales: {
-            x: { ticks: { color: '#8598A8', font: { family: 'IBM Plex Mono', size: 10 } }, grid: { color: 'rgba(15,36,56,0.06)' } },
+            x: { ticks: { color: '#8598A8', font: { family: 'IBM Plex Mono', size: 10 }, maxTicksLimit: 10 }, grid: { color: 'rgba(15,36,56,0.06)' } },
             y: { ticks: { color: '#8598A8', font: { family: 'IBM Plex Mono', size: 10 } }, grid: { color: 'rgba(15,36,56,0.06)' } },
           },
         },
@@ -1007,17 +1221,24 @@ function canonicalMatriz(raw) {
 
       const unit = filtered.find(r => r.unidad)?.unidad || '';
       document.getElementById(`poal-unit-${cssSafe(param)}`).textContent = unit;
+      document.getElementById(`poal-status-${cssSafe(param)}`).innerHTML = statusHTML;
 
       document.getElementById(`poal-cardlegend-${cssSafe(param)}`).innerHTML =
-        stationNames.map((name, i) => `
-          <div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:${STATION_COLORS[i % STATION_COLORS.length]}"></span>${name}</div>
+        shownStations.map((code, i) => `
+          <div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:${STATION_COLORS[i % STATION_COLORS.length]}"></span>${stationLabel(code)}</div>
         `).join('') +
-        (ref ? `<div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:#DC2626"></span>Referencia</div>` : '');
+        (ref ? `<div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:#DC2626"></span>Referencia</div>` : '') +
+        (flatlineYears.size ? `<div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:#C7D2DA"></span>Sospecha no-detectado</div>` : '') +
+        (hiddenCount > 0 ? `<div class="poal-card-legend-item" style="color:var(--ink-muted);">+${hiddenCount} estación(es) más con menos datos</div>` : '');
 
       const footParts = [];
       if (ref) footParts.push(`Línea de referencia: ${ref.value} ${ref.unit} (${ref.source}) — no es un límite legal chileno.`);
-      if (!ref) footParts.push('Sin valor de referencia confirmado para este parámetro y matriz.');
+      else footParts.push(NO_REFERENCE_REASON[param] || NO_REFERENCE_REASON[`${param} (${matriz})`] || 'Sin valor de referencia confirmado para este parámetro y matriz.');
+      if (flatlineYears.size) footParts.push(`Años marcados en gris (${[...flatlineYears].sort().join(', ')}): todas las estaciones reportaron el mismo valor exacto — probable límite de detección del laboratorio, no una medición real.`);
+      if (hiddenCount > 0) footParts.push(`Mostrando las ${shownStations.length} estaciones con más mediciones de ${stationNames.length} totales.`);
       document.getElementById(`poal-cardfoot-${cssSafe(param)}`).textContent = footParts.join(' ');
+
+      document.getElementById(`poal-explainer-${cssSafe(param)}`).innerHTML = EXPLAINER_BY_PARAM[param] || EXPLAINER_GENERIC;
     });
   }
 
@@ -1035,6 +1256,44 @@ function canonicalMatriz(raw) {
 }
 
 /* ============================================================
+   GENERAL EXPLAINER — only the questions that aren't tied to one
+   specific parameter (those now live inline in the POAL cards above).
+   ============================================================ */
+const EXPLAINER_ITEMS = [
+  {
+    q: '¿Por qué Chile no tiene un límite de cadmio para mariscos?',
+    a: 'A diferencia de la UE y Codex, la normativa chilena de seguridad alimentaria no fija un límite específico de cadmio para productos del mar — un vacío regulatorio que esta plataforma documenta, no resuelve.',
+    src: 'Hallazgo del equipo, ver Regulatory Gap Map.',
+  },
+  {
+    q: '¿Qué significa un punto gris en los gráficos?',
+    a: 'Indica que, ese año, todas las estaciones reportaron exactamente el mismo valor — la señal típica de que el laboratorio reportó "no detectado" usando su límite técnico como número, no una medición real de la bahía. Tratamos esos años como un vacío de monitoreo, no como evidencia de que el agua estaba limpia.',
+    src: 'Metodología del equipo — detección automática por coincidencia exacta entre estaciones.',
+  },
+  {
+    q: '¿Qué efectos tiene el cadmio y el plomo en la salud?',
+    a: 'El cadmio daña los riñones y debilita los huesos con exposición prolongada. El plomo es neurotóxico, especialmente dañino para el desarrollo del sistema nervioso en niños — la OMS no ha identificado un nivel de plomo en sangre considerado seguro.',
+    src: 'Consenso científico general — no reemplaza orientación médica.',
+  },
+];
+document.getElementById('explainer-acc').innerHTML = EXPLAINER_ITEMS.map((item, i) => `
+  <div class="acc-item" id="acc-${i}">
+    <button class="acc-trigger" onclick="toggleAcc(${i})">
+      <span>${item.q}</span>
+      <span class="chevron">⌄</span>
+    </button>
+    <div class="acc-panel">
+      <p>${item.a}</p>
+      <div class="src">${item.src}</div>
+    </div>
+  </div>
+`).join('');
+function toggleAcc(i) {
+  document.getElementById(`acc-${i}`).classList.toggle('open');
+}
+
+
+/* ============================================================
    SCIENTIFIC PANEL — curated, published sources only.
    Do NOT add unpublished figures here (e.g. any not-yet-published
    coliform data) — anything not peer-reviewed or publicly released
@@ -1048,10 +1307,6 @@ const SCI_CATEGORIES = [
   { key: 'hydrocarbons_spill',       label: 'Hidrocarburos / derrame',        color: '#DC2626' },
 ];
 
-/* Demo fallback — the same real, filtered set now in Supabase: year_pub
-   >= 2010 AND marine = true (direct ocean measurements only). Shown
-   only if scientific_studies isn't reachable. The live copy lives in
-   Supabase, not here — see scientific_studies_seed.sql. */
 const DEMO_SCI_STUDIES = [
   { id: 6, year_pub: 2012, year_sampled: '2012', title: 'Análisis de metales pesados en mariscos y crustáceos, Bahía de Ventanas', authors: 'Oceana (encargo) / Laboratorio GCL, Fundación Chile', source_type: 'ngo-commissioned', journal: 'Commissioned lab analysis', category: 'heavy_metals', matrix: 'biota (clam, urchin, limpet, loco, crab)', location: 'La Virgen, La Churra, El Tebo, La Boca (Ventanas)', marine: true, verified: 'secondary', finding: '100% of samples contaminated with Cu, As and Cd, at levels far above national/international norms.' },
   { id: 7, year_pub: 2012, year_sampled: '2011 (Sept, Nov)', title: 'Fiscalización RILES — Fundición Ventanas CODELCO', authors: 'Gobernación Marítima de Valparaíso', source_type: 'government-report', journal: 'Enforcement inspection', category: 'heavy_metals', matrix: 'industrial effluent (marine discharge)', location: 'Ventanas outfall', marine: true, verified: 'secondary', finding: 'Selenium (Se) in RILES effluent up to 40x the D.S. 90/2000 emission limit.' },
@@ -1235,48 +1490,7 @@ try {
 }
 
 /* ============================================================
-   EXPLAINER ACCORDION
-   ============================================================ */
-const EXPLAINER_ITEMS = [
-  {
-    q: '¿Qué son los coliformes fecales?',
-    a: 'Bacterias indicadoras de contaminación por aguas servidas. Programas de seguridad de mariscos en otros países exigen un promedio geométrico bajo 14 organismos por 100 mL en aguas de cultivo — un estándar mucho más estricto que el usado para playas de baño (cercano a 200/100 mL).',
-    src: 'Referencia internacional (NSSP / estándares comparables) — no es un límite legal chileno.',
-  },
-  {
-    q: '¿Qué significa que haya cadmio o plomo en el agua o los mariscos?',
-    a: 'Son metales pesados que se acumulan en tejido biológico con el tiempo. La Unión Europea limita el cadmio a 0.05 mg/kg y el plomo a 0.3 mg/kg en la mayoría de los peces; Codex Alimentarius fija sus propios límites según la especie y matriz.',
-    src: 'EU Commission Regulation (EC) 488/2014; Codex Alimentarius CXS 193-1995.',
-  },
-  {
-    q: '¿Por qué Chile no tiene un límite de cadmio para mariscos?',
-    a: 'A diferencia de la UE y Codex, la normativa chilena de seguridad alimentaria no fija un límite específico de cadmio para productos del mar — un vacío regulatorio que esta plataforma documenta, no resuelve.',
-    src: 'Hallazgo del equipo, ver Regulatory Gap Map.',
-  },
-  {
-    q: '¿Qué efectos tiene el cadmio y el plomo en la salud?',
-    a: 'El cadmio daña los riñones y debilita los huesos con exposición prolongada. El plomo es neurotóxico, especialmente dañino para el desarrollo del sistema nervioso en niños — la OMS no ha identificado un nivel de plomo en sangre considerado seguro.',
-    src: 'Consenso científico general — no reemplaza orientación médica.',
-  },
-];
-document.getElementById('explainer-acc').innerHTML = EXPLAINER_ITEMS.map((item, i) => `
-  <div class="acc-item" id="acc-${i}">
-    <button class="acc-trigger" onclick="toggleAcc(${i})">
-      <span>${item.q}</span>
-      <span class="chevron">⌄</span>
-    </button>
-    <div class="acc-panel">
-      <p>${item.a}</p>
-      <div class="src">${item.src}</div>
-    </div>
-  </div>
-`).join('');
-function toggleAcc(i) {
-  document.getElementById(`acc-${i}`).classList.toggle('open');
-}
-
-/* ============================================================
-   TABS (scroll-to + active state — sections stay on one page)
+   TABS
    ============================================================ */
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -1287,9 +1501,6 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-/* ============================================================
-   CITIZEN REPORT FORM
-   ============================================================ */
 let geoLat = null, geoLon = null;
 document.getElementById('geo-btn').addEventListener('click', () => {
   const status = document.getElementById('geo-status');
