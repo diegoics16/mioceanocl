@@ -1585,7 +1585,7 @@ const DEMO_SCI_STUDIES = [
 try {
 
 (async function initSciTimeline() {
-  let studies = await sbSelect(CONFIG.TABLES.sciStudies, 'id, year_pub, year_sampled, title, authors, source_type, journal, category, matrix, location, marine, verified, finding');
+  let studies = await sbSelect(CONFIG.TABLES.sciStudies, 'id, year_pub, year_sampled, year_sampled_es, year_sampled_en, title, authors, source_type, journal, category, matrix, location, marine, verified, finding, finding_es, finding_en');
   if (!studies || studies.length === 0) studies = DEMO_SCI_STUDIES;
 
   const svg = document.getElementById('sci-chart');
@@ -1738,8 +1738,8 @@ try {
   }
 
   function showTooltip(ev, d) {
-    const yearSampled = currentLang === 'en' ? d.year_sampled_en : d.year_sampled_es;
-    const finding = currentLang === 'en' ? d.finding_en : d.finding_es;
+    const yearSampled = (currentLang === 'en' ? d.year_sampled_en : d.year_sampled_es) ?? d.year_sampled;
+    const finding = (currentLang === 'en' ? d.finding_en : d.finding_es) ?? d.finding;
     tooltip.innerHTML = `
       <div class="t-year">${d.year_pub}${yearSampled ? t('sci.sampled') + yearSampled : ''}</div>
       <div class="t-title">${d.title}</div>
