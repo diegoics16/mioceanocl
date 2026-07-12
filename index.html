@@ -240,13 +240,6 @@
   .map-controls {
     display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;
   }
-  .chip {
-    font-family: var(--font-ui); font-size: 12px; font-weight: 500;
-    padding: 6px 12px; border-radius: 999px; border: 1px solid var(--hairline-strong);
-    background: var(--bg-alt); color: var(--ink-secondary); cursor: pointer;
-    display: flex; align-items: center; gap: 6px; transition: all 0.15s ease;
-  }
-  .chip.on { color: #FFFFFF; background: var(--ocean); border-color: var(--ocean); }
   .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 
   .map-legend-bar {
@@ -495,10 +488,6 @@
   <section class="panel" id="tab-mapa">
     <h2>Qué está pasando</h2>
     <p class="section-lede">Cada burbuja del mapa es una de las instalaciones detrás del embudo de arriba, ubicada donde está fiscalizada.</p>
-
-    <div class="map-controls">
-      <button class="chip on" id="chip-snifa"><span class="legend-dot" style="background:var(--crimson)"></span>SNIFA — instalaciones</button>
-    </div>
 
     <div class="map-legend-bar">
       <span class="map-legend-item"><span class="legend-dot" style="background:var(--crimson)"></span>Con sanción firme registrada</span>
@@ -922,12 +911,6 @@ async function loadSnifaLayer() {
 }
 
 loadSnifaLayer();
-
-document.getElementById('chip-snifa').addEventListener('click', (e) => toggleLayer('snifa', e.currentTarget));
-function toggleLayer(key, btn) {
-  if (map.hasLayer(layers[key])) { map.removeLayer(layers[key]); btn.classList.remove('on'); }
-  else { map.addLayer(layers[key]); btn.classList.add('on'); }
-}
 
 /* ---------- info badge: hover works on desktop, but touch devices never
    fire :hover at all, so the panel needs an explicit tap-to-open too. ---------- */
