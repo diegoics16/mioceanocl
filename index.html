@@ -34,8 +34,8 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<!-- Plotly.js -->
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 
 <!-- Supabase JS -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -255,6 +255,10 @@
     background: #FFFFFF; color: var(--ink); cursor: pointer;
   }
   .chart-wrap-tall { height: 380px; }
+  .poal-charts-block { display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 20px; margin-top: 20px; }
+  .poal-chart-card { padding: 20px; }
+  .poal-chart-card h3 { font-family: var(--font-ui); font-weight: 700; font-size: 15px; color: var(--ink); margin-bottom: 10px; }
+  .poal-plot { height: 340px; width: 100%; }
 
   /* ---------- footer resource cards ---------- */
   .footer-zone { padding: 48px 0 80px; }
@@ -486,7 +490,45 @@
     <h2>Metales y coliformes</h2>
     <p class="section-lede">Mientras las fiscalizaciones de arriba documentan qué se ha revisado, estas mediciones muestran qué hay realmente en el agua. Datos de DIRECTEMAR (POAL) en agua, sedimento y biota — un gráfico por parámetro, comparando estaciones en el tiempo. La línea punteada, cuando aparece, es un valor de referencia internacional — no un límite legal chileno.</p>
 
-    <div id="poal-grid" class="poal-grid"></div>
+    <div class="poal-charts-block">
+
+      <div class="glass poal-chart-card">
+        <h3>Coliformes fecales en agua de mar – Región de Valparaíso</h3>
+        <div id="poal-plot-coliformes" class="poal-plot"></div>
+        <p class="poal-card-explainer">Línea punteada (200 NMP/100 ml): referencia cercana al estándar de calidad para aguas recreativas según OMS y EPA. Cuando los valores máximos anuales están sobre esta línea, aumentan los riesgos de diarreas e infecciones asociadas al contacto con el agua y problemas de higiene en zonas de cultivo de mariscos. La medición dejó de hacerse de forma consistente después de 2017 — no hay datos más recientes en este archivo.</p>
+      </div>
+
+      <div class="glass poal-chart-card">
+        <h3>Cobre total en sedimento marino – Región de Valparaíso</h3>
+        <div id="poal-plot-cobre_sed" class="poal-plot"></div>
+        <p class="poal-card-explainer">Línea punteada (18,7 mg/kg): nivel umbral (TEL) de cobre en sedimentos marinos según las guías CCME, por debajo del cual los efectos tóxicos sobre la fauna del fondo son poco probables. Valores repetidamente superiores a este nivel indican sedimentos enriquecidos en metales y posibles efectos crónicos en invertebrados y peces demersales. El valor de Valparaíso en 2024 (12.017 mg/kg, estación Dique Flotante) es un caso extremo frente al resto de la serie de esa misma estación (7 mg/kg en 2023) — vale la pena verificarlo contra la fuente original antes de citarlo en la presentación.</p>
+      </div>
+
+      <div class="glass poal-chart-card">
+        <h3>Mercurio total en sedimento marino – Región de Valparaíso</h3>
+        <div id="poal-plot-hg_sed" class="poal-plot"></div>
+        <p class="poal-card-explainer">Línea punteada (0,13 mg/kg): umbral TEL para mercurio en sedimentos marinos (CCME). Superar esta referencia implica mayor probabilidad de bioacumulación y biomagnificación del mercurio en la cadena trófica, aumentando la exposición de peces y la de las personas que los consumen.</p>
+      </div>
+
+      <div class="glass poal-chart-card">
+        <h3>Benzo(a)pireno en agua de mar – Región de Valparaíso</h3>
+        <div id="poal-plot-bap_agua" class="poal-plot"></div>
+        <p class="poal-card-explainer">Línea punteada (0,01 µg/L): referencia basada en criterios internacionales para hidrocarburos aromáticos policíclicos cancerígenos en agua de mar. Concentraciones por encima de este nivel reflejan contaminación por combustión o hidrocarburos que puede afectar la fauna marina y, a largo plazo, la seguridad alimentaria. Se excluyó un valor de 225 µg/L reportado de forma idéntica en tres bahías distintas en 2023 y 2024 — miles de veces por sobre el resto de la serie y repetido en ubicaciones no relacionadas, la misma firma que en el resto del sitio se trata como límite de detección de laboratorio, no como medición real.</p>
+      </div>
+
+      <div class="glass poal-chart-card">
+        <h3>Mercurio total en biota – Región de Valparaíso</h3>
+        <div id="poal-plot-hg_biota" class="poal-plot"></div>
+        <p class="poal-card-explainer">Línea punteada (0,5 mg/kg): valor cercano a los límites máximos para mercurio en productos de la pesca según Codex y la Unión Europea. Si las concentraciones en tejidos de peces o mariscos superan esta línea, aumenta el riesgo de efectos neurotóxicos en consumidores frecuentes, especialmente niños y embarazadas. Solo hay 4 mediciones en toda la región desde 2022 — muy poco para hablar de una tendencia.</p>
+      </div>
+
+      <div class="glass poal-chart-card">
+        <h3>Fósforo total en agua de mar – Región de Valparaíso</h3>
+        <div id="poal-plot-fosforo" class="poal-plot"></div>
+        <p class="poal-card-explainer">Línea punteada: mediana histórica 1993–2019 de fósforo total en cada cuerpo de agua — no es un límite legal, es el propio historial local de cada bahía. Valores muy superiores a esa mediana reflejan enriquecimiento de nutrientes que favorece floraciones de algas y pérdida de oxígeno, afectando la salud del ecosistema costero.</p>
+      </div>
+
+    </div>
 
     <div class="glass res-card" id="explainer-general" style="margin-top:24px;">
       <h3>Más preguntas</h3>
@@ -1020,285 +1062,119 @@ function stationLabel(code) {
 }
 
 /* ============================================================
-   POAL_DATA — hardcoded, not fetched. Source is DIRECTEMAR's
-   standardized national file (the "VALOR Corregida" column —
-   not the raw legacy scrape, per the pipeline's own finding).
-   There is no live query for this section anymore: no Supabase
-   round-trip, no GitHub Action dependency, no DEMO_MODE fallback.
-   To update a number, edit the `readings` array directly.
+   POAL_CHART_DATA — precomputed from poal_cleaned.xlsx (DIRECTEMAR's
+   standardized national file, filtered to Region == "Valparaíso").
+   Computed once in Python/pandas from the real file, then embedded
+   here as static data — not fetched, not recomputed in the browser.
+   This is a static site and the source file doesn't change often
+   enough to justify shipping a spreadsheet parser to every visitor.
+   To refresh: rerun the same aggregation against a newer export of
+   the file and replace this object. Every number below traces back
+   to a real row in that file — nothing here is invented.
 
-   Format per parameter: [estación, año, valor].
-   Use the same station names as STATION_NAMES where possible so
-   labels stay human-readable — but raw names from the DIRECTEMAR
-   Excel work fine too if that's faster to paste.
+   Aggregation, per spec: max(VALOR Corregida) grouped by
+   (Cuerpo.de.Agua, AÑO) — the worst reading recorded anywhere in
+   each bay each year, not an average and not per-station.
 
-   PLACEHOLDER STATE: every `readings` array below is empty.
-   Cards will render "sin datos" until real numbers are filled in.
+   ONE exclusion was applied before taking the max, and only one:
+   Benzo(a)pireno en Agua de Mar had a value of 225 µg/L reported
+   identically across three unrelated bays (Quintero, San Antonio,
+   Isla de Pascua) in exactly 2023 and 2024 — a jump of roughly
+   4,000-10,000x over every other value in that series, repeated
+   across independent locations in the same two years. That's the
+   same signature (identical value, multiple independent stations,
+   same year) this site already treats elsewhere as a lab
+   detection-limit substitution, not a real reading, so those points
+   were dropped before computing the max. No other value was touched,
+   however extreme — see the Cobre total caption for one that's real
+   but worth double-checking against the source before it goes in a
+   deck.
    ============================================================ */
-const POAL_DATA = {
-  cobre_sedimento: {
-    kind: 'single',
-    title: 'Cobre — Sedimento',
-    matriz: 'Sedimento',
-    parametro: 'Cobre Total',
-    unidad: 'mg/kg',
-    explainer: 'El cobre se usa como anti-incrustante en pinturas de barcos y como fungicida industrial. En el sedimento se acumula con el tiempo y afecta a los organismos que viven enterrados en el fondo — almejas, gusanos, poliquetos — la base de la cadena alimentaria de la bahía. El valor más reciente (2024) es 6.7 veces el umbral de referencia canadiense, en la misma estación que se usa como punto de comparación limpio.',
-    readings: [
-      // ['Frente CT Nueva Ventanas', 2021, 41.2],
-      // ['Frente CT Nueva Ventanas', 2024, 125.0],
-      // ['Zapallar Referencia', 2024, 6.8],
-    ],
-  },
-  mercurio_sedimento: {
-    kind: 'single',
-    title: 'Mercurio — Sedimento',
-    matriz: 'Sedimento',
-    parametro: 'Mercurio Total',
-    unidad: 'mg/kg',
-    explainer: 'El mercurio es neurotóxico y se concentra a medida que sube en la cadena alimentaria: de sedimento a molusco a pez a persona. El valor 2024 está justo en el límite de referencia — no es una alarma aún, pero tampoco hay margen.',
-    readings: [
-      // ['Frente CT Nueva Ventanas', 2024, 0.15],
-    ],
-  },
-  coliformes_agua: {
-    kind: 'single',
-    title: 'Coliformes Fecales — Agua',
-    matriz: 'Agua',
-    parametro: 'Coliformes Fecales',
-    unidad: 'NMP/100mL',
-    explainer: 'Indican contaminación con aguas servidas sin tratar. El pico histórico de la bahía (1995) fue 65 veces el estándar que EEUU usa para aguas donde se cultivan mariscos. La medición dejó de hacerse de forma consistente después de 2017 — no podemos decir si mejoró o si simplemente se dejó de mirar.',
-    readings: [
-      // ['Muelle Barón', 1995, 910],
-    ],
-  },
-  bap_agua: {
-    kind: 'single',
-    title: 'Benzo(a)pireno — Agua',
-    matriz: 'Agua',
-    parametro: 'Benzo(a)pireno',
-    unidad: 'ug/L',
-    explainer: 'Es un hidrocarburo que se forma por combustión — de carbón, petróleo, procesos industriales — y es cancerígeno comprobado. Aparece elevado tanto en el agua como en el sedimento en 2024, lo cual es consistente: una fuente activa, no un residuo antiguo. (Ver también la ficha de Sedimento, más abajo.)',
-    readings: [],
-  },
-  bap_sedimento: {
-    kind: 'single',
-    title: 'Benzo(a)pireno — Sedimento',
-    matriz: 'Sedimento',
-    parametro: 'Benzo(a)pireno',
-    unidad: 'mg/kg',
-    explainer: 'Es un hidrocarburo que se forma por combustión — de carbón, petróleo, procesos industriales — y es cancerígeno comprobado. Aparece elevado tanto en el agua como en el sedimento en 2024, lo cual es consistente: una fuente activa, no un residuo antiguo. (Ver también la ficha de Agua, más arriba.)',
-    readings: [],
-  },
-  cd_hg_disuelto_agua: {
-    kind: 'dual-avg',
-    title: 'Cadmio y Mercurio Disuelto — Agua',
-    matriz: 'Agua',
-    explainer: 'No mostramos una tendencia para estos dos metales en el agua desde 2016 en adelante: el laboratorio reporta el mismo valor en las seis estaciones, año tras año, lo que indica que el método no está detectando nada por debajo de su propio límite técnico — no que la bahía esté limpia. Tratamos esto como un vacío de monitoreo, no como una medición.',
-    series: [
-      { parametro: 'Cadmio Disuelto', label: 'Cadmio Disuelto', color: '#0891B2', unidad: 'ug/L', readings: [] },
-      { parametro: 'Mercurio Disuelto', label: 'Mercurio Disuelto', color: '#EA580C', unidad: 'ug/L', readings: [] },
-    ],
-  },
+const POAL_CHART_DATA = {"coliformes":{"title":"Coliformes fecales en agua de mar – Región de Valparaíso","data":{"ALGARROBO":[[2013,0.9],[2014,7.8],[2015,2.0],[2016,6.8],[2017,94.0]],"CONCON":[[1994,22.0],[1995,1100.0],[1996,5400.0],[1997,130.0],[1998,350.0],[1999,2400.0],[2000,490.0],[2001,2.0],[2002,900.0],[2003,50.0],[2004,14.0],[2005,9.0],[2006,130.0],[2007,130.0],[2008,49.0],[2009,220.0],[2010,240.0],[2011,130.0],[2013,49.0],[2014,280.0],[2015,240.0],[2016,540.0],[2017,170.0]],"ISLA DE PASCUA":[[2005,2.0],[2006,230.0],[2007,2.0],[2008,0.9],[2009,33.0],[2010,22.0],[2011,4.0],[2013,9.3],[2014,130.0],[2015,0.9],[2016,0.9],[2017,920.0]],"PLAYA ANCHA":[[1993,220.0],[1994,16000.0],[1995,920.0],[1996,16000.0],[1997,2400.0],[1998,2400.0],[1999,1600.0],[2000,1300.0],[2001,2.0],[2002,900.0],[2003,900.0],[2004,30000.0],[2005,2800.0],[2006,22.0],[2007,2300.0],[2008,1600.0],[2009,1600.0],[2010,920.0],[2011,800.0],[2013,800.0],[2014,920.0],[2015,540.0],[2016,350.0],[2017,5400.0]],"QUINTERO":[[1993,2.0],[1994,540.0],[1995,920.0],[1996,790.0],[1997,23.0],[1998,5.5],[1999,15.0],[2000,2.0],[2001,5.0],[2002,4.0],[2003,4.0],[2004,17.0],[2005,80.0],[2006,11.0],[2007,2.0],[2008,26.0],[2009,130.0],[2010,11.0],[2011,2.0],[2013,0.9],[2014,27.0],[2015,79.0],[2016,170.0],[2017,2.0]],"SAN ANTONIO":[[1993,5400.0],[1994,5400.0],[1995,9200.0],[1996,16000.0],[1997,21.0],[1998,2400.0],[1999,1600.0],[2000,460.0],[2001,193.0],[2002,1600.0],[2003,170.0],[2004,2.0],[2005,17.0],[2006,24000.0],[2007,79.0],[2008,170.0],[2009,170.0],[2010,79.0],[2011,79.0],[2013,11.0],[2014,240.0],[2015,33.0],[2016,26.0],[2017,23.0]],"VALPARAISO":[[1993,16000.0],[1994,16000.0],[1995,16000.0],[1996,16000.0],[1997,540.0],[1998,2400.0],[1999,2400.0],[2000,490.0],[2001,81.0],[2002,1600.0],[2003,300.0],[2004,50000.0],[2005,500.0],[2006,35000.0],[2007,3300.0],[2008,1600.0],[2009,1600.0],[2010,1600.0],[2011,920.0],[2013,6.8],[2014,540.0],[2015,79.0],[2016,540.0],[2017,920.0]]},"unit":"NMP/100 ml","baseline":200,"baseline_label":"OMS/EPA (agua recreativa)"},"cobre_sed":{"title":"Cobre total en sedimento marino – Región de Valparaíso","data":{"ALGARROBO":[[2013,3.8],[2014,3.2],[2015,3.7],[2016,5.0],[2017,3.9]],"CONCON":[[1994,53.9],[1995,44.7],[1996,57.1],[1997,63.734],[1998,115.978],[1999,95.083],[2000,1469.0],[2001,95.7],[2002,187.0],[2003,81.5],[2004,54.7],[2005,66.8],[2006,180.0],[2007,560.593],[2008,120.0],[2009,214.0],[2010,231.0],[2011,67.6],[2013,54.0],[2014,61.0],[2015,54.0],[2016,70.0],[2017,60.9],[2019,53.98],[2021,188.36],[2022,37.8],[2023,313.0],[2024,494.0]],"ISLA DE PASCUA":[[2005,14.2],[2006,16.4],[2007,144.561],[2008,25.6],[2009,32.8],[2010,13.9],[2011,51.4],[2013,11.0],[2014,16.0],[2015,15.0],[2016,17.5],[2017,17.2],[2019,13.38],[2022,18.4],[2023,492.0],[2024,171.0]],"PLAYA ANCHA":[[1994,607.0],[1995,219.0],[1996,1068.0],[1997,501.34],[1998,97.798],[1999,129.66],[2000,125.0],[2001,61.5],[2002,91.0],[2003,36.7],[2004,32.2],[2005,29.3],[2006,322.0],[2007,629.473],[2008,219.0],[2009,47.1],[2010,43.7],[2011,32.5],[2013,65.0],[2014,171.0],[2015,95.0],[2016,49.2],[2017,78.1]],"QUINTERO":[[1993,83.9],[1994,109.0],[1997,371.67],[1998,247.879],[1999,600.59],[2000,117.0],[2001,175.73],[2002,156.0],[2003,73.5],[2004,297.0],[2005,207.0],[2006,169.0],[2007,142.0],[2008,178.0],[2009,319.0],[2010,47.3],[2011,141.0],[2013,215.0],[2014,202.0],[2015,76.9],[2016,88.9],[2017,73.0],[2019,274.57],[2021,2215.41],[2022,102.1],[2023,549.0],[2024,1256.0]],"SAN ANTONIO":[[1993,24.8],[1994,42.1],[1997,345.4],[1998,160.196],[1999,249.82],[2000,160.0],[2001,150.33],[2002,100.0],[2003,120.0],[2004,139.0],[2005,183.0],[2006,108.0],[2007,125.0],[2008,149.0],[2009,101.0],[2010,99.6],[2011,61.8],[2013,101.0],[2014,97.0],[2015,142.0],[2016,146.0],[2017,89.2],[2019,103.13],[2021,193.08],[2022,76.6],[2023,625.0],[2024,698.0]],"VALPARAISO":[[1993,16.0],[1994,28.2],[1997,848.64],[1998,781.677],[1999,813.82],[2000,516.3],[2001,9527.69],[2002,440.0],[2003,290.0],[2004,2952.0],[2005,1048.0],[2006,14304.0],[2007,12733.0],[2008,4282.0],[2009,3339.0],[2010,7257.0],[2011,3547.0],[2013,285.0],[2014,929.0],[2015,421.0],[2016,436.0],[2017,281.9],[2019,391.43],[2021,495.0],[2022,419.0],[2023,2322.0],[2024,12017.0]]},"unit":"mg/kg","baseline":18.7,"baseline_label":"CCME TEL"},"hg_sed":{"title":"Mercurio total en sedimento marino – Región de Valparaíso","data":{"ALGARROBO":[[2013,0.005],[2014,0.005],[2015,0.01],[2016,0.005],[2017,0.005]],"CONCON":[[1994,0.05],[1995,0.09],[1996,0.07],[1997,0.492],[1998,0.13],[1999,0.182],[2000,0.001],[2001,0.12],[2002,0.25],[2003,0.05],[2004,0.05],[2005,0.05],[2006,0.05],[2007,0.05],[2008,0.07],[2009,0.005],[2010,0.005],[2011,0.005],[2013,0.005],[2014,0.05],[2015,0.27],[2016,0.03],[2017,0.2],[2019,0.005],[2021,0.005],[2022,0.01],[2023,5.0],[2024,5.0]],"ISLA DE PASCUA":[[2005,0.05],[2006,0.05],[2007,0.05],[2008,0.06],[2009,0.005],[2010,0.005],[2011,0.005],[2013,0.005],[2014,0.02],[2015,0.02],[2016,0.03],[2017,0.07],[2022,0.005],[2023,5.0],[2024,5.0]],"PLAYA ANCHA":[[1994,0.04],[1995,0.15],[1996,0.2],[1997,0.08],[1998,1.495],[1999,0.13],[2000,0.001],[2001,0.12],[2002,0.1],[2003,0.1],[2004,0.1],[2005,0.1],[2006,0.1],[2007,0.17],[2008,0.02],[2009,0.05],[2010,0.005],[2011,0.2],[2013,0.005],[2014,0.03],[2015,0.23],[2016,0.04],[2017,0.12]],"QUINTERO":[[1993,0.22],[1994,0.04],[1997,2.141],[1998,0.695],[1999,0.186],[2000,0.001],[2001,0.209],[2002,0.05],[2003,0.05],[2004,0.05],[2005,0.05],[2006,0.2],[2007,0.15],[2008,0.07],[2009,0.03],[2010,0.005],[2011,0.4],[2013,0.08],[2014,0.12],[2015,0.14],[2016,0.12],[2017,0.06],[2021,0.08],[2022,0.06],[2023,5.0],[2024,14.0]],"SAN ANTONIO":[[1993,0.01],[1994,0.03],[1997,0.318],[1998,0.104],[1999,0.11],[2000,0.001],[2001,0.12],[2002,0.05],[2003,0.3],[2004,0.05],[2005,0.05],[2006,0.05],[2007,0.1],[2008,0.04],[2009,0.005],[2010,0.005],[2011,0.08],[2013,0.01],[2014,0.05],[2015,0.07],[2016,0.04],[2017,0.25],[2019,0.02],[2021,0.03],[2022,0.47],[2023,5.0],[2024,45.0]],"VALPARAISO":[[1993,0.8],[1994,0.03],[1997,0.84],[1998,3.504],[1999,0.733],[2000,0.001],[2001,1.37],[2002,0.1],[2003,0.1],[2004,0.1],[2005,0.18],[2006,0.1],[2007,1.93],[2008,0.4],[2009,0.36],[2010,0.005],[2011,0.05],[2013,0.06],[2014,0.06],[2015,0.42],[2016,0.53],[2017,1.84],[2019,0.31],[2021,0.005],[2022,0.83],[2023,64.0],[2024,52.0]]},"unit":"mg/kg","baseline":0.13,"baseline_label":"CCME TEL"},"bap_agua":{"title":"Benzo(a)pireno en agua de mar – Región de Valparaíso","data":{"ALGARROBO":[[2013,0.05],[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05]],"CONCON":[[2013,0.05],[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05]],"ISLA DE PASCUA":[[2013,0.05],[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05],[2022,0.0225]],"PLAYA ANCHA":[[2013,0.05],[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05]],"QUINTERO":[[2013,0.05],[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05],[2019,0.0225],[2021,0.0225],[2022,0.0225],[2023,162.0]],"SAN ANTONIO":[[2013,0.05],[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05],[2019,0.0225],[2021,0.0225],[2022,0.0225]],"VALPARAISO":[[2013,0.05],[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05]]},"unit":"ug/L","baseline":0.01,"baseline_label":"referencia crónica internacional"},"hg_biota":{"title":"Mercurio total en biota – Región de Valparaíso","data":{"QUINTERO":[[2022,3.56],[2023,2.0],[2024,7.0]],"SAN ANTONIO":[[2022,1.16]]},"unit":"mg/kg","baseline":0.5,"baseline_label":"Codex/UE/FDA"},"fosforo":{"title":"Fósforo total en agua de mar – Región de Valparaíso","data":{"CONCON":[[1994,0.16],[1995,0.16],[1996,0.32],[1997,0.64],[1998,0.184],[1999,0.088],[2000,0.005],[2001,0.13],[2002,0.23],[2003,0.1],[2004,0.1],[2005,0.1],[2006,0.1],[2007,0.2],[2008,0.01],[2009,0.09],[2010,0.46],[2011,0.05]],"ISLA DE PASCUA":[[2005,0.1],[2006,0.1],[2007,0.2],[2008,0.01],[2009,0.05],[2010,0.07],[2011,0.01],[2015,0.066],[2023,635.0],[2024,635.0]],"PLAYA ANCHA":[[1993,0.17],[1994,0.25],[1995,0.48],[1996,0.32],[1997,0.41],[1998,0.11],[1999,0.227],[2000,0.54],[2001,0.12],[2002,0.1],[2003,0.1],[2004,0.1],[2005,0.1],[2006,0.1],[2007,0.2],[2008,0.01],[2009,0.08],[2010,0.14],[2011,0.01]],"QUINTERO":[[1993,0.17],[1994,0.56],[1995,0.43],[1996,0.34],[1997,0.38],[1998,0.191],[1999,0.174],[2000,0.04],[2001,0.597],[2002,0.2],[2003,0.2],[2004,0.2],[2005,0.2],[2006,0.2],[2007,0.2],[2008,0.01],[2009,0.09],[2010,0.08],[2011,0.07]],"SAN ANTONIO":[[1993,0.24],[1994,0.47],[1995,0.34],[1996,0.32],[1997,0.42],[1998,0.216],[1999,0.3],[2000,0.005],[2001,0.49],[2002,0.2],[2003,0.2],[2004,0.2],[2005,0.2],[2006,0.2],[2007,0.2],[2008,0.01],[2009,0.09],[2010,0.03],[2011,0.4]],"VALPARAISO":[[1993,0.33],[1994,1.03],[1995,1.12],[1996,0.49],[1997,0.43],[1998,0.128],[1999,0.28],[2000,0.54],[2001,0.11],[2002,0.2],[2003,0.2],[2004,0.2],[2005,0.2],[2006,0.2],[2007,0.2],[2008,0.01],[2009,0.09],[2010,0.13],[2011,0.06]]},"unit":"mg/L","baseline":{"CONCON":0.09,"ISLA DE PASCUA":0.01,"PLAYA ANCHA":0.1,"QUINTERO":0.1,"SAN ANTONIO":0.15,"VALPARAISO":0.16},"baseline_label":"mediana histórica local 1993-2019"}};
+
+const POAL_CUERPO_COLORS = {
+  QUINTERO: '#DC2626',
+  VALPARAISO: '#0891B2',
+  CONCON: '#EA580C',
+  'SAN ANTONIO': '#059669',
+  'PLAYA ANCHA': '#7C3AED',
+  'ISLA DE PASCUA': '#CA8A04',
+  ALGARROBO: '#4B5F73',
 };
 
 try {
-  if (typeof Chart === 'undefined') throw new Error('Chart.js (Chart) is undefined — the Chart.js CDN script did not load.');
+  if (typeof Plotly === 'undefined') throw new Error('Plotly is undefined — the Plotly CDN script did not load.');
 
-const STATION_COLORS = ['#0891B2', '#EA580C', '#059669', '#DC2626', '#7C3AED', '#CA8A04'];
-const MAX_STATIONS_SHOWN = 6;
-
-const grid = document.getElementById('poal-grid');
-const cardKeys = Object.keys(POAL_DATA);
-
-grid.innerHTML = cardKeys.map(key => {
-  const c = POAL_DATA[key];
-  return `
-    <div class="glass poal-card">
-      <div class="poal-card-head">
-        <span class="poal-card-title">${c.title}</span>
-        <span class="poal-card-unit" id="poal-unit-${key}"></span>
-      </div>
-      <div class="poal-card-chart"><canvas id="poal-chart-${key}"></canvas></div>
-      <div class="poal-card-legend" id="poal-cardlegend-${key}"></div>
-      <div id="poal-status-${key}"></div>
-      <div class="poal-card-footnote" id="poal-cardfoot-${key}"></div>
-      <div class="poal-card-explainer" id="poal-explainer-${key}">${c.explainer}</div>
-    </div>
-  `;
-}).join('');
-
-// Always surface the single highest reading, even if that station has
-// sparse data overall — otherwise a worst-case station can silently
-// drop out of the "most-datapoints" cut while the written explainer
-// still references its number.
-function selectStations(filtered, max) {
-  const countByStation = {};
-  filtered.forEach(r => { countByStation[r.estacion] = (countByStation[r.estacion] || 0) + 1; });
-  let ranked = Object.keys(countByStation).sort((a, b) => countByStation[b] - countByStation[a]);
-  const maxRow = filtered.reduce((best, r) => (best == null || r.valor_numeric > best.valor_numeric) ? r : best, null);
-  const maxStation = maxRow ? maxRow.estacion : null;
-  let shown = ranked.slice(0, max);
-  if (maxStation && !shown.includes(maxStation)) {
-    shown = shown.slice(0, max - 1);
-    shown.push(maxStation);
-  }
-  return { shown, allStations: ranked };
-}
-
-function readingsToRows(readings, matriz, parametro, unidad) {
-  return readings.map(([estacion, year, valor_numeric]) => ({ estacion, year, valor_numeric, matriz, parametro, unidad }));
-}
-
-function renderSingleCard(key, card) {
-  const filtered = readingsToRows(card.readings, card.matriz, card.parametro, card.unidad);
-  const unitEl = document.getElementById(`poal-unit-${key}`);
-  if (filtered.length === 0) {
-    unitEl.textContent = card.unidad || '';
-    document.getElementById(`poal-cardfoot-${key}`).textContent = 'Sin datos cargados todavía para esta combinación — pendiente de carga desde el archivo DIRECTEMAR.';
-    return;
-  }
-  const flatlineYears = computeFlatlineYears(filtered);
-  const { shown: shownStations, allStations: stationNames } = selectStations(filtered, MAX_STATIONS_SHOWN);
-  const hiddenCount = stationNames.length - shownStations.length;
-
-  const byStation = {};
-  filtered.forEach(r => { if (shownStations.includes(r.estacion)) (byStation[r.estacion] = byStation[r.estacion] || []).push(r); });
-  const allYears = [...new Set(filtered.filter(r => shownStations.includes(r.estacion)).map(r => r.year))].sort((a, b) => a - b);
-
-  const datasets = shownStations.map((code, i) => {
-    const color = STATION_COLORS[i % STATION_COLORS.length];
-    const byYear = {};
-    (byStation[code] || []).forEach(r => { byYear[r.year] = r.valor_numeric; });
-    const pointColors = allYears.map(y => flatlineYears.has(y) ? '#C7D2DA' : color);
-    const pointRadii = allYears.map(y => (byYear[y] == null) ? 0 : (flatlineYears.has(y) ? 3 : 3.5));
-    return {
-      label: stationLabel(code), data: allYears.map(y => byYear[y] ?? null),
-      borderColor: color, backgroundColor: color + '22', spanGaps: true, tension: 0.25,
-      pointRadius: pointRadii, pointBackgroundColor: pointColors, pointBorderColor: pointColors,
-      borderWidth: 1.6,
-    };
-  });
-
-  const matrizKey = card.matriz.toLowerCase();
-  const ref = REFERENCE_VALUES[card.parametro]?.[matrizKey];
-  let statusHTML = '';
-  if (ref && allYears.length) {
-    datasets.push({
-      label: `Referencia (${ref.source})`, data: allYears.map(() => ref.value),
-      borderColor: '#DC2626', borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0, fill: false,
+  function renderPoalChart(divId, chart) {
+    const cuerpos = Object.keys(chart.data);
+    const traces = cuerpos.map(cuerpo => {
+      const pts = chart.data[cuerpo].slice().sort((a, b) => a[0] - b[0]);
+      const isQuintero = cuerpo === 'QUINTERO';
+      return {
+        x: pts.map(p => p[0]),
+        y: pts.map(p => p[1]),
+        name: cuerpo,
+        mode: 'lines+markers',
+        line: { color: POAL_CUERPO_COLORS[cuerpo] || '#8598A8', width: isQuintero ? 3 : 1.4 },
+        marker: { size: isQuintero ? 5 : 3 },
+        hovertemplate: `${cuerpo}: %{y} (%{x})<extra></extra>`,
+      };
     });
-    const lastRealYear = [...allYears].reverse().find(y => !flatlineYears.has(y) &&
-      shownStations.some(code => (byStation[code] || []).some(r => r.year === y)));
-    if (lastRealYear != null) {
-      const valsThatYear = shownStations.map(code => (byStation[code] || []).find(r => r.year === lastRealYear)?.valor_numeric).filter(v => v != null);
-      const maxVal = valsThatYear.length ? Math.max(...valsThatYear) : null;
-      if (maxVal != null) {
-        const over = ref.direction === 'min' ? maxVal < ref.value : maxVal > ref.value;
-        statusHTML = `<span class="poal-card-status ${over ? 'over' : 'ok'}">${lastRealYear}: ${over ? (ref.direction === 'min' ? 'bajo el mínimo' : (maxVal / ref.value).toFixed(1) + 'x sobre referencia') : 'dentro de referencia'}</span>`;
+
+    // Baseline is either one flat reference number (most charts) or a
+    // per-Cuerpo.de.Agua object (Fósforo Total's local historical median).
+    if (typeof chart.baseline === 'number') {
+      const allYears = traces.flatMap(t => t.x);
+      if (allYears.length) {
+        traces.push({
+          x: [Math.min(...allYears), Math.max(...allYears)],
+          y: [chart.baseline, chart.baseline],
+          name: `Referencia (${chart.baseline_label})`,
+          mode: 'lines',
+          line: { color: '#DC2626', dash: 'dash', width: 1.5 },
+          hoverinfo: 'name+y',
+        });
       }
+    } else if (chart.baseline && typeof chart.baseline === 'object') {
+      Object.entries(chart.baseline).forEach(([cuerpo, val]) => {
+        const cData = chart.data[cuerpo];
+        if (!cData || !cData.length) return;
+        const years = cData.map(p => p[0]);
+        traces.push({
+          x: [Math.min(...years), Math.max(...years)],
+          y: [val, val],
+          name: `Mediana histórica – ${cuerpo}`,
+          mode: 'lines',
+          line: { color: POAL_CUERPO_COLORS[cuerpo] || '#DC2626', dash: 'dot', width: 1 },
+          opacity: 0.55,
+          hoverinfo: 'name+y',
+          showlegend: false,
+        });
+      });
     }
-  } else {
-    statusHTML = `<span class="poal-card-status nodata">sin línea de referencia</span>`;
+
+    Plotly.newPlot(divId, traces, {
+      margin: { l: 55, r: 16, t: 8, b: 36 },
+      font: { family: 'Plus Jakarta Sans, sans-serif', size: 11, color: '#4B5F73' },
+      xaxis: { tickfont: { family: 'IBM Plex Mono', size: 10 }, gridcolor: 'rgba(15,36,56,0.06)', dtick: 2 },
+      yaxis: { title: chart.unit, tickfont: { family: 'IBM Plex Mono', size: 10 }, gridcolor: 'rgba(15,36,56,0.06)' },
+      legend: { orientation: 'h', y: -0.22, font: { size: 9.5 } },
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      hovermode: 'closest',
+    }, { responsive: true, displayModeBar: false });
   }
 
-  const ctx = document.getElementById(`poal-chart-${key}`).getContext('2d');
-  new Chart(ctx, {
-    type: 'line',
-    data: { labels: allYears, datasets },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: '#8598A8', font: { family: 'IBM Plex Mono', size: 10 }, maxTicksLimit: 10 }, grid: { color: 'rgba(15,36,56,0.06)' } },
-        y: { ticks: { color: '#8598A8', font: { family: 'IBM Plex Mono', size: 10 } }, grid: { color: 'rgba(15,36,56,0.06)' } },
-      },
-    },
+  Object.keys(POAL_CHART_DATA).forEach(key => {
+    const el = document.getElementById(`poal-plot-${key}`);
+    if (el) renderPoalChart(`poal-plot-${key}`, POAL_CHART_DATA[key]);
   });
-
-  unitEl.textContent = card.unidad || '';
-  document.getElementById(`poal-status-${key}`).innerHTML = statusHTML;
-
-  document.getElementById(`poal-cardlegend-${key}`).innerHTML =
-    shownStations.map((code, i) => `
-      <div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:${STATION_COLORS[i % STATION_COLORS.length]}"></span>${stationLabel(code)}</div>
-    `).join('') +
-    (ref ? `<div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:#DC2626"></span>Referencia</div>` : '') +
-    (flatlineYears.size ? `<div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:#C7D2DA"></span>Sospecha no-detectado</div>` : '') +
-    (hiddenCount > 0 ? `<div class="poal-card-legend-item" style="color:var(--ink-muted);">+${hiddenCount} estación(es) más con menos datos</div>` : '');
-
-  const footParts = [];
-  if (ref) footParts.push(`Línea de referencia: ${ref.value} ${ref.unit} (${ref.source}) — no es un límite legal chileno.`);
-  else footParts.push(NO_REFERENCE_REASON[card.parametro] || 'Sin valor de referencia confirmado para este parámetro y matriz.');
-  if (flatlineYears.size) footParts.push(`Años marcados en gris (${[...flatlineYears].sort().join(', ')}): todas las estaciones reportaron el mismo valor exacto — probable límite de detección del laboratorio, no una medición real.`);
-  if (hiddenCount > 0) footParts.push(`Mostrando las ${shownStations.length} estaciones con más mediciones de ${stationNames.length} totales (incluyendo siempre la estación con el valor más alto registrado).`);
-  document.getElementById(`poal-cardfoot-${key}`).textContent = footParts.join(' ');
-}
-
-function renderDualAvgCard(key, card) {
-  const seriesData = card.series.map(s => {
-    const filtered = readingsToRows(s.readings, card.matriz, s.parametro, s.unidad);
-    const flatlineYears = computeFlatlineYears(filtered);
-    const byYear = {};
-    filtered.forEach(r => { (byYear[r.year] = byYear[r.year] || []).push(r.valor_numeric); });
-    const years = Object.keys(byYear).map(Number).sort((a, b) => a - b);
-    const avgByYear = {};
-    years.forEach(y => { avgByYear[y] = byYear[y].reduce((a, b) => a + b, 0) / byYear[y].length; });
-    return { ...s, years, avgByYear, flatlineYears };
-  });
-
-  const hasAny = seriesData.some(s => s.years.length > 0);
-  if (!hasAny) {
-    document.getElementById(`poal-unit-${key}`).textContent = card.series[0]?.unidad || '';
-    document.getElementById(`poal-cardfoot-${key}`).textContent = 'Sin datos cargados todavía para esta combinación — pendiente de carga desde el archivo DIRECTEMAR.';
-    return;
-  }
-
-  const allYears = [...new Set(seriesData.flatMap(s => s.years))].sort((a, b) => a - b);
-  const datasets = seriesData.map((s, i) => {
-    const pointColors = allYears.map(y => s.flatlineYears.has(y) ? '#C7D2DA' : s.color);
-    const pointRadii = allYears.map(y => (s.avgByYear[y] == null) ? 0 : (s.flatlineYears.has(y) ? 3 : 3.5));
-    return {
-      label: s.label, data: allYears.map(y => s.avgByYear[y] ?? null),
-      borderColor: s.color, backgroundColor: s.color + '22', spanGaps: true, tension: 0.25,
-      pointRadius: pointRadii, pointBackgroundColor: pointColors, pointBorderColor: pointColors,
-      borderWidth: 1.6, yAxisID: i === 0 ? 'y' : 'y1',
-    };
-  });
-
-  const ctx = document.getElementById(`poal-chart-${key}`).getContext('2d');
-  new Chart(ctx, {
-    type: 'line',
-    data: { labels: allYears, datasets },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: '#8598A8', font: { family: 'IBM Plex Mono', size: 10 }, maxTicksLimit: 10 }, grid: { color: 'rgba(15,36,56,0.06)' } },
-        y: { position: 'left', ticks: { color: seriesData[0].color, font: { family: 'IBM Plex Mono', size: 10 } }, grid: { color: 'rgba(15,36,56,0.06)' } },
-        y1: { position: 'right', ticks: { color: seriesData[1].color, font: { family: 'IBM Plex Mono', size: 10 } }, grid: { drawOnChartArea: false } },
-      },
-    },
-  });
-
-  document.getElementById(`poal-unit-${key}`).textContent = seriesData.find(s => s.unidad)?.unidad || 'ug/L';
-  document.getElementById(`poal-status-${key}`).innerHTML = `<span class="poal-card-status nodata">promedio entre estaciones</span>`;
-  document.getElementById(`poal-cardlegend-${key}`).innerHTML =
-    seriesData.map(s => `<div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:${s.color}"></span>${s.label}</div>`).join('') +
-    `<div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:#C7D2DA"></span>Sospecha no-detectado</div>`;
-  document.getElementById(`poal-cardfoot-${key}`).textContent =
-    'Cada línea es el promedio entre las estaciones con datos ese año, no una serie por estación individual — casi todas se mueven juntas en el mismo límite de detección. Ejes separados (cadmio a la izquierda, mercurio a la derecha) porque sus umbrales de referencia difieren en un orden de magnitud. Años en gris: todas las estaciones reportaron el mismo valor exacto ese año.';
-}
-
-cardKeys.forEach(key => {
-  const card = POAL_DATA[key];
-  if (card.kind === 'single') renderSingleCard(key, card);
-  else if (card.kind === 'dual-avg') renderDualAvgCard(key, card);
-});
 
 } catch (e) {
-  console.error('POAL grid failed to initialize:', e);
-  const gridEl = document.getElementById('poal-grid');
-  if (gridEl) gridEl.innerHTML = '<div style="padding:24px;color:#DC2626;font-size:13px;">No se pudo cargar los gráficos POAL (' + e.message + ').</div>';
+  console.error('POAL charts failed to initialize:', e);
+  document.querySelectorAll('.poal-plot').forEach(el => {
+    el.innerHTML = '<div style="padding:24px;color:#DC2626;font-size:13px;">No se pudieron cargar los gráficos POAL (' + e.message + ').</div>';
+  });
 }
 
 /* ============================================================
