@@ -169,31 +169,15 @@
     color: var(--ink-secondary); font-size: 14px; margin-bottom: 24px; max-width: 640px;
   }
 
-  /* ---------- thesis + funnel (the narrative "stem") ---------- */
-  .thesis-panel { padding: 44px 0 8px; }
+  /* ---------- thesis (the narrative "stem") ---------- */
+  section.thesis-panel { padding: 44px 0 8px; }
   .thesis-eyebrow {
     font-family: var(--font-data); font-size: 11px; text-transform: uppercase;
     letter-spacing: 0.1em; color: var(--ocean); margin-bottom: 10px; font-weight: 600;
   }
   .thesis-text {
     font-family: var(--font-head); font-size: 21px; line-height: 1.45; color: var(--ink);
-    max-width: 760px; margin-bottom: 32px;
-  }
-  .funnel-wrap { max-width: 620px; }
-  .funnel-title { font-family: var(--font-ui); font-weight: 700; font-size: 13px; color: var(--ink); margin-bottom: 16px; }
-  .funnel-row { display: flex; align-items: center; gap: 16px; margin-bottom: 4px; }
-  .funnel-bar-track { flex: 1; height: 34px; background: var(--bg-alt); border-radius: 6px; overflow: hidden; }
-  .funnel-bar { height: 100%; border-radius: 6px; transition: width 0.6s ease; min-width: 6%; }
-  .funnel-meta { width: 230px; flex-shrink: 0; display: flex; align-items: baseline; gap: 8px; }
-  .funnel-count { font-family: var(--font-data); font-size: 18px; font-weight: 600; color: var(--ink); }
-  .funnel-label { font-size: 11.5px; color: var(--ink-secondary); line-height: 1.3; }
-  .funnel-drop {
-    display: flex; align-items: center; gap: 8px; margin: 4px 0 4px 4px;
-    font-size: 11px; color: var(--ink-muted); font-style: italic;
-  }
-  .funnel-drop-arrow { color: var(--hairline-strong); font-size: 13px; }
-  .funnel-note {
-    font-size: 12px; color: var(--ink-muted); margin-top: 14px; max-width: 620px; line-height: 1.6;
+    max-width: 760px;
   }
 
   /* ---------- map + alerts zone ---------- */
@@ -253,7 +237,7 @@
 
   .map-disclaimer {
     font-size: 11px; line-height: 1.5; color: var(--ink-muted); font-style: italic;
-    padding: 10px 2px 0; max-width: 900px;
+    padding: 10px 2px 0; max-width: 640px;
   }
 
   .popup-facility { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12.5px; line-height: 1.4; }
@@ -459,7 +443,7 @@
     <div class="region-photo-caption">Región de Valparaíso, Chile · Foto: Denys Amaro / Unsplash</div>
   </div>
 
-  <!-- ============ THESIS + FUNNEL (the narrative stem) ============ -->
+  <!-- ============ THESIS (the narrative stem) ============ -->
   <section class="panel thesis-panel">
     <div class="thesis-eyebrow">Lo que muestran los datos</div>
     <p class="thesis-text">Los datos ambientales de la Región de Valparaíso existen, pero están repartidos entre la Superintendencia del Medio Ambiente, La Armada y diferentes partes del gobierno que casi nunca se cruzan entre sí.</p>
@@ -741,52 +725,6 @@ async function loadSyncStatus() {
   }
 }
 loadSyncStatus();
-
-/* ============================================================
-   FUNNEL — the narrative centerpiece. Pulls live counts from
-   Supabase rather than a hardcoded figure, since enforcement
-   numbers move and a remembered number would go stale silently.
-   Own try/catch: independent of the map, doesn't need Leaflet.
-   ============================================================ */
-async function initFunnel() {
-  const els = {
-    bar1: document.getElementById('funnel-bar-1'), n1: document.getElementById('funnel-n-1'),
-    bar2: document.getElementById('funnel-bar-2'), n2: document.getElementById('funnel-n-2'),
-    bar3: document.getElementById('funnel-bar-3'), n3: document.getElementById('funnel-n-3'),
-    drop1: document.getElementById('funnel-drop-1'), drop2: document.getElementById('funnel-drop-2'),
-  };
-  if (!els.bar1) return;
-
-  // Last-resort fallback only, a previously documented real finding, not a
-  // fabricated placeholder — used only if Supabase is unreachable. Live
-  // counts below are authoritative whenever they load.
-  let n1 = 1393, n2 = 74, n3 = 12;
-
-  const [cFisc, cProc, cSanc] = await Promise.all([
-    sbCount(CONFIG.TABLES.events, (q) => q.eq('section', 'fiscalizaciones')),
-    sbCount(CONFIG.TABLES.events, (q) => q.eq('section', 'procedimientos_sancionatorios')),
-    sbCount(CONFIG.TABLES.events, (q) => q.eq('section', 'registro_publico_sanciones')),
-  ]);
-  if (cFisc != null) n1 = cFisc;
-  if (cProc != null) n2 = cProc;
-  if (cSanc != null) n3 = cSanc;
-
-  // sqrt scale, not linear: the real ratio (~100:1) would make the last
-  // bar a near-invisible sliver under a linear scale. Floor of 6% keeps
-  // every bar visible and tappable regardless of how extreme the ratio is.
-  const scale = (n) => Math.max(6, Math.round(Math.sqrt(n / n1) * 100));
-  els.bar1.style.width = '100%';
-  els.bar2.style.width = scale(n2) + '%';
-  els.bar3.style.width = scale(n3) + '%';
-  els.n1.textContent = n1.toLocaleString('es-CL');
-  els.n2.textContent = n2.toLocaleString('es-CL');
-  els.n3.textContent = n3.toLocaleString('es-CL');
-
-  const pct = (a, b) => (b > 0 ? ((a / b) * 100).toFixed(1) : '0');
-  els.drop1.textContent = `solo el ${pct(n2, n1)}% de las fiscalizaciones llega a un procedimiento sancionatorio`;
-  els.drop2.textContent = `solo el ${pct(n3, n2)}% de esos procedimientos termina en una sanción firme`;
-}
-initFunnel().catch((e) => console.error('Funnel failed to initialize:', e));
 
 /* ============================================================
    MAP — wrapped in try/catch: if Leaflet's CDN script fails to
