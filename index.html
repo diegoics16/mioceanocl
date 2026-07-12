@@ -141,11 +141,11 @@
   }
   .hero-overlay h1 {
     font-family: var(--font-head); font-weight: 700; font-size: clamp(32px, 6vw, 56px);
-    line-height: 1.1; margin-bottom: 12px; color: #FFFFFF;
+    line-height: 1.1; max-width: 780px; margin-bottom: 12px; color: #FFFFFF;
   }
   .hero-overlay h1 em { font-style: italic; color: var(--coral); }
   .hero-overlay p.lede {
-    font-size: 17px; color: rgba(255,255,255,0.88); margin-bottom: 8px;
+    font-size: 17px; color: rgba(255,255,255,0.88); max-width: 560px; margin-bottom: 8px;
   }
   .hero-overlay .trust-strip {
     display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
@@ -176,7 +176,7 @@
     font-family: var(--font-head); font-size: 28px; font-weight: 700; margin-bottom: 6px;
   }
   section.panel p.section-lede {
-    color: var(--ink-secondary); font-size: 14px; margin-bottom: 24px;
+    color: var(--ink-secondary); font-size: 14px; margin-bottom: 24px; max-width: 640px;
   }
 
   /* ---------- thesis (the narrative "stem") ---------- */
@@ -187,7 +187,8 @@
   }
   .thesis-text {
     font-family: var(--font-head); font-size: 21px; line-height: 1.45; color: var(--ink);
-      }
+    max-width: 760px;
+  }
 
   /* ---------- map + alerts zone ---------- */
   .map-shell-fullbleed {
@@ -246,7 +247,7 @@
 
   .map-disclaimer {
     font-size: 11px; line-height: 1.5; color: var(--ink-muted); font-style: italic;
-    padding: 10px 2px 0;
+    padding: 10px 2px 0; max-width: 640px;
   }
 
   .popup-facility { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12.5px; line-height: 1.4; }
@@ -620,7 +621,7 @@
     <div class="footer-grid footer-grid-2">
 
       <!-- Citizen report -->
-      <div class="glass res-card" id="tab-reportar" style="grid-column: 1 / -1;">
+      <div class="glass res-card" id="tab-reportar" style="grid-column: 1 / -1; max-width: 560px;">
         <h3 data-i18n-html="report.h3">Reportar</h3>
         <form id="report-form">
           <div>
@@ -771,7 +772,6 @@ es: {
   'sci.stat.total': 'Estudios identificados',
   'sci.stat.marine': 'Mediciones marinas directas',
   'sci.stat.coverage': 'Años de cobertura',
-  'sci.stat.fulltext': 'Verificados en texto completo',
   'report.h3': 'Reportar',
   'report.labelCategory': 'Categoría',
   'report.optSelect': 'Selecciona…',
@@ -887,7 +887,6 @@ en: {
   'sci.stat.total': 'Studies identified',
   'sci.stat.marine': 'Direct marine measurements',
   'sci.stat.coverage': 'Years of coverage',
-  'sci.stat.fulltext': 'Verified in full text',
   'report.h3': 'Report',
   'report.labelCategory': 'Category',
   'report.optSelect': 'Select…',
@@ -1606,12 +1605,10 @@ try {
     const marine = studies.filter(d => d.marine).length;
     const years = studies.map(d => d.year_pub);
     const span = Math.max(...years) - Math.min(...years);
-    const fulltext = studies.filter(d => d.verified === 'full-text').length;
     el.innerHTML = `
       <div class="glass sci-stat-card"><div class="n">${total}</div><div class="l">${t('sci.stat.total')}</div></div>
       <div class="glass sci-stat-card"><div class="n">${marine}</div><div class="l">${t('sci.stat.marine')}</div></div>
       <div class="glass sci-stat-card"><div class="n">${span}</div><div class="l">${t('sci.stat.coverage')} (${Math.min(...years)}–${Math.max(...years)})</div></div>
-      <div class="glass sci-stat-card"><div class="n">${fulltext}</div><div class="l">${t('sci.stat.fulltext')}</div></div>
     `;
   }
 
