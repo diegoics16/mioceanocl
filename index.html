@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>mioceano — Región de Valparaíso</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB5MT0iMCIgeDI9IjMyIiB5Mj0iMzIiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjMDg5MUIyIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzA1OTY2OSIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+CjxyZWN0IHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgcng9IjciIGZpbGw9InVybCgjZykiLz4KPHBhdGggZD0iTTUgMjFDOC41IDE0LjUgMTMgMjMgMTcgMTYuNUMyMSAxMCAyNS41IDE5IDI5IDEyLjUiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz4KPHBhdGggZD0iTTUgMTQuNUM4LjUgOCAxMyAxNi41IDE3IDEwQzIxIDMuNSAyNS41IDEyIDI5IDUuNSIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIgb3BhY2l0eT0iMC41NSIvPgo8L3N2Zz4=">
 
 <!-- Error visibility, installed BEFORE any CDN script below so a failure
      in Leaflet/Chart.js/Supabase loading itself gets caught too, not just
@@ -118,6 +119,15 @@
     display: flex; align-items: center; gap: 6px;
   }
   .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 3px rgba(5,150,105,0.15); }
+  .lang-toggle-btn {
+    font-family: var(--font-data); font-size: 11px; font-weight: 500;
+    background: var(--bg-alt); border: 1px solid var(--hairline-strong); border-radius: 999px;
+    padding: 5px 10px; cursor: pointer; display: flex; align-items: center; gap: 3px; color: var(--ink-muted);
+  }
+  .lang-toggle-btn:hover { border-color: var(--ocean); }
+  .lang-toggle-btn .lang-opt { padding: 1px 3px; border-radius: 4px; transition: all 0.15s ease; }
+  .lang-toggle-btn .lang-opt.active { color: #FFFFFF; background: var(--ocean); font-weight: 700; }
+  .lang-toggle-btn .lang-sep { color: var(--hairline-strong); }
 
   /* ---------- hero / KPIs (now overlaid on the region photo) ---------- */
   .hero-overlay {
@@ -131,11 +141,11 @@
   }
   .hero-overlay h1 {
     font-family: var(--font-head); font-weight: 700; font-size: clamp(32px, 6vw, 56px);
-    line-height: 1.1; margin-bottom: 12px; color: #FFFFFF;
+    line-height: 1.1; max-width: 780px; margin-bottom: 12px; color: #FFFFFF;
   }
   .hero-overlay h1 em { font-style: italic; color: var(--coral); }
   .hero-overlay p.lede {
-    font-size: 17px; color: rgba(255,255,255,0.88); margin-bottom: 8px;
+    font-size: 17px; color: rgba(255,255,255,0.88); max-width: 560px; margin-bottom: 8px;
   }
   .hero-overlay .trust-strip {
     display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
@@ -166,7 +176,7 @@
     font-family: var(--font-head); font-size: 28px; font-weight: 700; margin-bottom: 6px;
   }
   section.panel p.section-lede {
-    color: var(--ink-secondary); font-size: 14px; margin-bottom: 24px;
+    color: var(--ink-secondary); font-size: 14px; margin-bottom: 24px; max-width: 640px;
   }
 
   /* ---------- thesis (the narrative "stem") ---------- */
@@ -177,7 +187,7 @@
   }
   .thesis-text {
     font-family: var(--font-head); font-size: 21px; line-height: 1.45; color: var(--ink);
-    
+    max-width: 760px;
   }
 
   /* ---------- map + alerts zone ---------- */
@@ -237,7 +247,7 @@
 
   .map-disclaimer {
     font-size: 11px; line-height: 1.5; color: var(--ink-muted); font-style: italic;
-    padding: 10px 2px 0; 
+    padding: 10px 2px 0; max-width: 640px;
   }
 
   .popup-facility { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12.5px; line-height: 1.4; }
@@ -362,6 +372,23 @@
     background: rgba(8,145,178,0.10); border: 1px solid var(--ocean); color: var(--ocean);
     border-radius: 8px; padding: 8px; font-size: 12px; cursor: pointer; font-family: var(--font-ui);
   }
+  .file-upload-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(8,145,178,0.10); border: 1px solid var(--ocean); color: var(--ocean);
+    border-radius: 8px; padding: 8px 12px; font-size: 12px; cursor: pointer; font-family: var(--font-ui);
+  }
+  .file-upload-btn:hover { filter: brightness(1.05); }
+  .file-upload-list { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+  .file-upload-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    font-size: 11.5px; color: var(--ink-secondary); background: var(--bg-alt);
+    border-radius: 6px; padding: 5px 8px;
+  }
+  .file-upload-remove {
+    cursor: pointer; color: var(--ink-muted); background: none; border: none;
+    font-size: 13px; line-height: 1; padding: 0 2px;
+  }
+  .file-upload-remove:hover { color: var(--crimson); }
   #form-status { font-size: 12px; margin-top: 4px; display: none; }
   #form-status.ok { color: var(--mint); display: block; }
   #form-status.err { color: var(--crimson); display: block; }
@@ -392,7 +419,7 @@
 </head>
 <body>
 
-<div id="demo-banner" class="demo-banner" style="display:none;">
+<div id="demo-banner" class="demo-banner" style="display:none;" data-i18n-html="demo.banner">
   Mostrando datos de demostración — conecta tu Supabase real editando SUPABASE_URL / SUPABASE_ANON_KEY en el código.
 </div>
 
@@ -412,12 +439,17 @@
       <span>mioceano</span>
     </div>
     <nav class="tabs">
-      <button class="tab-btn active" data-tab="mapa">Fiscalizaciones</button>
-      <button class="tab-btn" data-tab="poal">Contaminación en el agua</button>
-      <button class="tab-btn" data-tab="cientifico">Investigacion Cientifica</button>
-      <button class="tab-btn" data-tab="reportar">Reportar</button>
+      <button class="tab-btn active" data-tab="mapa" data-i18n-html="nav.mapa">Fiscalizaciones</button>
+      <button class="tab-btn" data-tab="poal" data-i18n-html="nav.poal">Contaminación en el agua</button>
+      <button class="tab-btn" data-tab="cientifico" data-i18n-html="nav.cientifico">Investigacion Cientifica</button>
+      <button class="tab-btn" data-tab="reportar" data-i18n-html="nav.reportar">Reportar</button>
     </nav>
-    <div class="sync-pill"><span class="sync-dot"></span><span id="sync-label">sincronizando…</span></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="sync-pill"><span class="sync-dot"></span><span id="sync-label">sincronizando…</span></div>
+      <button type="button" id="lang-toggle" class="lang-toggle-btn" aria-label="Cambiar idioma / Switch language">
+        <span class="lang-opt lang-opt-es active" data-lang="es">ES</span><span class="lang-sep">/</span><span class="lang-opt lang-opt-en" data-lang="en">EN</span>
+      </button>
+    </div>
   </div>
 </header>
 
@@ -428,10 +460,10 @@
     <img src="https://images.unsplash.com/photo-1718781208870-a7a8be57c448?auto=format&fit=crop&w=2000&q=75" alt="Vista costera de la Región de Valparaíso, Chile" loading="lazy">
     <div class="hero-overlay">
       <div class="hero-overlay-inner">
-        <div class="hero-eyebrow">La Salud del Océano</div>
-        <h1>Valparaíso, <em>en vivo</em>.</h1>
-        <p class="lede">Fiscalizaciones, mediciones de agua y reportes ciudadanos de toda la región — con foco en Bahía Quintero-Puchuncaví, el punto de mayor concentración industrial.</p>
-        <div class="trust-strip">
+        <div class="hero-eyebrow" data-i18n-html="hero.eyebrow">La Salud del Océano</div>
+        <h1 data-i18n-html="hero.h1">Valparaíso, <em>en vivo</em>.</h1>
+        <p class="lede" data-i18n-html="hero.lede">Fiscalizaciones, mediciones de agua y reportes ciudadanos de toda la región — con foco en Bahía Quintero-Puchuncaví, el punto de mayor concentración industrial.</p>
+        <div class="trust-strip" data-i18n-html="hero.trust">
           <span>Fuentes</span><span class="trust-sep">·</span>
           <span>Sistema Nacional de Información de Fiscalización Ambiental (SMA)</span><span class="trust-sep">·</span>
           <span>DIRECTEMAR (Armada de Chile)</span><span class="trust-sep">·</span>
@@ -439,122 +471,122 @@
         </div>
       </div>
     </div>
-    <div class="region-photo-caption">Región de Valparaíso, Chile · Foto: Denys Amaro / Unsplash</div>
+    <div class="region-photo-caption" data-i18n-html="hero.caption">Región de Valparaíso, Chile · Foto: Denys Amaro / Unsplash</div>
   </div>
 
   <!-- ============ THESIS (the narrative stem) ============ -->
   <section class="panel thesis-panel">
-    <div class="thesis-eyebrow">Lo que muestran los datos</div>
-    <p class="thesis-text">Los datos ambientales de la Región de Valparaíso existen, pero están repartidos entre la Superintendencia del Medio Ambiente, La Armada y diferentes partes del gobierno que casi nunca se cruzan entre sí.</p>
+    <div class="thesis-eyebrow" data-i18n-html="thesis.eyebrow">Lo que muestran los datos</div>
+    <p class="thesis-text" data-i18n-html="thesis.text">Los datos ambientales de la Región de Valparaíso existen, pero están repartidos entre la Superintendencia del Medio Ambiente, La Armada y diferentes partes del gobierno que casi nunca se cruzan entre sí.</p>
   </section>
 
   <!-- ============ MAP + ALERTS ============ -->
   <section class="panel" id="tab-mapa">
-    <h2>Qué está pasando</h2>
-    <p class="section-lede">Cada burbuja del mapa es una de las instalaciones detrás del embudo de arriba, ubicada donde está fiscalizada.</p>
+    <h2 data-i18n-html="map.h2">Qué está pasando</h2>
+    <p class="section-lede" data-i18n-html="map.lede">Cada burbuja del mapa es una de las instalaciones detrás del embudo de arriba, ubicada donde está fiscalizada.</p>
 
     <div class="map-legend-bar">
-      <span class="map-legend-item"><span class="legend-dot" style="background:var(--crimson)"></span>Con sanción firme registrada</span>
-      <span class="map-legend-item"><span class="legend-dot" style="background:var(--cyan)"></span>Fiscalizada, sin sanción firme</span>
+      <span class="map-legend-item"><span class="legend-dot" style="background:var(--crimson)"></span><span data-i18n-html="map.legend1">Con sanción firme registrada</span></span>
+      <span class="map-legend-item"><span class="legend-dot" style="background:var(--cyan)"></span><span data-i18n-html="map.legend2">Fiscalizada, sin sanción firme</span></span>
     </div>
 
     <div class="map-shell map-shell-fullbleed">
       <div id="map"></div>
       <div class="map-info-badge" id="map-info-badge">
         ⓘ
-        <div class="map-info-panel">
+        <div class="map-info-panel" data-i18n-html="map.infoPanel">
           <strong>Cómo leer el mapa</strong>
           Cada burbuja es una instalación fiscalizada por SNIFA. El tamaño indica cuántos procedimientos tiene; el color indica si alguno terminó en sanción firme. Toca o pasa el cursor sobre una burbuja para ver el detalle.
         </div>
       </div>
     </div>
 
-    <div class="map-disclaimer">
+    <div class="map-disclaimer" data-i18n-html="map.disclaimer">
       SNIFA no publica una tasa de cumplimiento — esto es el conteo bruto de procedimientos, no un veredicto de contaminación. Una "sanción" puede corresponder a incumplimientos de reporte, no solo a descargas fuera de norma. Las categorías de instalación se eligieron por relevancia costera — no todas las fiscalizaciones registradas son sobre descargas al agua.
     </div>
   </section>
 
   <section class="panel" id="tab-poal">
-    <h2>Metales y coliformes</h2>
-    <p class="section-lede">Mientras las fiscalizaciones de arriba documentan qué se ha revisado, estas mediciones muestran qué hay realmente en el agua. Datos de DIRECTEMAR (POAL) en agua, sedimento y biota — un gráfico por parámetro, comparando estaciones en el tiempo. La línea punteada, cuando aparece, es un valor de referencia internacional — no un límite legal chileno.</p>
+    <h2 data-i18n-html="poal.h2">Metales y coliformes</h2>
+    <p class="section-lede" data-i18n-html="poal.lede">Mientras las fiscalizaciones de arriba documentan qué se ha revisado, estas mediciones muestran qué hay realmente en el agua. Datos de DIRECTEMAR (POAL) en agua, sedimento y biota — un gráfico por parámetro, comparando estaciones en el tiempo. La línea punteada, cuando aparece, es un valor de referencia internacional — no un límite legal chileno.</p>
 
     <div class="poal-charts-block">
 
       <div class="glass poal-chart-card">
-        <h3>Coliformes fecales en agua de mar – Región de Valparaíso</h3>
+        <h3 data-i18n-html="poal.c1.title">Coliformes fecales en agua de mar – Región de Valparaíso</h3>
         <div id="poal-plot-coliformes" class="poal-plot"></div>
         <div class="poal-card-explainer">
-          <span class="poal-explainer-label">Estándar internacional</span>
-          <p>Línea punteada (200 NMP/100 ml): referencia cercana al estándar de calidad para aguas recreativas según OMS y EPA.</p>
-          <span class="poal-explainer-label">Qué significa esto</span>
-          <p>Cuando los valores máximos anuales están sobre esta línea, aumentan los riesgos de diarreas e infecciones asociadas al contacto con el agua y problemas de higiene en zonas de cultivo de mariscos.</p>
-          <span class="poal-explainer-label">Mediciones</span>
-          <p>La medición dejó de hacerse de forma consistente después de 2017 — no hay datos más recientes en este archivo.</p>
+          <span class="poal-explainer-label" data-i18n-html="poal.labelStd">Estándar internacional</span>
+          <p data-i18n-html="poal.c1.std">Línea punteada (200 NMP/100 ml): referencia cercana al estándar de calidad para aguas recreativas según OMS y EPA.</p>
+          <span class="poal-explainer-label" data-i18n-html="poal.labelMeaning">Qué significa esto</span>
+          <p data-i18n-html="poal.c1.meaning">Cuando los valores máximos anuales están sobre esta línea, aumentan los riesgos de diarreas e infecciones asociadas al contacto con el agua y problemas de higiene en zonas de cultivo de mariscos.</p>
+          <span class="poal-explainer-label" data-i18n-html="poal.labelMeasurements">Mediciones</span>
+          <p data-i18n-html="poal.c1.measurements">La medición dejó de hacerse de forma consistente después de 2017 — no hay datos más recientes en este archivo.</p>
         </div>
       </div>
 
       <div class="glass poal-chart-card">
-        <h3>Cobre total en sedimento marino – Región de Valparaíso</h3>
+        <h3 data-i18n-html="poal.c2.title">Cobre total en sedimento marino – Región de Valparaíso</h3>
         <div id="poal-plot-cobre_sed" class="poal-plot"></div>
         <div class="poal-card-explainer">
-          <span class="poal-explainer-label">Estándar internacional</span>
-          <p>Línea punteada (18,7 mg/kg): nivel umbral (TEL) de cobre en sedimentos marinos según las guías CCME, por debajo del cual los efectos tóxicos sobre la fauna del fondo son poco probables.</p>
-          <span class="poal-explainer-label">Qué significa esto</span>
-          <p>Valores repetidamente por encima de esta línea indican sedimentos enriquecidos en metales, donde los invertebrados bentónicos pueden sufrir efectos crónicos y acumular cobre en sus tejidos, afectando también a peces demersales.</p>
-          <span class="poal-explainer-label">Mediciones</span>
-          <p>En este gráfico se muestran los valores máximos anuales por cuerpo de agua entre 2014 y 2024 — el tramo reciente donde se observan los mayores incrementos. Valparaíso registra el valor más alto de toda la serie: 12.017 mg/kg en 2024 (estación Dique Flotante), frente a 7 mg/kg en la misma estación un año antes — más de 600 veces el umbral y un salto de 1.700x en un solo año. Vale la pena verificarlo contra la fuente original antes de citarlo.</p>
+          <span class="poal-explainer-label" data-i18n-html="poal.labelStd">Estándar internacional</span>
+          <p data-i18n-html="poal.c2.std">Línea punteada (18,7 mg/kg): nivel umbral (TEL) de cobre en sedimentos marinos según las guías CCME, por debajo del cual los efectos tóxicos sobre la fauna del fondo son poco probables.</p>
+          <span class="poal-explainer-label" data-i18n-html="poal.labelMeaning">Qué significa esto</span>
+          <p data-i18n-html="poal.c2.meaning">Valores repetidamente por encima de esta línea indican sedimentos enriquecidos en metales, donde los invertebrados bentónicos pueden sufrir efectos crónicos y acumular cobre en sus tejidos, afectando también a peces demersales.</p>
+          <span class="poal-explainer-label" data-i18n-html="poal.labelMeasurements">Mediciones</span>
+          <p data-i18n-html="poal.c2.measurements">En este gráfico se muestran los valores máximos anuales por cuerpo de agua entre 2014 y 2024 — el tramo reciente donde se observan los mayores incrementos. Valparaíso registra el valor más alto de toda la serie: 12.017 mg/kg en 2024 (estación Dique Flotante), frente a 7 mg/kg en la misma estación un año antes — más de 600 veces el umbral y un salto de 1.700x en un solo año. Vale la pena verificarlo contra la fuente original antes de citarlo.</p>
         </div>
       </div>
 
       <div class="glass poal-chart-card">
-        <h3>Mercurio total en sedimento marino – Región de Valparaíso</h3>
+        <h3 data-i18n-html="poal.c3.title">Mercurio total en sedimento marino – Región de Valparaíso</h3>
         <div id="poal-plot-hg_sed" class="poal-plot"></div>
         <div class="poal-card-explainer">
-          <span class="poal-explainer-label">Estándar internacional</span>
-          <p>Línea punteada (0,13 mg/kg): umbral TEL para mercurio en sedimentos marinos (CCME).</p>
-          <span class="poal-explainer-label">Qué significa esto</span>
-          <p>Superar esta referencia implica mayor probabilidad de bioacumulación y biomagnificación del mercurio en la cadena trófica, aumentando la exposición de peces y la de las personas que los consumen.</p>
-          <span class="poal-explainer-label">Mediciones</span>
-          <p>Se muestran los valores máximos anuales por cuerpo de agua entre 2014 y 2024.</p>
+          <span class="poal-explainer-label" data-i18n-html="poal.labelStd">Estándar internacional</span>
+          <p data-i18n-html="poal.c3.std">Línea punteada (0,13 mg/kg): umbral TEL para mercurio en sedimentos marinos (CCME).</p>
+          <span class="poal-explainer-label" data-i18n-html="poal.labelMeaning">Qué significa esto</span>
+          <p data-i18n-html="poal.c3.meaning">Superar esta referencia implica mayor probabilidad de bioacumulación y biomagnificación del mercurio en la cadena trófica, aumentando la exposición de peces y la de las personas que los consumen.</p>
+          <span class="poal-explainer-label" data-i18n-html="poal.labelMeasurements">Mediciones</span>
+          <p data-i18n-html="poal.c3.measurements">Se muestran los valores máximos anuales por cuerpo de agua entre 2014 y 2024.</p>
         </div>
       </div>
 
       <div class="glass poal-chart-card">
-        <h3>Benzo(a)pireno en agua de mar – Región de Valparaíso</h3>
+        <h3 data-i18n-html="poal.c4.title">Benzo(a)pireno en agua de mar – Región de Valparaíso</h3>
         <div id="poal-plot-bap_agua" class="poal-plot"></div>
         <div class="poal-card-explainer">
-          <span class="poal-explainer-label">Estándar internacional</span>
-          <p>Línea punteada (0,01 µg/L): referencia basada en criterios internacionales para hidrocarburos aromáticos policíclicos cancerígenos en agua de mar.</p>
-          <span class="poal-explainer-label">Qué significa esto</span>
-          <p>Concentraciones por encima de este nivel reflejan contaminación por combustión o hidrocarburos que puede afectar la fauna marina y, a largo plazo, la seguridad alimentaria.</p>
-          <span class="poal-explainer-label">Mediciones</span>
-          <p>Se excluyó un valor de 225 µg/L reportado de forma idéntica en tres bahías distintas en 2023 y 2024 — miles de veces por sobre el resto de la serie y repetido en ubicaciones no relacionadas, la misma firma que en el resto del sitio se trata como límite de detección de laboratorio, no como medición real.</p>
+          <span class="poal-explainer-label" data-i18n-html="poal.labelStd">Estándar internacional</span>
+          <p data-i18n-html="poal.c4.std">Línea punteada (0,01 µg/L): referencia basada en criterios internacionales para hidrocarburos aromáticos policíclicos cancerígenos en agua de mar.</p>
+          <span class="poal-explainer-label" data-i18n-html="poal.labelMeaning">Qué significa esto</span>
+          <p data-i18n-html="poal.c4.meaning">Concentraciones por encima de este nivel reflejan contaminación por combustión o hidrocarburos que puede afectar la fauna marina y, a largo plazo, la seguridad alimentaria.</p>
+          <span class="poal-explainer-label" data-i18n-html="poal.labelMeasurements">Mediciones</span>
+          <p data-i18n-html="poal.c4.measurements">Se excluyó un valor de 225 µg/L reportado de forma idéntica en tres bahías distintas en 2023 y 2024 — miles de veces por sobre el resto de la serie y repetido en ubicaciones no relacionadas, la misma firma que en el resto del sitio se trata como límite de detección de laboratorio, no como medición real.</p>
         </div>
       </div>
 
       <div class="glass poal-chart-card">
-        <h3>Mercurio total en biota – Región de Valparaíso</h3>
+        <h3 data-i18n-html="poal.c5.title">Mercurio total en biota – Región de Valparaíso</h3>
         <div id="poal-plot-hg_biota" class="poal-plot"></div>
         <div class="poal-card-explainer">
-          <span class="poal-explainer-label">Estándar internacional</span>
-          <p>Línea punteada (0,5 mg/kg): valor cercano a los límites máximos para mercurio en productos de la pesca según Codex y la Unión Europea.</p>
-          <span class="poal-explainer-label">Qué significa esto</span>
-          <p>Si las concentraciones en tejidos de peces o mariscos superan esta línea, aumenta el riesgo de efectos neurotóxicos en consumidores frecuentes, especialmente niños y embarazadas.</p>
-          <span class="poal-explainer-label">Mediciones</span>
-          <p>El gráfico muestra los valores máximos anuales por cuerpo de agua entre 2014 y 2024, el rango real presente en la hoja para este parámetro. Quintero tiene mediciones en 2014, 2015 y 2017, un vacío entre 2018 y 2021, y datos nuevamente desde 2022 — insuficiente continuidad para hablar de una tendencia sostenida.</p>
+          <span class="poal-explainer-label" data-i18n-html="poal.labelStd">Estándar internacional</span>
+          <p data-i18n-html="poal.c5.std">Línea punteada (0,5 mg/kg): valor cercano a los límites máximos para mercurio en productos de la pesca según Codex y la Unión Europea.</p>
+          <span class="poal-explainer-label" data-i18n-html="poal.labelMeaning">Qué significa esto</span>
+          <p data-i18n-html="poal.c5.meaning">Si las concentraciones en tejidos de peces o mariscos superan esta línea, aumenta el riesgo de efectos neurotóxicos en consumidores frecuentes, especialmente niños y embarazadas.</p>
+          <span class="poal-explainer-label" data-i18n-html="poal.labelMeasurements">Mediciones</span>
+          <p data-i18n-html="poal.c5.measurements">El gráfico muestra los valores máximos anuales por cuerpo de agua entre 2014 y 2024, el rango real presente en la hoja para este parámetro. Quintero tiene mediciones en 2014, 2015 y 2017, un vacío entre 2018 y 2021, y datos nuevamente desde 2022 — insuficiente continuidad para hablar de una tendencia sostenida.</p>
         </div>
       </div>
 
       <div class="glass poal-chart-card">
-        <h3>Plomo total en biota (tejidos) – Región de Valparaíso</h3>
+        <h3 data-i18n-html="poal.c6.title">Plomo total en biota (tejidos) – Región de Valparaíso</h3>
         <div id="poal-plot-pb_biota" class="poal-plot"></div>
         <div class="poal-card-explainer">
-          <span class="poal-explainer-label">Estándar internacional</span>
-          <p>Línea punteada (0,30 mg/kg): valor de referencia cercano a los límites máximos para plomo en productos de la pesca según Codex Alimentarius y la normativa europea. Se usa aquí como umbral conservador de seguridad alimentaria para tejidos de peces y mariscos.</p>
-          <span class="poal-explainer-label">Qué significa esto</span>
-          <p>Cuando las concentraciones en tejidos de biota superan esta línea, aumentan los riesgos de efectos tóxicos por exposición crónica al plomo en personas que consumen estos organismos con frecuencia. Los valores muy por encima del umbral indican sitios donde la contaminación histórica o reciente puede hacer que el consumo de mariscos locales sea especialmente riesgoso.</p>
-          <span class="poal-explainer-label">Mediciones</span>
-          <p>El gráfico muestra los valores máximos anuales de plomo en tejidos de biota por cuerpo de agua entre 2014 y 2024. En algunas bahías — en particular sectores de Quintero (Rocas Loncura, Rocas Estrella) — las concentraciones de 2023-2024 se sitúan cientos de veces por sobre el nivel de referencia internacional; el resto de la región se mantiene en niveles moderados o cercanos al umbral.</p>
+          <span class="poal-explainer-label" data-i18n-html="poal.labelStd">Estándar internacional</span>
+          <p data-i18n-html="poal.c6.std">Línea punteada (0,30 mg/kg): valor de referencia cercano a los límites máximos para plomo en productos de la pesca según Codex Alimentarius y la normativa europea. Se usa aquí como umbral conservador de seguridad alimentaria para tejidos de peces y mariscos.</p>
+          <span class="poal-explainer-label" data-i18n-html="poal.labelMeaning">Qué significa esto</span>
+          <p data-i18n-html="poal.c6.meaning">Cuando las concentraciones en tejidos de biota superan esta línea, aumentan los riesgos de efectos tóxicos por exposición crónica al plomo en personas que consumen estos organismos con frecuencia. Los valores muy por encima del umbral indican sitios donde la contaminación histórica o reciente puede hacer que el consumo de mariscos locales sea especialmente riesgoso.</p>
+          <span class="poal-explainer-label" data-i18n-html="poal.labelMeasurements">Mediciones</span>
+          <p data-i18n-html="poal.c6.measurements">El gráfico muestra los valores máximos anuales de plomo en tejidos de biota por cuerpo de agua entre 2014 y 2024. En algunas bahías — en particular sectores de Quintero (Rocas Loncura, Rocas Estrella) — las concentraciones de 2023-2024 se sitúan cientos de veces por sobre el nivel de referencia internacional; el resto de la región se mantiene en niveles moderados o cercanos al umbral.</p>
         </div>
       </div>
 
@@ -562,13 +594,13 @@
   </section>
 
   <section class="panel" id="tab-cientifico">
-    <h2>Panel científico</h2>
-    <p class="section-lede">La evidencia científica independiente ha documentado de forma sistemática el estado ambiental de la bahía, complementando y, en ocasiones, ampliando el alcance de las fiscalizaciones y mediciones oficiales. Esta cronología reúne estudios publicados desde 2010 con mediciones directas en agua, sedimentos y biota. Cada registro corresponde a una fuente original y citable, sin interpretaciones ni síntesis. Solo se incluyen publicaciones científicas y documentos institucionales de acceso público; se excluyen datos inéditos o no publicados de investigadores individuales.</p>
+    <h2 data-i18n-html="sci.h2">Panel científico</h2>
+    <p class="section-lede" data-i18n-html="sci.lede">Estudios científicos independientes confirman, año tras año, lo que fiscalizaciones y mediciones oficiales apenas alcanzan a mostrar. Cronología de mediciones marinas directas en la bahía — agua, sedimento y biota — desde 2010. Cada punto es una fuente citable, no una síntesis. Solo fuentes publicadas o institucionales — nada de datos no publicados de investigadores individuales.</p>
 
     <div class="sci-stats" id="sci-stats"></div>
 
     <div class="sci-toolbar" id="sci-toolbar">
-      <span class="sci-toolbar-label">Filtrar por categoría</span>
+      <span class="sci-toolbar-label" data-i18n-html="sci.toolbarLabel">Filtrar por categoría</span>
     </div>
 
     <div class="glass" style="padding:20px;">
@@ -576,9 +608,9 @@
     </div>
 
     <div class="sci-legend-foot">
-      <div class="item"><span class="sci-legend-foot-dot" style="background:#fff;border:1.4px solid var(--ink);"></span>Borde = medición marina directa (agua / sedimento / biota de bahía)</div>
-      <div class="item"><span class="sci-legend-foot-dot" style="background:rgba(15,36,56,0.25);"></span>Sin borde = contexto terrestre / aéreo / humano</div>
-      <div class="item">Tamaño del punto = alcance del estudio</div>
+      <div class="item"><span class="sci-legend-foot-dot" style="background:#fff;border:1.4px solid var(--ink);"></span><span data-i18n-html="sci.legend1">Borde = medición marina directa (agua / sedimento / biota de bahía)</span></div>
+      <div class="item"><span class="sci-legend-foot-dot" style="background:rgba(15,36,56,0.25);"></span><span data-i18n-html="sci.legend2">Sin borde = contexto terrestre / aéreo / humano</span></div>
+      <div class="item"><span data-i18n-html="sci.legend3">Tamaño del punto = alcance del estudio</span></div>
     </div>
   </section>
 
@@ -589,38 +621,46 @@
     <div class="footer-grid footer-grid-2">
 
       <!-- Citizen report -->
-      <div class="glass res-card" id="tab-reportar" style="grid-column: 1 / -1;">
-        <h3>Reportar</h3>
+      <div class="glass res-card" id="tab-reportar" style="grid-column: 1 / -1; max-width: 560px;">
+        <h3 data-i18n-html="report.h3">Reportar</h3>
         <form id="report-form">
           <div>
-            <label for="rep-category">Categoría</label>
+            <label for="rep-category" data-i18n-html="report.labelCategory">Categoría</label>
             <select id="rep-category" required>
-              <option value="">Selecciona…</option>
-              <option value="descarga_visible">Descarga visible</option>
-              <option value="decoloracion">Decoloración del agua</option>
-              <option value="olor">Olor anómalo</option>
-              <option value="peces_muertos">Peces u organismos muertos</option>
-              <option value="otro">Otro</option>
+              <option value="" data-i18n-html="report.optSelect">Selecciona…</option>
+              <option value="descarga_visible" data-i18n-html="report.opt1">Descarga visible</option>
+              <option value="decoloracion" data-i18n-html="report.opt2">Decoloración del agua</option>
+              <option value="olor" data-i18n-html="report.opt3">Olor anómalo</option>
+              <option value="peces_muertos" data-i18n-html="report.opt4">Peces u organismos muertos</option>
+              <option value="otro" data-i18n-html="report.opt5">Otro</option>
             </select>
           </div>
           <div>
-            <label for="rep-desc">Descripción</label>
-            <textarea id="rep-desc" placeholder="¿Qué observaste? Sé lo más específico posible." required></textarea>
+            <label for="rep-desc" data-i18n-html="report.labelDesc">Descripción</label>
+            <textarea id="rep-desc" placeholder="¿Qué observaste? Sé lo más específico posible." data-i18n-placeholder="report.descPlaceholder" required></textarea>
           </div>
           <div>
-            <label>Ubicación</label>
-            <button type="button" id="geo-btn">Usar mi ubicación actual</button>
+            <label data-i18n-html="report.labelLocation">Ubicación</label>
+            <button type="button" id="geo-btn" data-i18n-html="report.geoBtn">Usar mi ubicación actual</button>
             <span id="geo-status" style="font-size:11px;color:var(--ink-muted);margin-left:6px;"></span>
+          </div>
+          <div>
+            <label for="rep-media" data-i18n-html="report.labelMedia">Fotos o video (opcional)</label>
+            <label class="file-upload-btn" for="rep-media" data-i18n-html="report.mediaBtn">📎 Elegir archivos</label>
+            <input type="file" id="rep-media" accept="image/*,video/*" multiple style="display:none;">
+            <div id="rep-media-list" class="file-upload-list"></div>
+            <div style="font-size:11px;color:var(--ink-muted);margin-top:4px;" data-i18n-html="report.mediaHint">Máximo 4 archivos, 15 MB cada uno.</div>
+            <div id="rep-media-status" style="font-size:11px;color:var(--crimson);margin-top:2px;"></div>
           </div>
           <div class="checkbox-row">
             <input type="checkbox" id="rep-armada">
-            <label for="rep-armada" style="text-transform:none;">¿Reportaste esto también a la Armada (137)?</label>
+            <label for="rep-armada" style="text-transform:none;" data-i18n-html="report.labelArmada">¿Reportaste esto también a la Armada (137)?</label>
           </div>
           <div>
-            <label for="rep-contact">Contacto (opcional)</label>
-            <input type="text" id="rep-contact" placeholder="Email o teléfono, solo si quieres seguimiento">
+            <label for="rep-contact" data-i18n-html="report.labelContact">Contacto (opcional)</label>
+            <input type="text" id="rep-contact" placeholder="Email o teléfono, solo si quieres seguimiento" data-i18n-placeholder="report.contactPlaceholder">
           </div>
-          <button type="submit">Enviar reporte</button>
+          <button type="submit" data-i18n-html="report.submitBtn">Enviar reporte</button>
           <div id="form-status"></div>
         </form>
       </div>
@@ -628,9 +668,10 @@
     </div>
   </section>
 
-  <footer class="site-footer">
+  <footer class="site-footer" data-i18n-html="footer.text">
     mioceano.cl — un proyecto ciudadano de transparencia ambiental para la Bahía Quintero-Puchuncaví. Datos: SNIFA (SMA), POAL (DIRECTEMAR), reportes comunitarios.
   </footer>
+
 </main>
 
 <script>
@@ -663,6 +704,244 @@
   });
 })();
 
+const TRANSLATIONS = {
+es: {
+  'nav.mapa': 'Fiscalizaciones',
+  'nav.poal': 'Contaminación en el agua',
+  'nav.cientifico': 'Investigacion Cientifica',
+  'nav.reportar': 'Reportar',
+  'sync.syncing': 'sincronizando…',
+  'sync.synced': 'sincronizado',
+  'sync.checkSync': 'revisar última sync',
+  'sync.demo': 'modo demo',
+  'sync.noData': 'sin datos',
+  'demo.banner': 'Mostrando datos de demostración — conecta tu Supabase real editando SUPABASE_URL / SUPABASE_ANON_KEY en el código.',
+  'hero.eyebrow': 'La Salud del Océano',
+  'hero.h1': 'Valparaíso, <em>en vivo</em>.',
+  'hero.lede': 'Fiscalizaciones, mediciones de agua y reportes ciudadanos de toda la región — con foco en Bahía Quintero-Puchuncaví, el punto de mayor concentración industrial.',
+  'hero.trust': '<span>Fuentes</span><span class="trust-sep">·</span><span>Sistema Nacional de Información de Fiscalización Ambiental (SMA)</span><span class="trust-sep">·</span><span>DIRECTEMAR (Armada de Chile)</span><span class="trust-sep">·</span><span>Reportes ciudadanos</span>',
+  'hero.caption': 'Región de Valparaíso, Chile · Foto: Denys Amaro / Unsplash',
+  'thesis.eyebrow': 'Lo que muestran los datos',
+  'thesis.text': 'Los datos ambientales de la Región de Valparaíso existen, pero están repartidos entre la Superintendencia del Medio Ambiente, La Armada y diferentes partes del gobierno que casi nunca se cruzan entre sí.',
+  'map.h2': 'Qué está pasando',
+  'map.lede': 'Cada burbuja del mapa es una de las instalaciones detrás del embudo de arriba, ubicada donde está fiscalizada.',
+  'map.legend1': 'Con sanción firme registrada',
+  'map.legend2': 'Fiscalizada, sin sanción firme',
+  'map.infoPanel': '<strong>Cómo leer el mapa</strong>Cada burbuja es una instalación fiscalizada por SNIFA. El tamaño indica cuántos procedimientos tiene; el color indica si alguno terminó en sanción firme. Toca o pasa el cursor sobre una burbuja para ver el detalle.',
+  'map.disclaimer': 'SNIFA no publica una tasa de cumplimiento — esto es el conteo bruto de procedimientos, no un veredicto de contaminación. Una "sanción" puede corresponder a incumplimientos de reporte, no solo a descargas fuera de norma. Las categorías de instalación se eligieron por relevancia costera — no todas las fiscalizaciones registradas son sobre descargas al agua.',
+  'poal.h2': 'Metales y coliformes',
+  'poal.lede': 'Mientras las fiscalizaciones de arriba documentan qué se ha revisado, estas mediciones muestran qué hay realmente en el agua. Datos de DIRECTEMAR (POAL) en agua, sedimento y biota — un gráfico por parámetro, comparando estaciones en el tiempo. La línea punteada, cuando aparece, es un valor de referencia internacional — no un límite legal chileno.',
+  'poal.labelStd': 'Estándar internacional',
+  'poal.labelMeaning': 'Qué significa esto',
+  'poal.labelMeasurements': 'Mediciones',
+  'poal.c1.title': 'Coliformes fecales en agua de mar – Región de Valparaíso',
+  'poal.c1.std': 'Línea punteada (200 NMP/100 ml): referencia cercana al estándar de calidad para aguas recreativas según OMS y EPA.',
+  'poal.c1.meaning': 'Cuando los valores máximos anuales están sobre esta línea, aumentan los riesgos de diarreas e infecciones asociadas al contacto con el agua y problemas de higiene en zonas de cultivo de mariscos.',
+  'poal.c1.measurements': 'La medición dejó de hacerse de forma consistente después de 2017 — no hay datos más recientes en este archivo.',
+  'poal.c2.title': 'Cobre total en sedimento marino – Región de Valparaíso',
+  'poal.c2.std': 'Línea punteada (18,7 mg/kg): nivel umbral (TEL) de cobre en sedimentos marinos según las guías CCME, por debajo del cual los efectos tóxicos sobre la fauna del fondo son poco probables.',
+  'poal.c2.meaning': 'Valores repetidamente por encima de esta línea indican sedimentos enriquecidos en metales, donde los invertebrados bentónicos pueden sufrir efectos crónicos y acumular cobre en sus tejidos, afectando también a peces demersales.',
+  'poal.c2.measurements': 'En este gráfico se muestran los valores máximos anuales por cuerpo de agua entre 2014 y 2024 — el tramo reciente donde se observan los mayores incrementos. Valparaíso registra el valor más alto de toda la serie: 12.017 mg/kg en 2024 (estación Dique Flotante), frente a 7 mg/kg en la misma estación un año antes — más de 600 veces el umbral y un salto de 1.700x en un solo año. Vale la pena verificarlo contra la fuente original antes de citarlo.',
+  'poal.c3.title': 'Mercurio total en sedimento marino – Región de Valparaíso',
+  'poal.c3.std': 'Línea punteada (0,13 mg/kg): umbral TEL para mercurio en sedimentos marinos (CCME).',
+  'poal.c3.meaning': 'Superar esta referencia implica mayor probabilidad de bioacumulación y biomagnificación del mercurio en la cadena trófica, aumentando la exposición de peces y la de las personas que los consumen.',
+  'poal.c3.measurements': 'Se muestran los valores máximos anuales por cuerpo de agua entre 2014 y 2024.',
+  'poal.c4.title': 'Benzo(a)pireno en agua de mar – Región de Valparaíso',
+  'poal.c4.std': 'Línea punteada (0,01 µg/L): referencia basada en criterios internacionales para hidrocarburos aromáticos policíclicos cancerígenos en agua de mar.',
+  'poal.c4.meaning': 'Concentraciones por encima de este nivel reflejan contaminación por combustión o hidrocarburos que puede afectar la fauna marina y, a largo plazo, la seguridad alimentaria.',
+  'poal.c4.measurements': 'Se excluyó un valor de 225 µg/L reportado de forma idéntica en tres bahías distintas en 2023 y 2024 — miles de veces por sobre el resto de la serie y repetido en ubicaciones no relacionadas, la misma firma que en el resto del sitio se trata como límite de detección de laboratorio, no como medición real.',
+  'poal.c5.title': 'Mercurio total en biota – Región de Valparaíso',
+  'poal.c5.std': 'Línea punteada (0,5 mg/kg): valor cercano a los límites máximos para mercurio en productos de la pesca según Codex y la Unión Europea.',
+  'poal.c5.meaning': 'Si las concentraciones en tejidos de peces o mariscos superan esta línea, aumenta el riesgo de efectos neurotóxicos en consumidores frecuentes, especialmente niños y embarazadas.',
+  'poal.c5.measurements': 'El gráfico muestra los valores máximos anuales por cuerpo de agua entre 2014 y 2024, el rango real presente en la hoja para este parámetro. Quintero tiene mediciones en 2014, 2015 y 2017, un vacío entre 2018 y 2021, y datos nuevamente desde 2022 — insuficiente continuidad para hablar de una tendencia sostenida.',
+  'poal.c6.title': 'Plomo total en biota (tejidos) – Región de Valparaíso',
+  'poal.c6.std': 'Línea punteada (0,30 mg/kg): valor de referencia cercano a los límites máximos para plomo en productos de la pesca según Codex Alimentarius y la normativa europea. Se usa aquí como umbral conservador de seguridad alimentaria para tejidos de peces y mariscos.',
+  'poal.c6.meaning': 'Cuando las concentraciones en tejidos de biota superan esta línea, aumentan los riesgos de efectos tóxicos por exposición crónica al plomo en personas que consumen estos organismos con frecuencia. Los valores muy por encima del umbral indican sitios donde la contaminación histórica o reciente puede hacer que el consumo de mariscos locales sea especialmente riesgoso.',
+  'poal.c6.measurements': 'El gráfico muestra los valores máximos anuales de plomo en tejidos de biota por cuerpo de agua entre 2014 y 2024. En algunas bahías — en particular sectores de Quintero (Rocas Loncura, Rocas Estrella) — las concentraciones de 2023-2024 se sitúan cientos de veces por sobre el nivel de referencia internacional; el resto de la región se mantiene en niveles moderados o cercanos al umbral.',
+  'sci.h2': 'Panel científico',
+  'sci.lede': 'Estudios científicos independientes confirman, año tras año, lo que fiscalizaciones y mediciones oficiales apenas alcanzan a mostrar. Cronología de mediciones marinas directas en la bahía — agua, sedimento y biota — desde 2010. Cada punto es una fuente citable, no una síntesis. Solo fuentes publicadas o institucionales — nada de datos no publicados de investigadores individuales.',
+  'sci.toolbarLabel': 'Filtrar por categoría',
+  'sci.legend1': 'Borde = medición marina directa (agua / sedimento / biota de bahía)',
+  'sci.legend2': 'Sin borde = contexto terrestre / aéreo / humano',
+  'sci.legend3': 'Tamaño del punto = alcance del estudio',
+  'sci.marine': 'marino',
+  'sci.terrestrial': 'terrestre/aéreo',
+  'sci.fullText': 'texto completo verificado',
+  'sci.secondary': 'fuente secundaria',
+  'sci.sampled': ' · muestreo: ',
+  'sci.stat.total': 'Estudios identificados',
+  'sci.stat.marine': 'Mediciones marinas directas',
+  'sci.stat.coverage': 'Años de cobertura',
+  'sci.stat.fulltext': 'Verificados en texto completo',
+  'report.h3': 'Reportar',
+  'report.labelCategory': 'Categoría',
+  'report.optSelect': 'Selecciona…',
+  'report.opt1': 'Descarga visible',
+  'report.opt2': 'Decoloración del agua',
+  'report.opt3': 'Olor anómalo',
+  'report.opt4': 'Peces u organismos muertos',
+  'report.opt5': 'Otro',
+  'report.labelDesc': 'Descripción',
+  'report.descPlaceholder': '¿Qué observaste? Sé lo más específico posible.',
+  'report.labelLocation': 'Ubicación',
+  'report.geoBtn': 'Usar mi ubicación actual',
+  'report.labelMedia': 'Fotos o video (opcional)',
+  'report.mediaBtn': '📎 Elegir archivos',
+  'report.mediaHint': 'Máximo 4 archivos, 15 MB cada uno.',
+  'report.labelArmada': '¿Reportaste esto también a la Armada (137)?',
+  'report.labelContact': 'Contacto (opcional)',
+  'report.contactPlaceholder': 'Email o teléfono, solo si quieres seguimiento',
+  'report.submitBtn': 'Enviar reporte',
+  'report.geo.unavailable': 'Geolocalización no disponible en este navegador.',
+  'report.geo.getting': 'Obteniendo ubicación…',
+  'report.geo.captured': 'Ubicación capturada',
+  'report.geo.failed': 'No se pudo obtener la ubicación — puedes enviar el reporte sin ella.',
+  'report.media.maxFiles': 'archivos — el resto no se agregó.',
+  'report.media.tooBig': 'supera',
+  'report.media.tooBigSuffix': 'MB — no se agregó.',
+  'report.media.remove': 'Quitar',
+  'report.status.demo': 'Modo demo — este reporte no se guardó. Conecta Supabase para activar el envío real.',
+  'report.status.uploading': 'Subiendo archivos…',
+  'report.status.ok': 'Reporte enviado. Gracias — aparecerá en el mapa como no verificado.',
+  'report.status.errPrefix': 'No se pudo enviar:',
+  'report.status.errSuffix': 'Verifica que la tabla community_reports y el bucket',
+  'report.status.errSuffix2': 'permitan escritura pública (RLS).',
+  'footer.text': 'mioceano.cl — un proyecto ciudadano de transparencia ambiental para la Bahía Quintero-Puchuncaví. Datos: SNIFA (SMA), POAL (DIRECTEMAR), reportes comunitarios.',
+  'map.popup.noName': 'Instalación no identificada',
+  'map.popup.procedures': 'procedimientos registrados',
+  'map.popup.sanctions': 'sanción(es) firme(s)',
+  'map.estado.sanction': 'Sanción confirmada',
+  'map.estado.absolved': 'Absuelto',
+  'map.estado.pdcOk': 'Programa de cumplimiento OK',
+  'map.estado.pdcRunning': 'Programa de cumplimiento en curso',
+  'map.estado.ongoing': 'Procedimiento en curso',
+  'map.estado.archived': 'Archivado',
+  'map.estado.suspended': 'Suspendido',
+  'chart.logScale': 'escala logarítmica',
+  'chart.reference': 'Referencia',
+  'chart.historicalMedian': 'Mediana histórica',
+},
+en: {
+  'nav.mapa': 'Enforcement',
+  'nav.poal': 'Water contamination',
+  'nav.cientifico': 'Scientific Research',
+  'nav.reportar': 'Report',
+  'sync.syncing': 'syncing…',
+  'sync.synced': 'synced',
+  'sync.checkSync': 'check last sync',
+  'sync.demo': 'demo mode',
+  'sync.noData': 'no data',
+  'demo.banner': 'Showing demo data — connect your real Supabase by editing SUPABASE_URL / SUPABASE_ANON_KEY in the code.',
+  'hero.eyebrow': 'Ocean Health',
+  'hero.h1': 'Valparaíso, <em>live</em>.',
+  'hero.lede': 'Enforcement actions, water measurements, and citizen reports for the whole region — with a focus on Quintero-Puchuncaví Bay, the point of highest industrial concentration.',
+  'hero.trust': '<span>Sources</span><span class="trust-sep">·</span><span>National Environmental Enforcement Information System (SMA)</span><span class="trust-sep">·</span><span>DIRECTEMAR (Chilean Navy)</span><span class="trust-sep">·</span><span>Citizen reports</span>',
+  'hero.caption': 'Valparaíso Region, Chile · Photo: Denys Amaro / Unsplash',
+  'thesis.eyebrow': 'What the data shows',
+  'thesis.text': 'Environmental data for the Valparaíso Region exists, but it\'s split across the Environmental Superintendency, the Navy, and different parts of government that almost never cross-reference each other.',
+  'map.h2': "What's happening",
+  'map.lede': 'Each bubble on the map is one of the facilities behind the funnel above, placed where it was inspected.',
+  'map.legend1': 'Confirmed sanction on record',
+  'map.legend2': 'Inspected, no confirmed sanction',
+  'map.infoPanel': '<strong>How to read the map</strong>Each bubble is a facility inspected by SNIFA. Size indicates how many procedures it has; color indicates whether any ended in a confirmed sanction. Tap or hover over a bubble for detail.',
+  'map.disclaimer': 'SNIFA does not publish a compliance rate — this is the raw count of procedures, not a verdict on contamination. A "sanction" can correspond to reporting failures, not only out-of-standard discharges. Facility categories were chosen for coastal relevance — not every recorded inspection is about water discharge.',
+  'poal.h2': 'Metals and coliforms',
+  'poal.lede': "While the enforcement records above document what's been reviewed, these measurements show what's actually in the water. DIRECTEMAR (POAL) data on water, sediment and biota — one chart per parameter, comparing stations over time. The dotted line, when it appears, is an international reference value — not a Chilean legal limit.",
+  'poal.labelStd': 'International standard',
+  'poal.labelMeaning': 'What this means',
+  'poal.labelMeasurements': 'Measurements',
+  'poal.c1.title': 'Fecal coliforms in seawater – Valparaíso Region',
+  'poal.c1.std': 'Dashed line (200 MPN/100 ml): reference close to the recreational water quality standard from WHO and EPA.',
+  'poal.c1.meaning': 'When annual maximum values sit above this line, the risk of diarrhea and infections from water contact and hygiene issues in shellfish-growing areas increases.',
+  'poal.c1.measurements': "Consistent measurement stopped after 2017 — there's no more recent data in this file.",
+  'poal.c2.title': 'Total copper in marine sediment – Valparaíso Region',
+  'poal.c2.std': 'Dashed line (18.7 mg/kg): threshold level (TEL) for copper in marine sediment per CCME guidelines, below which toxic effects on bottom-dwelling fauna are unlikely.',
+  'poal.c2.meaning': 'Values repeatedly above this line indicate metal-enriched sediment, where benthic invertebrates can suffer chronic effects and accumulate copper in their tissue, also affecting demersal fish.',
+  'poal.c2.measurements': 'This chart shows the annual maximum values per body of water between 2014 and 2024 — the recent stretch where the largest increases are seen. Valparaíso records the highest value in the whole series: 12,017 mg/kg in 2024 (Dique Flotante station), versus 7 mg/kg at the same station a year earlier — more than 600 times the threshold and a 1,700x jump in a single year. Worth verifying against the original source before citing it.',
+  'poal.c3.title': 'Total mercury in marine sediment – Valparaíso Region',
+  'poal.c3.std': 'Dashed line (0.13 mg/kg): TEL threshold for mercury in marine sediment (CCME).',
+  'poal.c3.meaning': 'Exceeding this reference implies a higher likelihood of bioaccumulation and biomagnification of mercury up the food chain, increasing exposure for fish and for the people who eat them.',
+  'poal.c3.measurements': 'Annual maximum values per body of water between 2014 and 2024 are shown.',
+  'poal.c4.title': 'Benzo(a)pyrene in seawater – Valparaíso Region',
+  'poal.c4.std': 'Dashed line (0.01 µg/L): reference based on international criteria for carcinogenic polycyclic aromatic hydrocarbons in seawater.',
+  'poal.c4.meaning': 'Concentrations above this level reflect combustion or hydrocarbon contamination that can affect marine fauna and, over the long term, food safety.',
+  'poal.c4.measurements': 'A value of 225 µg/L reported identically across three different bays in 2023 and 2024 was excluded — thousands of times the rest of the series and repeated across unrelated locations, the same signature this site treats elsewhere as a lab detection limit, not a real measurement.',
+  'poal.c5.title': 'Total mercury in biota – Valparaíso Region',
+  'poal.c5.std': 'Dashed line (0.5 mg/kg): value close to the maximum limits for mercury in fishery products under Codex and the European Union.',
+  'poal.c5.meaning': 'When concentrations in fish or shellfish tissue exceed this line, the risk of neurotoxic effects increases for frequent consumers, especially children and pregnant women.',
+  'poal.c5.measurements': "The chart shows annual maximum values per body of water between 2014 and 2024, the actual range present in the sheet for this parameter. Quintero has measurements in 2014, 2015 and 2017, a gap between 2018 and 2021, and data again from 2022 onward — not enough continuity to speak of a sustained trend.",
+  'poal.c6.title': 'Total lead in biota (tissue) – Valparaíso Region',
+  'poal.c6.std': 'Dashed line (0.30 mg/kg): reference value close to the maximum limits for lead in fishery products under Codex Alimentarius and European regulation. Used here as a conservative food-safety threshold for fish and shellfish tissue.',
+  'poal.c6.meaning': 'When concentrations in biota tissue exceed this line, the risk of toxic effects from chronic lead exposure increases for people who eat these organisms frequently. Values far above the threshold indicate sites where historical or recent contamination may make eating local shellfish especially risky.',
+  'poal.c6.measurements': 'The chart shows annual maximum lead values in biota tissue per body of water between 2014 and 2024. In some bays — particularly sectors of Quintero (Rocas Loncura, Rocas Estrella) — 2023-2024 concentrations sit hundreds of times above the international reference level; the rest of the region stays at moderate levels or close to the threshold.',
+  'sci.h2': 'Scientific panel',
+  'sci.lede': "Independent scientific studies confirm, year after year, what official enforcement records and measurements barely manage to show. Timeline of direct marine measurements in the bay — water, sediment and biota — since 2010. Each point is a citable source, not a synthesis. Published or institutional sources only — no unpublished data from individual researchers.",
+  'sci.toolbarLabel': 'Filter by category',
+  'sci.legend1': 'Bordered = direct marine measurement (bay water / sediment / biota)',
+  'sci.legend2': 'No border = terrestrial / airborne / human context',
+  'sci.legend3': 'Point size = scope of the study',
+  'sci.marine': 'marine',
+  'sci.terrestrial': 'terrestrial/airborne',
+  'sci.fullText': 'full text verified',
+  'sci.secondary': 'secondary source',
+  'sci.sampled': ' · sampled: ',
+  'sci.stat.total': 'Studies identified',
+  'sci.stat.marine': 'Direct marine measurements',
+  'sci.stat.coverage': 'Years of coverage',
+  'sci.stat.fulltext': 'Verified in full text',
+  'report.h3': 'Report',
+  'report.labelCategory': 'Category',
+  'report.optSelect': 'Select…',
+  'report.opt1': 'Visible discharge',
+  'report.opt2': 'Water discoloration',
+  'report.opt3': 'Unusual odor',
+  'report.opt4': 'Dead fish or organisms',
+  'report.opt5': 'Other',
+  'report.labelDesc': 'Description',
+  'report.descPlaceholder': 'What did you observe? Be as specific as possible.',
+  'report.labelLocation': 'Location',
+  'report.geoBtn': 'Use my current location',
+  'report.labelMedia': 'Photos or video (optional)',
+  'report.mediaBtn': '📎 Choose files',
+  'report.mediaHint': 'Maximum 4 files, 15 MB each.',
+  'report.labelArmada': 'Did you also report this to the Navy (137)?',
+  'report.labelContact': 'Contact (optional)',
+  'report.contactPlaceholder': "Email or phone, only if you want follow-up",
+  'report.submitBtn': 'Send report',
+  'report.geo.unavailable': 'Geolocation is not available in this browser.',
+  'report.geo.getting': 'Getting location…',
+  'report.geo.captured': 'Location captured',
+  'report.geo.failed': "Couldn't get your location — you can still send the report without it.",
+  'report.media.maxFiles': 'files max — the rest were not added.',
+  'report.media.tooBig': 'is over',
+  'report.media.tooBigSuffix': 'MB — not added.',
+  'report.media.remove': 'Remove',
+  'report.status.demo': "Demo mode — this report wasn't saved. Connect Supabase to enable real submissions.",
+  'report.status.uploading': 'Uploading files…',
+  'report.status.ok': 'Report sent. Thanks — it will appear on the map as unverified.',
+  'report.status.errPrefix': "Couldn't send:",
+  'report.status.errSuffix': 'Check that the community_reports table and the',
+  'report.status.errSuffix2': 'bucket allow public writes (RLS).',
+  'footer.text': 'mioceano.cl — a citizen environmental transparency project for Quintero-Puchuncaví Bay. Data: SNIFA (SMA), POAL (DIRECTEMAR), community reports.',
+  'map.popup.noName': 'Unidentified facility',
+  'map.popup.procedures': 'procedures on record',
+  'map.popup.sanctions': 'confirmed sanction(s)',
+  'map.estado.sanction': 'Confirmed sanction',
+  'map.estado.absolved': 'Absolved',
+  'map.estado.pdcOk': 'Compliance program OK',
+  'map.estado.pdcRunning': 'Compliance program in progress',
+  'map.estado.ongoing': 'Procedure in progress',
+  'map.estado.archived': 'Archived',
+  'map.estado.suspended': 'Suspended',
+  'chart.logScale': 'log scale',
+  'chart.reference': 'Reference',
+  'chart.historicalMedian': 'Historical median',
+},
+};
+
+let currentLang = 'es';
+function t(key) { return (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key]) ?? TRANSLATIONS.es[key] ?? key; }
+
 const CONFIG = {
   SUPABASE_URL: 'https://ugczsukaikjfymoqrzmi.supabase.co',
   SUPABASE_ANON_KEY: 'sb_publishable_630bq8efnVE3fopCyviaCA_6DiHak27',
@@ -674,6 +953,13 @@ const CONFIG = {
     syncRuns: 'sync_runs',
     sciStudies: 'scientific_studies',
   },
+  // REQUIRES SETUP: a Storage bucket with this exact name must exist in the
+  // Supabase project, set to allow public uploads (a permissive INSERT
+  // policy on storage.objects for this bucket) and public read access —
+  // same category of requirement as the "RLS must allow public inserts"
+  // note already on the community_reports table below. Nothing here creates
+  // that bucket automatically.
+  STORAGE_BUCKET: 'community-reports-media',
 };
 
 const DEMO_MODE = CONFIG.SUPABASE_URL.includes('YOUR-PROJECT-REF');
@@ -757,13 +1043,19 @@ async function sbCount(table, extra = (q) => q) {
   }
 }
 
+let currentSyncState = 'syncing';
+function applySyncLabel() {
+  const map = { syncing: 'sync.syncing', synced: 'sync.synced', check: 'sync.checkSync', demo: 'sync.demo', none: 'sync.noData' };
+  document.getElementById('sync-label').textContent = t(map[currentSyncState] || 'sync.syncing');
+}
 async function loadSyncStatus() {
   const lastSync = await sbSelect(CONFIG.TABLES.syncRuns, 'source, finished_at, status', (q) => q.order('finished_at', { ascending: false }).limit(1));
   if (lastSync && lastSync[0]) {
-    document.getElementById('sync-label').textContent = lastSync[0].status === 'success' ? 'sincronizado' : 'revisar última sync';
+    currentSyncState = lastSync[0].status === 'success' ? 'synced' : 'check';
   } else {
-    document.getElementById('sync-label').textContent = DEMO_MODE ? 'modo demo' : 'sin datos';
+    currentSyncState = DEMO_MODE ? 'demo' : 'none';
   }
+  applySyncLabel();
 }
 loadSyncStatus();
 
@@ -788,13 +1080,13 @@ function facilityRadius(f) {
 }
 
 const ESTADO_LABELS = {
-  'Terminado - Sanción':               { label: 'Sanción confirmada',          tone: 'crimson' },
-  'Terminado - Absolución':            { label: 'Absuelto',                     tone: 'mint' },
-  'Terminado - PDC Satisfactorio':     { label: 'Programa de cumplimiento OK',  tone: 'cyan' },
-  'Programa de Cumplimiento en ejecución': { label: 'Programa de cumplimiento en curso', tone: 'coral' },
-  'En curso':                          { label: 'Procedimiento en curso',       tone: 'coral' },
-  'Terminado - Archivado':             { label: 'Archivado',                    tone: 'ink-muted' },
-  'Suspendido':                        { label: 'Suspendido',                   tone: 'ink-muted' },
+  'Terminado - Sanción':               { key: 'map.estado.sanction',    tone: 'crimson' },
+  'Terminado - Absolución':            { key: 'map.estado.absolved',    tone: 'mint' },
+  'Terminado - PDC Satisfactorio':     { key: 'map.estado.pdcOk',       tone: 'cyan' },
+  'Programa de Cumplimiento en ejecución': { key: 'map.estado.pdcRunning', tone: 'coral' },
+  'En curso':                          { key: 'map.estado.ongoing',     tone: 'coral' },
+  'Terminado - Archivado':             { key: 'map.estado.archived',    tone: 'ink-muted' },
+  'Suspendido':                        { key: 'map.estado.suspended',   tone: 'ink-muted' },
 };
 
 function parseRaw(e) {
@@ -802,6 +1094,26 @@ function parseRaw(e) {
   if (r == null) return {};
   if (typeof r === 'object') return r;
   try { return JSON.parse(r); } catch { return {}; }
+}
+
+let cachedFacilities = null;
+
+function renderSnifaMarkers(facilities) {
+  layers.snifa.clearLayers();
+  const markers = [];
+  facilities.forEach(f => {
+    const marker = L.circleMarker([f.lat, f.lon], {
+      radius: facilityRadius(f), color: facilityColor(f), weight: 1.2,
+      fillColor: facilityColor(f), fillOpacity: 0.35,
+    });
+    marker.bindPopup(facilityPopupHTML(f), { maxWidth: 280 });
+    marker.on('mouseover', () => marker.openPopup());
+    marker.addTo(layers.snifa);
+    markers.push(marker);
+  });
+  if (markers.length > 0) {
+    map.fitBounds(L.featureGroup(markers).getBounds().pad(0.15));
+  }
 }
 
 async function loadSnifaLayer() {
@@ -833,22 +1145,13 @@ async function loadSnifaLayer() {
   }
   if (!facilities || facilities.length === 0) facilities = DEMO_FACILITIES;
 
-  const markers = [];
-  facilities.forEach(f => {
-    const marker = L.circleMarker([f.lat, f.lon], {
-      radius: facilityRadius(f), color: facilityColor(f), weight: 1.2,
-      fillColor: facilityColor(f), fillOpacity: 0.35,
-    });
-    marker.bindPopup(facilityPopupHTML(f), { maxWidth: 280 });
-    marker.on('mouseover', () => marker.openPopup());
-    marker.addTo(layers.snifa);
-    markers.push(marker);
-  });
-
-  if (markers.length > 0) {
-    map.fitBounds(L.featureGroup(markers).getBounds().pad(0.15));
-  }
+  cachedFacilities = facilities;
+  renderSnifaMarkers(facilities);
 }
+
+window.__refreshMapPopups = () => {
+  if (cachedFacilities) renderSnifaMarkers(cachedFacilities);
+};
 
 loadSnifaLayer();
 
@@ -863,22 +1166,24 @@ loadSnifaLayer();
 })();
 
 function facilityPopupHTML(f) {
-  const name = f.razon_social || f.fallback_name || 'Instalación no identificada';
+  const name = f.razon_social || f.fallback_name || t('map.popup.noName');
   const procs = f.procedures || [];
   let outcomeRows = '';
   if (procs.length > 0) {
     const tally = {};
     procs.forEach(p => { tally[p.estado] = (tally[p.estado] || 0) + 1; });
     outcomeRows = Object.entries(tally).map(([estado, n]) => {
-      const meta = ESTADO_LABELS[estado] || { label: estado, tone: 'ink-muted' };
-      return `<div class="popup-outcome"><span class="popup-outcome-dot" style="background:var(--${meta.tone})"></span>${n} × ${meta.label}</div>`;
+      const meta = ESTADO_LABELS[estado];
+      const label = meta ? t(meta.key) : estado;
+      const tone = meta ? meta.tone : 'ink-muted';
+      return `<div class="popup-outcome"><span class="popup-outcome-dot" style="background:var(--${tone})"></span>${n} × ${label}</div>`;
     }).join('');
   }
   return `
     <div class="popup-facility">
       <div class="popup-name">${name}</div>
       <div class="popup-meta">${f.categoria || '—'} · ${f.comuna || '—'}</div>
-      <div class="popup-count">${f.event_count ?? '—'} procedimientos registrados · ${f.sanction_count ?? 0} sanción(es) firme(s)</div>
+      <div class="popup-count">${f.event_count ?? '—'} ${t('map.popup.procedures')} · ${f.sanction_count ?? 0} ${t('map.popup.sanctions')}</div>
       ${outcomeRows ? `<div class="popup-outcomes">${outcomeRows}</div>` : ''}
     </div>
   `;
@@ -1135,7 +1440,7 @@ function stationLabel(code) {
    caption for one that's real but worth double-checking against the
    source before it goes in a deck.
    ============================================================ */
-const POAL_CHART_DATA = {"coliformes":{"title":"Coliformes fecales en agua de mar – Región de Valparaíso","data":{"ALGARROBO":[[2013,0.9],[2014,7.8],[2015,2.0],[2016,6.8],[2017,94.0]],"CONCON":[[2006,130.0],[2007,130.0],[2008,49.0],[2009,220.0],[2010,240.0],[2011,130.0],[2013,49.0],[2014,280.0],[2015,240.0],[2016,540.0],[2017,170.0]],"ISLA DE PASCUA":[[2006,230.0],[2007,2.0],[2008,0.9],[2009,33.0],[2010,22.0],[2011,4.0],[2013,9.3],[2014,130.0],[2015,0.9],[2016,0.9],[2017,920.0]],"PLAYA ANCHA":[[2006,22.0],[2007,2300.0],[2008,1600.0],[2009,1600.0],[2010,920.0],[2011,800.0],[2013,800.0],[2014,920.0],[2015,540.0],[2016,350.0],[2017,5400.0]],"QUINTERO":[[2006,11.0],[2007,2.0],[2008,26.0],[2009,130.0],[2010,11.0],[2011,2.0],[2013,0.9],[2014,27.0],[2015,79.0],[2016,170.0],[2017,2.0]],"SAN ANTONIO":[[2006,24000.0],[2007,79.0],[2008,170.0],[2009,170.0],[2010,79.0],[2011,79.0],[2013,11.0],[2014,240.0],[2015,33.0],[2016,26.0],[2017,23.0]],"VALPARAISO":[[2006,35000.0],[2007,3300.0],[2008,1600.0],[2009,1600.0],[2010,1600.0],[2011,920.0],[2013,6.8],[2014,540.0],[2015,79.0],[2016,540.0],[2017,920.0]]},"unit":"NMP/100 ml","baseline":200,"baseline_label":"OMS/EPA (agua recreativa)","log":false,"xrange":[2006,2017]},"cobre_sed":{"title":"Cobre total en sedimento marino – Región de Valparaíso","data":{"ALGARROBO":[[2014,3.2],[2015,3.7],[2016,5.0],[2017,3.9]],"CONCON":[[2014,61.0],[2015,54.0],[2016,70.0],[2017,60.9],[2019,53.98],[2021,188.36],[2022,37.8],[2023,313.0],[2024,494.0]],"ISLA DE PASCUA":[[2014,16.0],[2015,15.0],[2016,17.5],[2017,17.2],[2019,13.38],[2022,18.4],[2023,492.0],[2024,171.0]],"PLAYA ANCHA":[[2014,171.0],[2015,95.0],[2016,49.2],[2017,78.1]],"QUINTERO":[[2014,202.0],[2015,76.9],[2016,88.9],[2017,73.0],[2019,274.57],[2021,2215.41],[2022,102.1],[2023,549.0],[2024,1256.0]],"SAN ANTONIO":[[2014,97.0],[2015,142.0],[2016,146.0],[2017,89.2],[2019,103.13],[2021,193.08],[2022,76.6],[2023,625.0],[2024,698.0]],"VALPARAISO":[[2014,929.0],[2015,421.0],[2016,436.0],[2017,281.9],[2019,391.43],[2021,495.0],[2022,419.0],[2023,2322.0],[2024,12017.0]]},"unit":"mg/kg","baseline":18.7,"baseline_label":"CCME TEL","log":true,"xrange":[2014,2024]},"hg_sed":{"title":"Mercurio total en sedimento marino – Región de Valparaíso","data":{"ALGARROBO":[[2014,0.005],[2015,0.01],[2016,0.005],[2017,0.005]],"CONCON":[[2014,0.05],[2015,0.27],[2016,0.03],[2017,0.2],[2019,0.005],[2021,0.005],[2022,0.01],[2023,5.0],[2024,5.0]],"ISLA DE PASCUA":[[2014,0.02],[2015,0.02],[2016,0.03],[2017,0.07],[2022,0.005],[2023,5.0],[2024,5.0]],"PLAYA ANCHA":[[2014,0.03],[2015,0.23],[2016,0.04],[2017,0.12]],"QUINTERO":[[2014,0.12],[2015,0.14],[2016,0.12],[2017,0.06],[2021,0.08],[2022,0.06],[2023,5.0],[2024,14.0]],"SAN ANTONIO":[[2014,0.05],[2015,0.07],[2016,0.04],[2017,0.25],[2019,0.02],[2021,0.03],[2022,0.47],[2023,5.0],[2024,45.0]],"VALPARAISO":[[2014,0.06],[2015,0.42],[2016,0.53],[2017,1.84],[2019,0.31],[2021,0.005],[2022,0.83],[2023,64.0],[2024,52.0]]},"unit":"mg/kg","baseline":0.13,"baseline_label":"CCME TEL","log":true,"xrange":[2014,2024]},"bap_agua":{"title":"Benzo(a)pireno en agua de mar – Región de Valparaíso","data":{"ALGARROBO":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05]],"CONCON":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05]],"ISLA DE PASCUA":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05],[2022,0.0225]],"PLAYA ANCHA":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05]],"QUINTERO":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05],[2019,0.0225],[2021,0.0225],[2022,0.0225],[2023,162.0]],"SAN ANTONIO":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05],[2019,0.0225],[2021,0.0225],[2022,0.0225]],"VALPARAISO":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05]]},"unit":"ug/L","baseline":0.01,"baseline_label":"referencia crónica internacional","log":true,"xrange":[2014,2024]},"hg_biota":{"title":"Mercurio total en biota – Región de Valparaíso","data":{"CONCON":[[2014,2.15],[2015,0.04],[2017,0.01]],"PLAYA ANCHA":[[2014,3.56],[2015,0.01],[2017,0.01]],"QUINTERO":[[2014,1.32],[2015,0.1],[2017,0.2],[2022,3.56],[2023,2.0],[2024,7.0]],"SAN ANTONIO":[[2015,0.005],[2016,0.01],[2017,0.01],[2019,0.0619],[2022,1.16]],"VALPARAISO":[[2014,3.4],[2015,0.04],[2017,0.01]]},"unit":"mg/kg","baseline":0.5,"baseline_label":"Codex/UE/FDA","log":true,"xrange":[2014,2024]},"pb_biota":{"title":"Plomo total en biota (tejidos) – Región de Valparaíso","data":{"CONCON":[[2014,1.0],[2015,0.38],[2017,0.28]],"PLAYA ANCHA":[[2014,1.81],[2015,1.7],[2017,4.15]],"QUINTERO":[[2014,0.43],[2015,0.55],[2017,0.42],[2022,2.51],[2023,495.0],[2024,465.0]],"SAN ANTONIO":[[2015,0.1084],[2016,0.26],[2017,0.19],[2019,1.167],[2022,0.002]],"VALPARAISO":[[2014,1.21],[2015,0.5458],[2017,1.17]]},"unit":"mg/kg","baseline":0.3,"baseline_label":"Límite de referencia internacional (0,30 mg/kg Pb en productos de la pesca)","log":true,"xrange":[2014,2024]}};
+const POAL_CHART_DATA = {"coliformes":{"title":"Coliformes fecales en agua de mar – Región de Valparaíso","data":{"ALGARROBO":[[2013,0.9],[2014,7.8],[2015,2.0],[2016,6.8],[2017,94.0]],"CONCON":[[2006,130.0],[2007,130.0],[2008,49.0],[2009,220.0],[2010,240.0],[2011,130.0],[2013,49.0],[2014,280.0],[2015,240.0],[2016,540.0],[2017,170.0]],"ISLA DE PASCUA":[[2006,230.0],[2007,2.0],[2008,0.9],[2009,33.0],[2010,22.0],[2011,4.0],[2013,9.3],[2014,130.0],[2015,0.9],[2016,0.9],[2017,920.0]],"PLAYA ANCHA":[[2006,22.0],[2007,2300.0],[2008,1600.0],[2009,1600.0],[2010,920.0],[2011,800.0],[2013,800.0],[2014,920.0],[2015,540.0],[2016,350.0],[2017,5400.0]],"QUINTERO":[[2006,11.0],[2007,2.0],[2008,26.0],[2009,130.0],[2010,11.0],[2011,2.0],[2013,0.9],[2014,27.0],[2015,79.0],[2016,170.0],[2017,2.0]],"SAN ANTONIO":[[2006,24000.0],[2007,79.0],[2008,170.0],[2009,170.0],[2010,79.0],[2011,79.0],[2013,11.0],[2014,240.0],[2015,33.0],[2016,26.0],[2017,23.0]],"VALPARAISO":[[2006,35000.0],[2007,3300.0],[2008,1600.0],[2009,1600.0],[2010,1600.0],[2011,920.0],[2013,6.8],[2014,540.0],[2015,79.0],[2016,540.0],[2017,920.0]]},"unit":"NMP/100 ml","baseline":200,"baseline_label":"OMS/EPA (agua recreativa)","log":false,"xrange":[2006,2017],"baseline_label_en":"WHO/EPA (recreational water)"},"cobre_sed":{"title":"Cobre total en sedimento marino – Región de Valparaíso","data":{"ALGARROBO":[[2014,3.2],[2015,3.7],[2016,5.0],[2017,3.9]],"CONCON":[[2014,61.0],[2015,54.0],[2016,70.0],[2017,60.9],[2019,53.98],[2021,188.36],[2022,37.8],[2023,313.0],[2024,494.0]],"ISLA DE PASCUA":[[2014,16.0],[2015,15.0],[2016,17.5],[2017,17.2],[2019,13.38],[2022,18.4],[2023,492.0],[2024,171.0]],"PLAYA ANCHA":[[2014,171.0],[2015,95.0],[2016,49.2],[2017,78.1]],"QUINTERO":[[2014,202.0],[2015,76.9],[2016,88.9],[2017,73.0],[2019,274.57],[2021,2215.41],[2022,102.1],[2023,549.0],[2024,1256.0]],"SAN ANTONIO":[[2014,97.0],[2015,142.0],[2016,146.0],[2017,89.2],[2019,103.13],[2021,193.08],[2022,76.6],[2023,625.0],[2024,698.0]],"VALPARAISO":[[2014,929.0],[2015,421.0],[2016,436.0],[2017,281.9],[2019,391.43],[2021,495.0],[2022,419.0],[2023,2322.0],[2024,12017.0]]},"unit":"mg/kg","baseline":18.7,"baseline_label":"CCME TEL","log":true,"xrange":[2014,2024],"baseline_label_en":"CCME TEL"},"hg_sed":{"title":"Mercurio total en sedimento marino – Región de Valparaíso","data":{"ALGARROBO":[[2014,0.005],[2015,0.01],[2016,0.005],[2017,0.005]],"CONCON":[[2014,0.05],[2015,0.27],[2016,0.03],[2017,0.2],[2019,0.005],[2021,0.005],[2022,0.01],[2023,5.0],[2024,5.0]],"ISLA DE PASCUA":[[2014,0.02],[2015,0.02],[2016,0.03],[2017,0.07],[2022,0.005],[2023,5.0],[2024,5.0]],"PLAYA ANCHA":[[2014,0.03],[2015,0.23],[2016,0.04],[2017,0.12]],"QUINTERO":[[2014,0.12],[2015,0.14],[2016,0.12],[2017,0.06],[2021,0.08],[2022,0.06],[2023,5.0],[2024,14.0]],"SAN ANTONIO":[[2014,0.05],[2015,0.07],[2016,0.04],[2017,0.25],[2019,0.02],[2021,0.03],[2022,0.47],[2023,5.0],[2024,45.0]],"VALPARAISO":[[2014,0.06],[2015,0.42],[2016,0.53],[2017,1.84],[2019,0.31],[2021,0.005],[2022,0.83],[2023,64.0],[2024,52.0]]},"unit":"mg/kg","baseline":0.13,"baseline_label":"CCME TEL","log":true,"xrange":[2014,2024],"baseline_label_en":"CCME TEL"},"bap_agua":{"title":"Benzo(a)pireno en agua de mar – Región de Valparaíso","data":{"ALGARROBO":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05]],"CONCON":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05]],"ISLA DE PASCUA":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05],[2022,0.0225]],"PLAYA ANCHA":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05]],"QUINTERO":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05],[2019,0.0225],[2021,0.0225],[2022,0.0225],[2023,162.0]],"SAN ANTONIO":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05],[2019,0.0225],[2021,0.0225],[2022,0.0225]],"VALPARAISO":[[2014,0.05],[2015,0.05],[2016,0.05],[2017,0.05]]},"unit":"ug/L","baseline":0.01,"baseline_label":"referencia crónica internacional","log":true,"xrange":[2014,2024],"baseline_label_en":"international chronic reference"},"hg_biota":{"title":"Mercurio total en biota – Región de Valparaíso","data":{"CONCON":[[2014,2.15],[2015,0.04],[2017,0.01]],"PLAYA ANCHA":[[2014,3.56],[2015,0.01],[2017,0.01]],"QUINTERO":[[2014,1.32],[2015,0.1],[2017,0.2],[2022,3.56],[2023,2.0],[2024,7.0]],"SAN ANTONIO":[[2015,0.005],[2016,0.01],[2017,0.01],[2019,0.0619],[2022,1.16]],"VALPARAISO":[[2014,3.4],[2015,0.04],[2017,0.01]]},"unit":"mg/kg","baseline":0.5,"baseline_label":"Codex/UE/FDA","log":true,"xrange":[2014,2024],"baseline_label_en":"Codex/EU/FDA"},"pb_biota":{"title":"Plomo total en biota (tejidos) – Región de Valparaíso","data":{"CONCON":[[2014,1.0],[2015,0.38],[2017,0.28]],"PLAYA ANCHA":[[2014,1.81],[2015,1.7],[2017,4.15]],"QUINTERO":[[2014,0.43],[2015,0.55],[2017,0.42],[2022,2.51],[2023,495.0],[2024,465.0]],"SAN ANTONIO":[[2015,0.1084],[2016,0.26],[2017,0.19],[2019,1.167],[2022,0.002]],"VALPARAISO":[[2014,1.21],[2015,0.5458],[2017,1.17]]},"unit":"mg/kg","baseline":0.3,"baseline_label":"Límite de referencia internacional (0,30 mg/kg Pb en productos de la pesca)","log":true,"xrange":[2014,2024],"baseline_label_en":"International reference limit (0.30 mg/kg Pb in fishery products)"}};
 
 const POAL_CUERPO_COLORS = {
   QUINTERO: '#DC2626',
@@ -1177,7 +1482,7 @@ try {
       traces.push({
         x: [xMin, xMax],
         y: [chart.baseline, chart.baseline],
-        name: `Referencia (${chart.baseline_label})`,
+        name: `${t('chart.reference')} (${currentLang === 'en' && chart.baseline_label_en ? chart.baseline_label_en : chart.baseline_label})`,
         mode: 'lines',
         line: { color: '#DC2626', dash: 'dash', width: chart.log ? 2 : 3.5 },
         hoverinfo: 'name+y',
@@ -1194,7 +1499,7 @@ try {
         traces.push({
           x: [xMin, xMax],
           y: [val, val],
-          name: `Mediana histórica – ${cuerpo}`,
+          name: `${t('chart.historicalMedian')} – ${cuerpo}`,
           mode: 'lines',
           line: { color: POAL_CUERPO_COLORS[cuerpo] || '#DC2626', dash: 'dot', width: 1 },
           opacity: 0.55,
@@ -1204,7 +1509,7 @@ try {
       });
     }
 
-    const yAxisTitle = chart.log ? `${chart.unit} — escala logarítmica` : chart.unit;
+    const yAxisTitle = chart.log ? `${chart.unit} — ${t('chart.logScale')}` : chart.unit;
 
     Plotly.newPlot(divId, traces, {
       margin: { l: 55, r: 70, t: 8, b: 36 },
@@ -1230,6 +1535,12 @@ try {
     const el = document.getElementById(`poal-plot-${key}`);
     if (el) renderPoalChart(`poal-plot-${key}`, POAL_CHART_DATA[key]);
   });
+  window.__refreshPoalCharts = () => {
+    Object.keys(POAL_CHART_DATA).forEach(key => {
+      const el = document.getElementById(`poal-plot-${key}`);
+      if (el) renderPoalChart(`poal-plot-${key}`, POAL_CHART_DATA[key]);
+    });
+  };
 
 } catch (e) {
   console.error('POAL charts failed to initialize:', e);
@@ -1246,31 +1557,31 @@ try {
    stays off this public page until its authors publish it.
    ============================================================ */
 const SCI_CATEGORIES = [
-  { key: 'heavy_metals',            label: 'Metales pesados',                color: '#EA580C' },
-  { key: 'coliforms',                label: 'Coliformes / microbiología',     color: '#0891B2' },
-  { key: 'biodiversity_ecotox',      label: 'Biodiversidad / ecotoxicología', color: '#059669' },
-  { key: 'sediment_geochronology',   label: 'Geocronología de sedimentos',    color: '#CA8A04' },
-  { key: 'hydrocarbons_spill',       label: 'Hidrocarburos / derrame',        color: '#DC2626' },
+  { key: 'heavy_metals',            label_es: 'Metales pesados',                label_en: 'Heavy metals',                color: '#EA580C' },
+  { key: 'coliforms',                label_es: 'Coliformes / microbiología',     label_en: 'Coliforms / microbiology',     color: '#0891B2' },
+  { key: 'biodiversity_ecotox',      label_es: 'Biodiversidad / ecotoxicología', label_en: 'Biodiversity / ecotoxicology', color: '#059669' },
+  { key: 'sediment_geochronology',   label_es: 'Geocronología de sedimentos',    label_en: 'Sediment geochronology',       color: '#CA8A04' },
+  { key: 'hydrocarbons_spill',       label_es: 'Hidrocarburos / derrame',        label_en: 'Hydrocarbons / spill',         color: '#DC2626' },
 ];
 
 const DEMO_SCI_STUDIES = [
-  { id: 6, year_pub: 2012, year_sampled: '2012', title: 'Análisis de metales pesados en mariscos y crustáceos, Bahía de Ventanas', authors: 'Oceana (encargo) / Laboratorio GCL, Fundación Chile', source_type: 'ngo-commissioned', journal: 'Commissioned lab analysis', category: 'heavy_metals', matrix: 'biota (clam, urchin, limpet, loco, crab)', location: 'La Virgen, La Churra, El Tebo, La Boca (Ventanas)', marine: true, verified: 'secondary', finding: '100% of samples contaminated with Cu, As and Cd, at levels far above national/international norms.' },
-  { id: 7, year_pub: 2012, year_sampled: '2011 (Sept, Nov)', title: 'Fiscalización RILES — Fundición Ventanas CODELCO', authors: 'Gobernación Marítima de Valparaíso', source_type: 'government-report', journal: 'Enforcement inspection', category: 'heavy_metals', matrix: 'industrial effluent (marine discharge)', location: 'Ventanas outfall', marine: true, verified: 'secondary', finding: 'Selenium (Se) in RILES effluent up to 40x the D.S. 90/2000 emission limit.' },
-  { id: 8, year_pub: 2012, year_sampled: 'pre-2012', title: 'Environmental assessment in a shallow subtidal rocky habitat: coupling chemical and ecological tools', authors: 'Sáez, Pérez-Matus, Lobos, Oliva, Vásquez & Bravo', source_type: 'peer-reviewed', journal: 'Chemistry and Ecology 28', category: 'heavy_metals', matrix: 'water + sediment + biota', location: 'Quintero–Puchuncaví Bay', marine: true, verified: 'secondary', finding: 'Coupled chemical/ecological indicators establishing subtidal impact of QP industrial discharge.' },
-  { id: 9, year_pub: 2012, year_sampled: 'pre-2012', title: 'Variation in patterns of metal accumulation in thallus parts of Lessonia trabeculata: implications for biomonitoring', authors: 'Sáez, Lobos, Macaya, Oliva, Quiroz & Brown', source_type: 'peer-reviewed', journal: 'PLoS ONE 7(11)', category: 'biodiversity_ecotox', matrix: 'kelp (biota)', location: 'Quintero–Puchuncaví Bay', marine: true, verified: 'secondary', finding: 'Established kelp (L. trabeculata) as a validated biomonitoring tool for metal accumulation in the bay.' },
-  { id: 11, year_pub: 2013, year_sampled: '2013', title: 'Análisis de riesgo ecológico por sustancias potencialmente contaminantes en el aire, suelo y agua, comunas de Concón, Quintero y Puchuncaví', authors: 'Centro de Ecología Aplicada (para MMA)', source_type: 'government-report', journal: 'Final report, 380pp', category: 'heavy_metals', matrix: 'water + sediment + biota + soil + air', location: 'Quintero and Concón bays', marine: true, verified: 'secondary', finding: 'Bioaccumulation confirmed in algae, mussels, crabs, fish; most RILES discharges exceeded D.S. 90/2000; Cu identified as the metal with highest chronic ecological risk probability (>89.9%).' },
-  { id: 14, year_pub: 2015, year_sampled: 'not specified in text', title: 'Distribution and pollution assessment of trace elements in marine sediments in the Quintero Bay (Chile)', authors: 'Parra, Bravo, Quiroz, Querol & Paipa', source_type: 'peer-reviewed', journal: 'Marine Pollution Bulletin 99', category: 'heavy_metals', matrix: 'sediment', location: 'Quintero Bay (14 sites, incl. reference)', marine: true, verified: 'full-text', finding: 'Extreme Cu enrichment factor (up to ~28x) near Puerto Ventanas / smelter-adjacent sites (002, SA, S4); SEM/EDX confirmed anthropogenic Cu-Zn-As-Pb particles and Pb-sulfide grains from the copper smelter.' },
-  { id: 15, year_pub: 2016, year_sampled: '2014-09-24 (spill) + post-spill campaign', title: 'Determinación de los impactos en los recursos hidrobiológicos y ecosistemas marinos en el área de influencia del derrame de hidrocarburo de Bahía Quintero', authors: 'Instituto de Fomento Pesquero (IFOP)', source_type: 'government-report', journal: 'Final report, 697pp', category: 'hydrocarbons_spill', matrix: 'water + sediment + biota', location: 'Quintero Bay', marine: true, verified: 'full-text', finding: 'As reached ~118 µg/g in crabs and ~189 µg/g in locos; Farellones de Quintero was the most contaminated station; AMERB banks and marine mammals largely unaffected but penguins (S. magellanicus) were; estimated fisher losses ~CLP 631 million.' },
-  { id: 21, year_pub: 2020, year_sampled: '2018-07 (in situ) + in vitro follow-up', title: 'Coastal pollution from the industrial park Quintero bay of central Chile: effects on abundance, morphology and development of the kelp Lessonia spicata', authors: 'Oyarzo-Miranda, Latorre, Meynard, Rivas, Bulboa & Contreras-Porcia', source_type: 'peer-reviewed', journal: 'PLOS ONE 15(10)', category: 'biodiversity_ecotox', matrix: 'water + sediment + kelp', location: 'Ventanas, Horcón, Cachagua (up to 40km from QB)', marine: true, verified: 'full-text', finding: 'Cu/As in seawater exceeded EPA acute limits at ALL three sites, including the presumed-clean control Cachagua (Cu 859 µg/L, As 1,484 µg/L); Ventanas kelp had 0% adult sporophytes and the smallest holdfasts/blades — evidence of pollution expansion along the coast since 2000.' },
-  { id: 23, year_pub: 2021, year_sampled: 'paleo (Late Pleistocene + historical layers)', title: 'A multi-proxy reconstruction of depositional environment of a Late Pleistocene submerged site from the Central Coast of Chile (32°S)', authors: 'Flores-Aqueveque, V. et al.', source_type: 'peer-reviewed', journal: 'Quaternary International 601', category: 'sediment_geochronology', matrix: 'sediment core', location: 'GNL Quintero 1 site', marine: true, verified: 'secondary', finding: 'Most recent historical sediment layer carries anthropogenic Cr, V, Cu, Zn, Zr, Y signature tied to smelting and coal thermoelectric activity.' },
-  { id: 24, year_pub: 2021, year_sampled: '2020-11-27 to 2020-11-29', title: 'Evaluación temporal y espacial del contenido de metales pesados en sedimentos de la Bahía de Quintero-Puchuncaví', authors: 'Laboratorio de Oceanografía Química, Universidad de Concepción (para MMA)', source_type: 'government-report', journal: 'Final report, 103pp', category: 'sediment_geochronology', matrix: 'sediment cores (3) + surface sediment (12 sites)', location: 'Quintero-Puchuncaví Bay', marine: true, verified: 'full-text', finding: '210Pb/226Ra dating established 3 historical horizons — Pre-Industrial (1860–1948), Industrialización Inicial (1959–2003), Industrialización Moderna (2005–2020) — with local pre-industrial reference values. Modern surface layer shows Cu +75%, Hg +81%, Pb +6%, As +4% vs. the pre-industrial baseline (Al-normalized).' },
-  { id: 27, year_pub: 2023, year_sampled: 'pre-2023', title: 'Metal(loid) content in Concholepas concholepas and human health assessment in a coastal environmental sacrifice zone, central Chile', authors: 'Castillo, A. et al.', source_type: 'peer-reviewed', journal: 'Marine Pollution Bulletin 197', category: 'heavy_metals', matrix: 'biota (loco)', location: 'Quintero-Puchuncaví (\'sacrifice zone\')', marine: true, verified: 'secondary', finding: 'Human health risk assessment from loco consumption in the impacted bay.' },
-  { id: 28, year_pub: 2023, year_sampled: '2022 (Sept 6 subtidal; Oct 28 coastal)', title: 'Análisis de metales en recursos pesqueros de la bahía Quintero-Puchuncaví', authors: 'HUB AMBIENTAL UPLA + Lab. Química Analítica y Ambiental, Universidad de Valparaíso', source_type: 'research-center-report', journal: 'Technical report, July 2023', category: 'coliforms', matrix: 'water + sediment + biota (10 species)', location: 'Ventanas Norte (incl. illegal outfall), Loncura, Puerto Ventanas, Playa Ventanas, vs. Quintay control', marine: true, verified: 'full-text', finding: 'Fecal coliforms at VN1 (site with an illegal sewage outfall) reached 35,000 NMP/100mL — 35x the D.S. 90 general limit (1,000) and 500x the managed-area limit (70). Cu and V in sediment exceeded NSCA Q-P; Cd and Pb in fish/crab/mollusk tissue exceeded EU 1881/2006 and CODEX limits. This is the primary dataset behind Curaz-Leiva et al. 2026.' },
-  { id: 32, year_pub: 2024, year_sampled: 'not specified', title: 'Metals and metaloids preserved in marine sediments of an industrial complex in central Chile', authors: 'Valdés-Saavedra, J. & Quiroga, E.', source_type: 'peer-reviewed', journal: 'Environmental Sustainability Indicators 22', category: 'heavy_metals', matrix: 'sediment', location: 'Quintero-Puchuncaví', marine: true, verified: 'secondary', finding: 'Reassessed sediment background values for the bay using updated methodology.' },
-  { id: 33, year_pub: 2025, year_sampled: 'historical trend', title: 'Historical trend of ecological risk caused by copper sediment in Quintero Bay, associated with a copper smelter and refinery', authors: 'Encina-Montoya, F. et al.', source_type: 'peer-reviewed', journal: 'Marine Pollution Bulletin 211', category: 'sediment_geochronology', matrix: 'sediment', location: 'Quintero Bay', marine: true, verified: 'secondary', finding: 'Long-term Cu ecological-risk trend confirms sustained smelter/refinery-linked contamination; source of the \'1993 declared saturated zone\' citation used by later papers.' },
-  { id: 35, year_pub: 2026, year_sampled: '2022 (spring)', title: 'Heavy Metal Contamination in Edible Species from Quintero-Puchuncaví Bay: Risks Associated with the Icon Industrial Complex in Central Chile', authors: 'Curaz-Leiva, S., Díaz, M.J., Sola, I., Ruiz, J., Pérez, M., González-Labra, D., Paredes-Ocaranza, B., Lobos, M.G., Lavergne, C., Klarian, S.A., Molina, V. & Sáez, C.A.', source_type: 'peer-reviewed', journal: 'Toxics 14(5), 397', category: 'heavy_metals', matrix: 'sediment + biota (10 species)', location: 'Quintero-Puchuncaví Bay (7 sites) vs. Quintay control', marine: true, verified: 'full-text', finding: 'Flagship, most comprehensive study to date. Cd and Pb exceeded food-safety limits in crabs, fish and mussels; THQ≥1 for Cd in R. setosum and A. purpuratus; Chile has no Cd limit for seafood at all — a regulatory gap.' },
-  { id: 36, year_pub: 2019, year_sampled: 'multi-year (station record)', title: 'Inter-annual variability of oceanographic conditions and phytoplankton in Valparaíso Bay (~33°S), central Chile', authors: 'Aparicio-Rizzo, P. & Masotti, I.', source_type: 'peer-reviewed', journal: 'Rev. Biología Marina y Oceanografía 54', category: 'biodiversity_ecotox', matrix: 'water (oceanographic)', location: 'Valparaíso Bay', marine: true, verified: 'secondary', finding: 'Physical oceanography / phytoplankton baseline for Valparaíso Bay — genuinely distinct from Quintero-Puchuncaví, useful circulation context.' },
-  { id: 37, year_pub: 2021, year_sampled: 'pre-2021', title: 'Transfer of pollutants from Macrocystis pyrifera to Tetrapygus niger in a highly impacted coastal zone of Chile', authors: 'Latorre-Padilla, N., Meynard, A., Rivas, J. & Contreras-Porcia, L.', source_type: 'peer-reviewed', journal: 'Toxics 9, 244', category: 'biodiversity_ecotox', matrix: 'kelp + sea urchin', location: 'Caleta Horcón (5km N of Quintero-Puchuncaví)', marine: true, verified: 'secondary', finding: 'Documented trophic transfer of Cu, Cd, As and naphthalene from kelp to grazing sea urchin.' }
+  { id: 6, year_pub: 2012, year_sampled_es: '2012', year_sampled_en: '2012', title: 'Análisis de metales pesados en mariscos y crustáceos, Bahía de Ventanas', authors: 'Oceana (encargo) / Laboratorio GCL, Fundación Chile', source_type: 'ngo-commissioned', journal: 'Commissioned lab analysis', category: 'heavy_metals', marine: true, verified: 'secondary', finding_es: 'El 100% de las muestras estaba contaminado con Cu, As y Cd, en niveles muy superiores a las normas nacionales e internacionales.', finding_en: '100% of samples contaminated with Cu, As and Cd, at levels far above national/international norms.' },
+  { id: 7, year_pub: 2012, year_sampled_es: '2011 (sept., nov.)', year_sampled_en: '2011 (Sept, Nov)', title: 'Fiscalización RILES — Fundición Ventanas CODELCO', authors: 'Gobernación Marítima de Valparaíso', source_type: 'government-report', journal: 'Enforcement inspection', category: 'heavy_metals', marine: true, verified: 'secondary', finding_es: 'El selenio (Se) en el efluente RILES alcanzó hasta 40 veces el límite de emisión del D.S. 90/2000.', finding_en: 'Selenium (Se) in RILES effluent up to 40x the D.S. 90/2000 emission limit.' },
+  { id: 8, year_pub: 2012, year_sampled_es: 'antes de 2012', year_sampled_en: 'pre-2012', title: 'Environmental assessment in a shallow subtidal rocky habitat: coupling chemical and ecological tools', authors: 'Sáez, Pérez-Matus, Lobos, Oliva, Vásquez & Bravo', source_type: 'peer-reviewed', journal: 'Chemistry and Ecology 28', category: 'heavy_metals', marine: true, verified: 'secondary', finding_es: 'Indicadores químicos y ecológicos combinados que establecen el impacto submareal de las descargas industriales de Quintero-Puchuncaví.', finding_en: 'Coupled chemical/ecological indicators establishing subtidal impact of QP industrial discharge.' },
+  { id: 9, year_pub: 2012, year_sampled_es: 'antes de 2012', year_sampled_en: 'pre-2012', title: 'Variation in patterns of metal accumulation in thallus parts of Lessonia trabeculata: implications for biomonitoring', authors: 'Sáez, Lobos, Macaya, Oliva, Quiroz & Brown', source_type: 'peer-reviewed', journal: 'PLoS ONE 7(11)', category: 'biodiversity_ecotox', marine: true, verified: 'secondary', finding_es: 'Estableció el alga parda (L. trabeculata) como una herramienta de biomonitoreo validada para la acumulación de metales en la bahía.', finding_en: 'Established kelp (L. trabeculata) as a validated biomonitoring tool for metal accumulation in the bay.' },
+  { id: 11, year_pub: 2013, year_sampled_es: '2013', year_sampled_en: '2013', title: 'Análisis de riesgo ecológico por sustancias potencialmente contaminantes en el aire, suelo y agua, comunas de Concón, Quintero y Puchuncaví', authors: 'Centro de Ecología Aplicada (para MMA)', source_type: 'government-report', journal: 'Final report, 380pp', category: 'heavy_metals', marine: true, verified: 'secondary', finding_es: 'Bioacumulación confirmada en algas, choritos, jaibas y peces; la mayoría de las descargas RILES excedió el D.S. 90/2000; el cobre fue identificado como el metal con mayor probabilidad de riesgo ecológico crónico (>89,9%).', finding_en: 'Bioaccumulation confirmed in algae, mussels, crabs, fish; most RILES discharges exceeded D.S. 90/2000; Cu identified as the metal with highest chronic ecological risk probability (>89.9%).' },
+  { id: 14, year_pub: 2015, year_sampled_es: 'no especificado en el texto', year_sampled_en: 'not specified in text', title: 'Distribution and pollution assessment of trace elements in marine sediments in the Quintero Bay (Chile)', authors: 'Parra, Bravo, Quiroz, Querol & Paipa', source_type: 'peer-reviewed', journal: 'Marine Pollution Bulletin 99', category: 'heavy_metals', marine: true, verified: 'full-text', finding_es: 'Factor de enriquecimiento de cobre extremo (hasta ~28x) cerca de Puerto Ventanas y sitios adyacentes a la fundición (002, SA, S4); análisis SEM/EDX confirmaron partículas antropogénicas de Cu-Zn-As-Pb y granos de sulfuro de plomo provenientes de la fundición de cobre.', finding_en: 'Extreme Cu enrichment factor (up to ~28x) near Puerto Ventanas / smelter-adjacent sites (002, SA, S4); SEM/EDX confirmed anthropogenic Cu-Zn-As-Pb particles and Pb-sulfide grains from the copper smelter.' },
+  { id: 15, year_pub: 2016, year_sampled_es: '24-09-2014 (derrame) + campaña post-derrame', year_sampled_en: '2014-09-24 (spill) + post-spill campaign', title: 'Determinación de los impactos en los recursos hidrobiológicos y ecosistemas marinos en el área de influencia del derrame de hidrocarburo de Bahía Quintero', authors: 'Instituto de Fomento Pesquero (IFOP)', source_type: 'government-report', journal: 'Final report, 697pp', category: 'hydrocarbons_spill', marine: true, verified: 'full-text', finding_es: 'El arsénico alcanzó ~118 µg/g en jaibas y ~189 µg/g en locos; Farellones de Quintero fue la estación más contaminada; los bancos AMERB y los mamíferos marinos no se vieron mayormente afectados, pero sí los pingüinos (S. magellanicus); se estimaron pérdidas para pescadores de ~CLP 631 millones.', finding_en: 'As reached ~118 µg/g in crabs and ~189 µg/g in locos; Farellones de Quintero was the most contaminated station; AMERB banks and marine mammals largely unaffected but penguins (S. magellanicus) were; estimated fisher losses ~CLP 631 million.' },
+  { id: 21, year_pub: 2020, year_sampled_es: '07-2018 (in situ) + seguimiento in vitro', year_sampled_en: '2018-07 (in situ) + in vitro follow-up', title: 'Coastal pollution from the industrial park Quintero bay of central Chile: effects on abundance, morphology and development of the kelp Lessonia spicata', authors: 'Oyarzo-Miranda, Latorre, Meynard, Rivas, Bulboa & Contreras-Porcia', source_type: 'peer-reviewed', journal: 'PLOS ONE 15(10)', category: 'biodiversity_ecotox', marine: true, verified: 'full-text', finding_es: 'El Cu/As en agua de mar excedió los límites agudos de la EPA en los tres sitios, incluyendo el control supuestamente limpio de Cachagua (Cu 859 µg/L, As 1.484 µg/L); las algas de Ventanas tuvieron 0% de esporofitos adultos y los rizoides/frondas más pequeños — evidencia de expansión de la contaminación a lo largo de la costa desde el año 2000.', finding_en: 'Cu/As in seawater exceeded EPA acute limits at ALL three sites, including the presumed-clean control Cachagua (Cu 859 µg/L, As 1,484 µg/L); Ventanas kelp had 0% adult sporophytes and the smallest holdfasts/blades — evidence of pollution expansion along the coast since 2000.' },
+  { id: 23, year_pub: 2021, year_sampled_es: 'paleo (Pleistoceno tardío + capas históricas)', year_sampled_en: 'paleo (Late Pleistocene + historical layers)', title: 'A multi-proxy reconstruction of depositional environment of a Late Pleistocene submerged site from the Central Coast of Chile (32°S)', authors: 'Flores-Aqueveque, V. et al.', source_type: 'peer-reviewed', journal: 'Quaternary International 601', category: 'sediment_geochronology', marine: true, verified: 'secondary', finding_es: 'La capa de sedimento histórica más reciente presenta una firma antropogénica de Cr, V, Cu, Zn, Zr e Y asociada a la fundición y la actividad termoeléctrica a carbón.', finding_en: 'Most recent historical sediment layer carries anthropogenic Cr, V, Cu, Zn, Zr, Y signature tied to smelting and coal thermoelectric activity.' },
+  { id: 24, year_pub: 2021, year_sampled_es: '27-11-2020 al 29-11-2020', year_sampled_en: '2020-11-27 to 2020-11-29', title: 'Evaluación temporal y espacial del contenido de metales pesados en sedimentos de la Bahía de Quintero-Puchuncaví', authors: 'Laboratorio de Oceanografía Química, Universidad de Concepción (para MMA)', source_type: 'government-report', journal: 'Final report, 103pp', category: 'sediment_geochronology', marine: true, verified: 'full-text', finding_es: 'La datación con 210Pb/226Ra estableció 3 horizontes históricos — Preindustrial (1860–1948), Industrialización Inicial (1959–2003), Industrialización Moderna (2005–2020) — con valores de referencia preindustrial locales. La capa superficial moderna muestra Cu +75%, Hg +81%, Pb +6%, As +4% respecto a la línea base preindustrial (normalizado por Al).', finding_en: '210Pb/226Ra dating established 3 historical horizons — Pre-Industrial (1860–1948), Industrialización Inicial (1959–2003), Industrialización Moderna (2005–2020) — with local pre-industrial reference values. Modern surface layer shows Cu +75%, Hg +81%, Pb +6%, As +4% vs. the pre-industrial baseline (Al-normalized).' },
+  { id: 27, year_pub: 2023, year_sampled_es: 'antes de 2023', year_sampled_en: 'pre-2023', title: 'Metal(loid) content in Concholepas concholepas and human health assessment in a coastal environmental sacrifice zone, central Chile', authors: 'Castillo, A. et al.', source_type: 'peer-reviewed', journal: 'Marine Pollution Bulletin 197', category: 'heavy_metals', marine: true, verified: 'secondary', finding_es: 'Evaluación de riesgo para la salud humana por consumo de locos en la bahía impactada.', finding_en: 'Human health risk assessment from loco consumption in the impacted bay.' },
+  { id: 28, year_pub: 2023, year_sampled_es: '2022 (6 sept. submareal; 28 oct. costero)', year_sampled_en: '2022 (Sept 6 subtidal; Oct 28 coastal)', title: 'Análisis de metales en recursos pesqueros de la bahía Quintero-Puchuncaví', authors: 'HUB AMBIENTAL UPLA + Lab. Química Analítica y Ambiental, Universidad de Valparaíso', source_type: 'research-center-report', journal: 'Technical report, July 2023', category: 'coliforms', marine: true, verified: 'full-text', finding_es: 'Los coliformes fecales en VN1 (sitio con una descarga clandestina de aguas servidas) alcanzaron 35.000 NMP/100mL — 35 veces el límite general del D.S. 90 (1.000) y 500 veces el límite de área de manejo (70). El Cu y V en sedimento excedieron la NSCA Q-P; el Cd y Pb en tejido de peces/jaibas/moluscos excedieron los límites de la UE 1881/2006 y CODEX. Este es el conjunto de datos principal detrás de Curaz-Leiva et al. 2026.', finding_en: 'Fecal coliforms at VN1 (site with an illegal sewage outfall) reached 35,000 NMP/100mL — 35x the D.S. 90 general limit (1,000) and 500x the managed-area limit (70). Cu and V in sediment exceeded NSCA Q-P; Cd and Pb in fish/crab/mollusk tissue exceeded EU 1881/2006 and CODEX limits. This is the primary dataset behind Curaz-Leiva et al. 2026.' },
+  { id: 32, year_pub: 2024, year_sampled_es: 'no especificado', year_sampled_en: 'not specified', title: 'Metals and metaloids preserved in marine sediments of an industrial complex in central Chile', authors: 'Valdés-Saavedra, J. & Quiroga, E.', source_type: 'peer-reviewed', journal: 'Environmental Sustainability Indicators 22', category: 'heavy_metals', marine: true, verified: 'secondary', finding_es: 'Reevaluación de los valores de fondo de sedimento de la bahía usando metodología actualizada.', finding_en: 'Reassessed sediment background values for the bay using updated methodology.' },
+  { id: 33, year_pub: 2025, year_sampled_es: 'tendencia histórica', year_sampled_en: 'historical trend', title: 'Historical trend of ecological risk caused by copper sediment in Quintero Bay, associated with a copper smelter and refinery', authors: 'Encina-Montoya, F. et al.', source_type: 'peer-reviewed', journal: 'Marine Pollution Bulletin 211', category: 'sediment_geochronology', marine: true, verified: 'secondary', finding_es: 'La tendencia de riesgo ecológico del cobre a largo plazo confirma contaminación sostenida vinculada a la fundición y refinería; es la fuente de la cita de "zona saturada declarada en 1993" usada por estudios posteriores.', finding_en: 'Long-term Cu ecological-risk trend confirms sustained smelter/refinery-linked contamination; source of the \'1993 declared saturated zone\' citation used by later papers.' },
+  { id: 35, year_pub: 2026, year_sampled_es: '2022 (primavera)', year_sampled_en: '2022 (spring)', title: 'Heavy Metal Contamination in Edible Species from Quintero-Puchuncaví Bay: Risks Associated with the Icon Industrial Complex in Central Chile', authors: 'Curaz-Leiva, S., Díaz, M.J., Sola, I., Ruiz, J., Pérez, M., González-Labra, D., Paredes-Ocaranza, B., Lobos, M.G., Lavergne, C., Klarian, S.A., Molina, V. & Sáez, C.A.', source_type: 'peer-reviewed', journal: 'Toxics 14(5), 397', category: 'heavy_metals', marine: true, verified: 'full-text', finding_es: 'Estudio insignia, el más completo hasta la fecha. El Cd y Pb excedieron los límites de seguridad alimentaria en jaibas, peces y choritos; THQ≥1 para Cd en R. setosum y A. purpuratus; Chile no tiene ningún límite de Cd para productos del mar — un vacío regulatorio.', finding_en: 'Flagship, most comprehensive study to date. Cd and Pb exceeded food-safety limits in crabs, fish and mussels; THQ≥1 for Cd in R. setosum and A. purpuratus; Chile has no Cd limit for seafood at all — a regulatory gap.' },
+  { id: 36, year_pub: 2019, year_sampled_es: 'multianual (registro de estación)', year_sampled_en: 'multi-year (station record)', title: 'Inter-annual variability of oceanographic conditions and phytoplankton in Valparaíso Bay (~33°S), central Chile', authors: 'Aparicio-Rizzo, P. & Masotti, I.', source_type: 'peer-reviewed', journal: 'Rev. Biología Marina y Oceanografía 54', category: 'biodiversity_ecotox', marine: true, verified: 'secondary', finding_es: 'Línea base de oceanografía física y fitoplancton para la Bahía de Valparaíso — genuinamente distinta de Quintero-Puchuncaví, útil como contexto de circulación.', finding_en: 'Physical oceanography / phytoplankton baseline for Valparaíso Bay — genuinely distinct from Quintero-Puchuncaví, useful circulation context.' },
+  { id: 37, year_pub: 2021, year_sampled_es: 'antes de 2021', year_sampled_en: 'pre-2021', title: 'Transfer of pollutants from Macrocystis pyrifera to Tetrapygus niger in a highly impacted coastal zone of Chile', authors: 'Latorre-Padilla, N., Meynard, A., Rivas, J. & Contreras-Porcia, L.', source_type: 'peer-reviewed', journal: 'Toxics 9, 244', category: 'biodiversity_ecotox', marine: true, verified: 'secondary', finding_es: 'Documentó la transferencia trófica de Cu, Cd, As y naftaleno desde el alga parda hacia el erizo herbívoro.', finding_en: 'Documented trophic transfer of Cu, Cd, As and naphthalene from kelp to grazing sea urchin.' }
 ];
 
 try {
@@ -1284,7 +1595,11 @@ try {
   let activeCats = new Set(SCI_CATEGORIES.map(c => c.key));
 
   function colorOf(key) { return (SCI_CATEGORIES.find(c => c.key === key) || {}).color || '#8598A8'; }
-  function labelOf(key) { return (SCI_CATEGORIES.find(c => c.key === key) || {}).label || key; }
+  function labelOf(key) {
+    const c = SCI_CATEGORIES.find(c => c.key === key);
+    if (!c) return key;
+    return currentLang === 'en' ? c.label_en : c.label_es;
+  }
 
   function renderStats() {
     const el = document.getElementById('sci-stats');
@@ -1294,20 +1609,21 @@ try {
     const span = Math.max(...years) - Math.min(...years);
     const fulltext = studies.filter(d => d.verified === 'full-text').length;
     el.innerHTML = `
-      <div class="glass sci-stat-card"><div class="n">${total}</div><div class="l">Estudios identificados</div></div>
-      <div class="glass sci-stat-card"><div class="n">${marine}</div><div class="l">Mediciones marinas directas</div></div>
-      <div class="glass sci-stat-card"><div class="n">${span}</div><div class="l">Años de cobertura (${Math.min(...years)}–${Math.max(...years)})</div></div>
-      <div class="glass sci-stat-card"><div class="n">${fulltext}</div><div class="l">Verificados en texto completo</div></div>
+      <div class="glass sci-stat-card"><div class="n">${total}</div><div class="l">${t('sci.stat.total')}</div></div>
+      <div class="glass sci-stat-card"><div class="n">${marine}</div><div class="l">${t('sci.stat.marine')}</div></div>
+      <div class="glass sci-stat-card"><div class="n">${span}</div><div class="l">${t('sci.stat.coverage')} (${Math.min(...years)}–${Math.max(...years)})</div></div>
+      <div class="glass sci-stat-card"><div class="n">${fulltext}</div><div class="l">${t('sci.stat.fulltext')}</div></div>
     `;
   }
 
   function renderToolbar() {
     const bar = document.getElementById('sci-toolbar');
+    bar.querySelectorAll('.sci-chip').forEach(el => el.remove());
     const usedCats = SCI_CATEGORIES.filter(c => studies.some(d => d.category === c.key));
     usedCats.forEach(c => {
       const chip = document.createElement('div');
-      chip.className = 'sci-chip active';
-      chip.innerHTML = `<span class="sci-chip-dot" style="background:${c.color}"></span>${c.label}`;
+      chip.className = 'sci-chip' + (activeCats.has(c.key) ? ' active' : '');
+      chip.innerHTML = `<span class="sci-chip-dot" style="background:${c.color}"></span>${labelOf(c.key)}`;
       chip.onclick = () => {
         if (activeCats.has(c.key)) { activeCats.delete(c.key); chip.classList.remove('active'); }
         else { activeCats.add(c.key); chip.classList.add('active'); }
@@ -1426,14 +1742,16 @@ try {
   }
 
   function showTooltip(ev, d) {
+    const yearSampled = currentLang === 'en' ? d.year_sampled_en : d.year_sampled_es;
+    const finding = currentLang === 'en' ? d.finding_en : d.finding_es;
     tooltip.innerHTML = `
-      <div class="t-year">${d.year_pub}${d.year_sampled ? ' · muestreo: ' + d.year_sampled : ''}</div>
+      <div class="t-year">${d.year_pub}${yearSampled ? t('sci.sampled') + yearSampled : ''}</div>
       <div class="t-title">${d.title}</div>
       <div class="t-meta">${d.authors || ''}${d.journal ? ' — ' + d.journal : ''}</div>
-      <div class="t-finding">${d.finding || ''}</div>
+      <div class="t-finding">${finding || ''}</div>
       <span class="t-tag">${labelOf(d.category)}</span>
-      <span class="t-tag">${d.marine ? 'marino' : 'terrestre/aéreo'}</span>
-      <span class="t-tag">${d.verified === 'full-text' ? 'texto completo verificado' : 'fuente secundaria'}</span>
+      <span class="t-tag">${d.marine ? t('sci.marine') : t('sci.terrestrial')}</span>
+      <span class="t-tag">${d.verified === 'full-text' ? t('sci.fullText') : t('sci.secondary')}</span>
     `;
     tooltip.classList.add('show');
     positionTooltip(ev);
@@ -1450,6 +1768,7 @@ try {
   renderToolbar();
   draw();
   window.addEventListener('resize', draw);
+  window.__refreshSciPanel = () => { renderStats(); renderToolbar(); draw(); };
 })();
 
 } catch (e) {
@@ -1473,46 +1792,169 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 let geoLat = null, geoLon = null;
 document.getElementById('geo-btn').addEventListener('click', () => {
   const status = document.getElementById('geo-status');
-  if (!navigator.geolocation) { status.textContent = 'Geolocalización no disponible en este navegador.'; return; }
-  status.textContent = 'Obteniendo ubicación…';
+  if (!navigator.geolocation) { status.textContent = t('report.geo.unavailable'); return; }
+  status.textContent = t('report.geo.getting');
   navigator.geolocation.getCurrentPosition(
-    (pos) => { geoLat = pos.coords.latitude; geoLon = pos.coords.longitude; status.textContent = `Ubicación capturada (${geoLat.toFixed(4)}, ${geoLon.toFixed(4)})`; },
-    () => { status.textContent = 'No se pudo obtener la ubicación — puedes enviar el reporte sin ella.'; },
+    (pos) => { geoLat = pos.coords.latitude; geoLon = pos.coords.longitude; status.textContent = `${t('report.geo.captured')} (${geoLat.toFixed(4)}, ${geoLon.toFixed(4)})`; },
+    () => { status.textContent = t('report.geo.failed'); },
   );
 });
+
+/* ============================================================
+   Citizen report media upload — client-side file picker backed by
+   a JS array (not just the raw <input> FileList) so individual
+   files can be removed before submit. Rebuilds the input's files
+   via DataTransfer after every add/remove so the native input and
+   the visible list never disagree about what's actually attached.
+   ============================================================ */
+const MAX_MEDIA_FILES = 4;
+const MAX_MEDIA_SIZE_MB = 15;
+let selectedMediaFiles = [];
+
+function syncMediaInput() {
+  const dt = new DataTransfer();
+  selectedMediaFiles.forEach(f => dt.items.add(f));
+  document.getElementById('rep-media').files = dt.files;
+}
+
+function renderMediaList() {
+  const list = document.getElementById('rep-media-list');
+  list.innerHTML = selectedMediaFiles.map((f, i) => `
+    <div class="file-upload-item">
+      <span>${f.name} (${(f.size / 1024 / 1024).toFixed(1)} MB)</span>
+      <button type="button" class="file-upload-remove" data-idx="${i}" aria-label="${t('report.media.remove')}">✕</button>
+    </div>
+  `).join('');
+  list.querySelectorAll('.file-upload-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedMediaFiles.splice(Number(btn.dataset.idx), 1);
+      syncMediaInput();
+      renderMediaList();
+    });
+  });
+}
+
+document.getElementById('rep-media').addEventListener('change', (e) => {
+  const mediaStatus = document.getElementById('rep-media-status');
+  mediaStatus.textContent = '';
+  const incoming = Array.from(e.target.files);
+  for (const f of incoming) {
+    if (selectedMediaFiles.some(sf => sf.name === f.name && sf.size === f.size)) continue;
+    if (selectedMediaFiles.length >= MAX_MEDIA_FILES) {
+      mediaStatus.textContent = `${MAX_MEDIA_FILES} ${t('report.media.maxFiles')}`;
+      break;
+    }
+    if (f.size > MAX_MEDIA_SIZE_MB * 1024 * 1024) {
+      mediaStatus.textContent = `"${f.name}" ${t('report.media.tooBig')} ${MAX_MEDIA_SIZE_MB} ${t('report.media.tooBigSuffix')}`;
+      continue;
+    }
+    selectedMediaFiles.push(f);
+  }
+  syncMediaInput();
+  renderMediaList();
+});
+
+async function uploadMediaFiles(files) {
+  if (!files.length) return [];
+  const urls = [];
+  for (const file of files) {
+    const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
+    const path = `reports/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error: upErr } = await sb.storage.from(CONFIG.STORAGE_BUCKET).upload(path, file, {
+      contentType: file.type || undefined,
+    });
+    if (upErr) throw new Error(`No se pudo subir "${file.name}": ${upErr.message}`);
+    const { data: pub } = sb.storage.from(CONFIG.STORAGE_BUCKET).getPublicUrl(path);
+    urls.push(pub.publicUrl);
+  }
+  return urls;
+}
 
 document.getElementById('report-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const statusEl = document.getElementById('form-status');
-  const payload = {
-    categoria: document.getElementById('rep-category').value,
-    descripcion: document.getElementById('rep-desc').value,
-    lat: geoLat, lon: geoLon,
-    reported_to_armada: document.getElementById('rep-armada').checked,
-    contact: document.getElementById('rep-contact').value || null,
-    status: 'unverified',
-    created_at: new Date().toISOString(),
-  };
 
   if (DEMO_MODE) {
-    statusEl.textContent = 'Modo demo — este reporte no se guardó. Conecta Supabase para activar el envío real.';
+    statusEl.textContent = t('report.status.demo');
     statusEl.className = 'err';
     return;
   }
 
   try {
+    let mediaUrls = [];
+    if (selectedMediaFiles.length) {
+      statusEl.textContent = t('report.status.uploading');
+      statusEl.className = '';
+      mediaUrls = await uploadMediaFiles(selectedMediaFiles);
+    }
+
+    const payload = {
+      categoria: document.getElementById('rep-category').value,
+      descripcion: document.getElementById('rep-desc').value,
+      lat: geoLat, lon: geoLon,
+      reported_to_armada: document.getElementById('rep-armada').checked,
+      contact: document.getElementById('rep-contact').value || null,
+      media_urls: mediaUrls.length ? mediaUrls : null,
+      status: 'unverified',
+      created_at: new Date().toISOString(),
+    };
+
     const { error } = await sb.from(CONFIG.TABLES.reports).insert([payload]);
     if (error) throw error;
-    statusEl.textContent = 'Reporte enviado. Gracias — aparecerá en el mapa como no verificado.';
+    statusEl.textContent = t('report.status.ok');
     statusEl.className = 'ok';
     e.target.reset();
     geoLat = null; geoLon = null;
     document.getElementById('geo-status').textContent = '';
+    selectedMediaFiles = [];
+    syncMediaInput();
+    renderMediaList();
+    document.getElementById('rep-media-status').textContent = '';
   } catch (err) {
-    statusEl.textContent = `No se pudo enviar: ${err.message}. Verifica que la tabla community_reports permita inserciones públicas (RLS).`;
+    statusEl.textContent = `${t('report.status.errPrefix')} ${err.message}. ${t('report.status.errSuffix')} "${CONFIG.STORAGE_BUCKET}" ${t('report.status.errSuffix2')}`;
     statusEl.className = 'err';
   }
 });
+
+/* ============================================================
+   LANGUAGE TOGGLE — walks every element tagged data-i18n-html /
+   data-i18n / data-i18n-placeholder and swaps in the translation
+   for the selected language, then re-runs the render hooks each
+   section exposed on window (POAL charts, scientific panel, map
+   popups, sync label) so JS-generated content picks up the switch
+   too — not just the static markup. Nothing here re-fetches from
+   Supabase; map/sci-panel refreshes reuse already-loaded data.
+   Default is Spanish; English is opt-in and resets to Spanish on
+   reload (no persistence), matching "base case should be Spanish."
+   ============================================================ */
+function applyLanguage(lang) {
+  currentLang = lang;
+  document.documentElement.lang = lang;
+
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    el.innerHTML = t(el.getAttribute('data-i18n-html'));
+  });
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+  });
+  document.querySelectorAll('#lang-toggle .lang-opt').forEach(el => {
+    el.classList.toggle('active', el.dataset.lang === lang);
+  });
+
+  applySyncLabel();
+  if (window.__refreshPoalCharts) window.__refreshPoalCharts();
+  if (window.__refreshSciPanel) window.__refreshSciPanel();
+  if (window.__refreshMapPopups) window.__refreshMapPopups();
+}
+
+document.getElementById('lang-toggle').addEventListener('click', () => {
+  applyLanguage(currentLang === 'es' ? 'en' : 'es');
+});
+
+
 </script>
 </body>
 </html>
