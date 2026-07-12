@@ -486,10 +486,6 @@
     <h2>Metales y coliformes</h2>
     <p class="section-lede">Mientras las fiscalizaciones de arriba documentan qué se ha revisado, estas mediciones muestran qué hay realmente en el agua. Datos de DIRECTEMAR (POAL) en agua, sedimento y biota — un gráfico por parámetro, comparando estaciones en el tiempo. La línea punteada, cuando aparece, es un valor de referencia internacional — no un límite legal chileno.</p>
 
-    <div class="map-controls">
-      <select id="poal-matriz" class="poal-select"></select>
-    </div>
-
     <div id="poal-grid" class="poal-grid"></div>
 
     <div class="glass res-card" id="explainer-general" style="margin-top:24px;">
@@ -828,40 +824,6 @@ function facilityPopupHTML(f) {
 }
 
 
-const DEMO_POAL_READINGS = [
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2021, valor_numeric: 0.041, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2024, valor_numeric: 0.052, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2021, valor_numeric: 0.022, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2024, valor_numeric: 0.026, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2015, valor_numeric: 0.006, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2018, valor_numeric: 0.007, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2021, valor_numeric: 0.006, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2024, valor_numeric: 0.008, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Plomo Total', year: 2020, valor_numeric: 0.070, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Plomo Total', year: 2024, valor_numeric: 0.090, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Plomo Total', year: 2020, valor_numeric: 0.050, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Sedimento', parametro: 'Plomo Total', year: 2024, valor_numeric: 0.060, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Sedimento', parametro: 'Mercurio Total', year: 2024, valor_numeric: 0.15, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Mercurio Total', year: 2018, valor_numeric: 0.03, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Sedimento', parametro: 'Mercurio Total', year: 2024, valor_numeric: 0.02, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Cadmio Total', year: 2018, valor_numeric: 0.09, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Cadmio Total', year: 2024, valor_numeric: 0.14, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Cadmio Total', year: 2018, valor_numeric: 0.04, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Cadmio Total', year: 2024, valor_numeric: 0.06, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Biota', parametro: 'Cadmio Total', year: 2018, valor_numeric: 0.01, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Zapallar Referencia', matriz: 'Biota', parametro: 'Cadmio Total', year: 2024, valor_numeric: 0.01, location: 'Zapallar', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Plomo Total', year: 2020, valor_numeric: 0.22, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Frente CT Nueva Ventanas', matriz: 'Biota', parametro: 'Plomo Total', year: 2024, valor_numeric: 0.38, location: 'Puchuncaví', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Plomo Total', year: 2020, valor_numeric: 0.12, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Muelle ENAP', matriz: 'Biota', parametro: 'Plomo Total', year: 2024, valor_numeric: 0.19, location: 'Quintero', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Desembocadura Aconcagua', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2017, valor_numeric: 0.012, location: 'Concón', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Desembocadura Aconcagua', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2023, valor_numeric: 0.017, location: 'Concón', source: 'standardized', unidad: 'mg/kg' },
-  { estacion: 'Desembocadura Aconcagua', matriz: 'Agua', parametro: 'Coliformes Fecales', year: 2023, valor_numeric: 340, location: 'Concón', source: 'estandarizado', unidad: 'NMP/100 ml' },
-  { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2016, valor_numeric: 0.019, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Cadmio Total', year: 2023, valor_numeric: 0.024, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Plomo Total', year: 2016, valor_numeric: 12.4, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
-  { estacion: 'Caleta Portales', matriz: 'Sedimento', parametro: 'Plomo Total', year: 2023, valor_numeric: 15.8, location: 'Valparaíso', source: 'estandarizado', unidad: 'mg/kg' },
-];
 const STATION_NAMES = {
   "005-A-Rn": "A la cuadra frente Tahai",
   "005-S-Rn": "A la cuadra frente Tahai",
@@ -1032,30 +994,6 @@ const NO_REFERENCE_REASON = {
 };
 
 /* ============================================================
-   EXPLAINER_BY_PARAM — what the number means and why it matters,
-   shown directly under each chart instead of in a separate
-   disconnected accordion.
-   ============================================================ */
-const EXPLAINER_BY_PARAM = {
-  'Cadmio Total': '<strong>Qué es:</strong> un metal que los mariscos filtran del agua y acumulan sin eliminarlo. <strong>Riesgo:</strong> no causa síntomas inmediatos, pero se acumula en los riñones con el consumo repetido a lo largo de los años. Chile no tiene un límite legal propio para cadmio en mariscos.',
-  'Mercurio Total': '<strong>Qué es:</strong> neurotóxico que se concentra a medida que sube en la cadena alimentaria — de sedimento a molusco a pez a persona. <strong>Riesgo:</strong> especialmente dañino para el desarrollo del sistema nervioso en niños y en embarazo.',
-  'Mercurio Disuelto': '<strong>Qué es:</strong> mercurio disuelto directamente en la columna de agua, antes de acumularse en sedimento o tejido. <strong>Nota:</strong> este parámetro tiene años marcados como "no detectado" (ver abajo) — el laboratorio reporta el mismo valor en todas las estaciones, lo que indica un límite técnico de detección, no necesariamente agua limpia.',
-  'Cadmio Disuelto': '<strong>Qué es:</strong> cadmio disuelto directamente en el agua. <strong>Nota:</strong> mismo problema de detección que el mercurio disuelto — revisar los puntos marcados antes de leer esto como una tendencia real.',
-  'Cobre Total': '<strong>Qué es:</strong> se usa como anti-incrustante en pinturas de barcos y como fungicida industrial. <strong>Riesgo:</strong> en sedimento afecta a los organismos que viven enterrados en el fondo — almejas, gusanos, poliquetos — la base de la cadena alimentaria de la bahía.',
-  'Plomo Total': '<strong>Qué es:</strong> metal pesado de uso industrial histórico. <strong>Riesgo:</strong> neurotóxico, especialmente dañino para el desarrollo del sistema nervioso en niños — la OMS no ha identificado un nivel de plomo en sangre considerado seguro.',
-  'Arsénico Total': '<strong>Qué es:</strong> en mariscos, la mayoría del arsénico total es una forma orgánica inofensiva. <strong>Nota:</strong> este dato no distingue arsénico orgánico de inorgánico (la forma tóxica), así que no se puede comparar directamente contra un límite de seguridad alimentaria.',
-  'Coliformes Fecales': '<strong>Qué es:</strong> bacterias indicadoras de contaminación con aguas servidas sin tratar. <strong>Riesgo:</strong> indica presencia de patógenos que pueden causar enfermedades gastrointestinales por consumo de mariscos crudos o contacto con el agua.',
-  'Benzo(a)pireno': '<strong>Qué es:</strong> hidrocarburo que se forma por combustión — de carbón, petróleo, procesos industriales. <strong>Riesgo:</strong> cancerígeno comprobado. Si aparece elevado en agua y sedimento a la vez, sugiere una fuente activa, no un residuo antiguo.',
-  'Naftaleno': '<strong>Qué es:</strong> hidrocarburo aromático asociado a combustión y derrames de petróleo. <strong>Riesgo:</strong> tóxico para organismos acuáticos incluso en concentraciones bajas.',
-  'Oxigeno Disuelto': '<strong>Qué es:</strong> el oxígeno disponible para la vida marina. <strong>Riesgo:</strong> a diferencia de los demás parámetros, aquí el peligro es un valor bajo, no alto — por eso la línea de referencia marca un piso mínimo, no un techo.',
-  'Zinc Total': '<strong>Qué es:</strong> metal esencial en dosis bajas, tóxico en exceso — compite con el transporte de calcio en organismos acuáticos.',
-  'Cromo Total': '<strong>Qué es:</strong> este dato no distingue cromo trivalente (poco tóxico) de hexavalente (cancerígeno) — la comparación usa el valor más conservador disponible.',
-  'PCBs': '<strong>Qué es:</strong> compuestos industriales prohibidos desde los años 80 en la mayoría de los países, pero extremadamente persistentes — se siguen acumulando en sedimento y tejido décadas después de su uso.',
-  'Nitrato': '<strong>Qué es:</strong> nutriente asociado a descargas de aguas servidas y agrícolas. <strong>Riesgo:</strong> en exceso, alimenta floraciones de algas que consumen el oxígeno del agua.',
-};
-const EXPLAINER_GENERIC = 'Sin explicación específica todavía para este parámetro — el equipo la está redactando.';
-
-/* ============================================================
    Non-detect / detection-limit flatline detector — the pattern that
    motivated this rewrite: when >=3 stations report the EXACT same
    value for the same parameter in the same year, that is almost
@@ -1082,172 +1020,280 @@ function stationLabel(code) {
 }
 
 /* ============================================================
-   POAL TRENDS + EXPLAINER (merged section) — a card per parameter,
-   full yearly series (paginated fetch, not the first-1000-rows
-   default), real station names, a matrix-appropriate reference line,
-   non-detect points visually distinguished, and a two-line
-   explainer baked into the same card instead of a disconnected
-   accordion elsewhere on the page.
+   POAL_DATA — hardcoded, not fetched. Source is DIRECTEMAR's
+   standardized national file (the "VALOR Corregida" column —
+   not the raw legacy scrape, per the pipeline's own finding).
+   There is no live query for this section anymore: no Supabase
+   round-trip, no GitHub Action dependency, no DEMO_MODE fallback.
+   To update a number, edit the `readings` array directly.
+
+   Format per parameter: [estación, año, valor].
+   Use the same station names as STATION_NAMES where possible so
+   labels stay human-readable — but raw names from the DIRECTEMAR
+   Excel work fine too if that's faster to paste.
+
+   PLACEHOLDER STATE: every `readings` array below is empty.
+   Cards will render "sin datos" until real numbers are filled in.
    ============================================================ */
+const POAL_DATA = {
+  cobre_sedimento: {
+    kind: 'single',
+    title: 'Cobre — Sedimento',
+    matriz: 'Sedimento',
+    parametro: 'Cobre Total',
+    unidad: 'mg/kg',
+    explainer: 'El cobre se usa como anti-incrustante en pinturas de barcos y como fungicida industrial. En el sedimento se acumula con el tiempo y afecta a los organismos que viven enterrados en el fondo — almejas, gusanos, poliquetos — la base de la cadena alimentaria de la bahía. El valor más reciente (2024) es 6.7 veces el umbral de referencia canadiense, en la misma estación que se usa como punto de comparación limpio.',
+    readings: [
+      // ['Frente CT Nueva Ventanas', 2021, 41.2],
+      // ['Frente CT Nueva Ventanas', 2024, 125.0],
+      // ['Zapallar Referencia', 2024, 6.8],
+    ],
+  },
+  mercurio_sedimento: {
+    kind: 'single',
+    title: 'Mercurio — Sedimento',
+    matriz: 'Sedimento',
+    parametro: 'Mercurio Total',
+    unidad: 'mg/kg',
+    explainer: 'El mercurio es neurotóxico y se concentra a medida que sube en la cadena alimentaria: de sedimento a molusco a pez a persona. El valor 2024 está justo en el límite de referencia — no es una alarma aún, pero tampoco hay margen.',
+    readings: [
+      // ['Frente CT Nueva Ventanas', 2024, 0.15],
+    ],
+  },
+  coliformes_agua: {
+    kind: 'single',
+    title: 'Coliformes Fecales — Agua',
+    matriz: 'Agua',
+    parametro: 'Coliformes Fecales',
+    unidad: 'NMP/100mL',
+    explainer: 'Indican contaminación con aguas servidas sin tratar. El pico histórico de la bahía (1995) fue 65 veces el estándar que EEUU usa para aguas donde se cultivan mariscos. La medición dejó de hacerse de forma consistente después de 2017 — no podemos decir si mejoró o si simplemente se dejó de mirar.',
+    readings: [
+      // ['Muelle Barón', 1995, 910],
+    ],
+  },
+  bap_agua: {
+    kind: 'single',
+    title: 'Benzo(a)pireno — Agua',
+    matriz: 'Agua',
+    parametro: 'Benzo(a)pireno',
+    unidad: 'ug/L',
+    explainer: 'Es un hidrocarburo que se forma por combustión — de carbón, petróleo, procesos industriales — y es cancerígeno comprobado. Aparece elevado tanto en el agua como en el sedimento en 2024, lo cual es consistente: una fuente activa, no un residuo antiguo. (Ver también la ficha de Sedimento, más abajo.)',
+    readings: [],
+  },
+  bap_sedimento: {
+    kind: 'single',
+    title: 'Benzo(a)pireno — Sedimento',
+    matriz: 'Sedimento',
+    parametro: 'Benzo(a)pireno',
+    unidad: 'mg/kg',
+    explainer: 'Es un hidrocarburo que se forma por combustión — de carbón, petróleo, procesos industriales — y es cancerígeno comprobado. Aparece elevado tanto en el agua como en el sedimento en 2024, lo cual es consistente: una fuente activa, no un residuo antiguo. (Ver también la ficha de Agua, más arriba.)',
+    readings: [],
+  },
+  cd_hg_disuelto_agua: {
+    kind: 'dual-avg',
+    title: 'Cadmio y Mercurio Disuelto — Agua',
+    matriz: 'Agua',
+    explainer: 'No mostramos una tendencia para estos dos metales en el agua desde 2016 en adelante: el laboratorio reporta el mismo valor en las seis estaciones, año tras año, lo que indica que el método no está detectando nada por debajo de su propio límite técnico — no que la bahía esté limpia. Tratamos esto como un vacío de monitoreo, no como una medición.',
+    series: [
+      { parametro: 'Cadmio Disuelto', label: 'Cadmio Disuelto', color: '#0891B2', unidad: 'ug/L', readings: [] },
+      { parametro: 'Mercurio Disuelto', label: 'Mercurio Disuelto', color: '#EA580C', unidad: 'ug/L', readings: [] },
+    ],
+  },
+};
+
 try {
   if (typeof Chart === 'undefined') throw new Error('Chart.js (Chart) is undefined — the Chart.js CDN script did not load.');
 
-const MATRIZ_KEYWORDS = [['SEDIMENT', 'Sedimento'], ['BIOTA', 'Biota'], ['AGUA', 'Agua']];
-function canonicalMatriz(raw) {
-  if (raw == null) return raw;
-  const v = raw.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
-  for (const [kw, canon] of MATRIZ_KEYWORDS) {
-    if (v.includes(kw)) return canon;
-  }
-  return raw;
-}
-
+const STATION_COLORS = ['#0891B2', '#EA580C', '#059669', '#DC2626', '#7C3AED', '#CA8A04'];
 const MAX_STATIONS_SHOWN = 6;
 
-(async function initPoalGrid() {
-  let rows = await sbSelectAll(CONFIG.TABLES.poal, 'estacion, matriz, parametro, valor_numeric, year, location, source, unidad');
-  if (!rows || rows.length === 0) rows = DEMO_POAL_READINGS;
-  rows = rows.map(r => ({ ...r, matriz: canonicalMatriz(r.matriz) }));
-  rows = rows.filter(r => r.source !== 'legacy' && r.source !== 'legado');
-  rows = rows.filter(r => r.valor_numeric != null && r.year != null && r.estacion && r.parametro && r.matriz);
+const grid = document.getElementById('poal-grid');
+const cardKeys = Object.keys(POAL_DATA);
 
-  const matrizSel = document.getElementById('poal-matriz');
-  const grid = document.getElementById('poal-grid');
+grid.innerHTML = cardKeys.map(key => {
+  const c = POAL_DATA[key];
+  return `
+    <div class="glass poal-card">
+      <div class="poal-card-head">
+        <span class="poal-card-title">${c.title}</span>
+        <span class="poal-card-unit" id="poal-unit-${key}"></span>
+      </div>
+      <div class="poal-card-chart"><canvas id="poal-chart-${key}"></canvas></div>
+      <div class="poal-card-legend" id="poal-cardlegend-${key}"></div>
+      <div id="poal-status-${key}"></div>
+      <div class="poal-card-footnote" id="poal-cardfoot-${key}"></div>
+      <div class="poal-card-explainer" id="poal-explainer-${key}">${c.explainer}</div>
+    </div>
+  `;
+}).join('');
 
-  if (rows.length === 0) {
-    grid.innerHTML = '<p style="color:var(--ink-muted);font-size:13px;">No hay datos POAL disponibles todavía.</p>';
+// Always surface the single highest reading, even if that station has
+// sparse data overall — otherwise a worst-case station can silently
+// drop out of the "most-datapoints" cut while the written explainer
+// still references its number.
+function selectStations(filtered, max) {
+  const countByStation = {};
+  filtered.forEach(r => { countByStation[r.estacion] = (countByStation[r.estacion] || 0) + 1; });
+  let ranked = Object.keys(countByStation).sort((a, b) => countByStation[b] - countByStation[a]);
+  const maxRow = filtered.reduce((best, r) => (best == null || r.valor_numeric > best.valor_numeric) ? r : best, null);
+  const maxStation = maxRow ? maxRow.estacion : null;
+  let shown = ranked.slice(0, max);
+  if (maxStation && !shown.includes(maxStation)) {
+    shown = shown.slice(0, max - 1);
+    shown.push(maxStation);
+  }
+  return { shown, allStations: ranked };
+}
+
+function readingsToRows(readings, matriz, parametro, unidad) {
+  return readings.map(([estacion, year, valor_numeric]) => ({ estacion, year, valor_numeric, matriz, parametro, unidad }));
+}
+
+function renderSingleCard(key, card) {
+  const filtered = readingsToRows(card.readings, card.matriz, card.parametro, card.unidad);
+  const unitEl = document.getElementById(`poal-unit-${key}`);
+  if (filtered.length === 0) {
+    unitEl.textContent = card.unidad || '';
+    document.getElementById(`poal-cardfoot-${key}`).textContent = 'Sin datos cargados todavía para esta combinación — pendiente de carga desde el archivo DIRECTEMAR.';
+    return;
+  }
+  const flatlineYears = computeFlatlineYears(filtered);
+  const { shown: shownStations, allStations: stationNames } = selectStations(filtered, MAX_STATIONS_SHOWN);
+  const hiddenCount = stationNames.length - shownStations.length;
+
+  const byStation = {};
+  filtered.forEach(r => { if (shownStations.includes(r.estacion)) (byStation[r.estacion] = byStation[r.estacion] || []).push(r); });
+  const allYears = [...new Set(filtered.filter(r => shownStations.includes(r.estacion)).map(r => r.year))].sort((a, b) => a - b);
+
+  const datasets = shownStations.map((code, i) => {
+    const color = STATION_COLORS[i % STATION_COLORS.length];
+    const byYear = {};
+    (byStation[code] || []).forEach(r => { byYear[r.year] = r.valor_numeric; });
+    const pointColors = allYears.map(y => flatlineYears.has(y) ? '#C7D2DA' : color);
+    const pointRadii = allYears.map(y => (byYear[y] == null) ? 0 : (flatlineYears.has(y) ? 3 : 3.5));
+    return {
+      label: stationLabel(code), data: allYears.map(y => byYear[y] ?? null),
+      borderColor: color, backgroundColor: color + '22', spanGaps: true, tension: 0.25,
+      pointRadius: pointRadii, pointBackgroundColor: pointColors, pointBorderColor: pointColors,
+      borderWidth: 1.6,
+    };
+  });
+
+  const matrizKey = card.matriz.toLowerCase();
+  const ref = REFERENCE_VALUES[card.parametro]?.[matrizKey];
+  let statusHTML = '';
+  if (ref && allYears.length) {
+    datasets.push({
+      label: `Referencia (${ref.source})`, data: allYears.map(() => ref.value),
+      borderColor: '#DC2626', borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0, fill: false,
+    });
+    const lastRealYear = [...allYears].reverse().find(y => !flatlineYears.has(y) &&
+      shownStations.some(code => (byStation[code] || []).some(r => r.year === y)));
+    if (lastRealYear != null) {
+      const valsThatYear = shownStations.map(code => (byStation[code] || []).find(r => r.year === lastRealYear)?.valor_numeric).filter(v => v != null);
+      const maxVal = valsThatYear.length ? Math.max(...valsThatYear) : null;
+      if (maxVal != null) {
+        const over = ref.direction === 'min' ? maxVal < ref.value : maxVal > ref.value;
+        statusHTML = `<span class="poal-card-status ${over ? 'over' : 'ok'}">${lastRealYear}: ${over ? (ref.direction === 'min' ? 'bajo el mínimo' : (maxVal / ref.value).toFixed(1) + 'x sobre referencia') : 'dentro de referencia'}</span>`;
+      }
+    }
+  } else {
+    statusHTML = `<span class="poal-card-status nodata">sin línea de referencia</span>`;
+  }
+
+  const ctx = document.getElementById(`poal-chart-${key}`).getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: { labels: allYears, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#8598A8', font: { family: 'IBM Plex Mono', size: 10 }, maxTicksLimit: 10 }, grid: { color: 'rgba(15,36,56,0.06)' } },
+        y: { ticks: { color: '#8598A8', font: { family: 'IBM Plex Mono', size: 10 } }, grid: { color: 'rgba(15,36,56,0.06)' } },
+      },
+    },
+  });
+
+  unitEl.textContent = card.unidad || '';
+  document.getElementById(`poal-status-${key}`).innerHTML = statusHTML;
+
+  document.getElementById(`poal-cardlegend-${key}`).innerHTML =
+    shownStations.map((code, i) => `
+      <div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:${STATION_COLORS[i % STATION_COLORS.length]}"></span>${stationLabel(code)}</div>
+    `).join('') +
+    (ref ? `<div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:#DC2626"></span>Referencia</div>` : '') +
+    (flatlineYears.size ? `<div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:#C7D2DA"></span>Sospecha no-detectado</div>` : '') +
+    (hiddenCount > 0 ? `<div class="poal-card-legend-item" style="color:var(--ink-muted);">+${hiddenCount} estación(es) más con menos datos</div>` : '');
+
+  const footParts = [];
+  if (ref) footParts.push(`Línea de referencia: ${ref.value} ${ref.unit} (${ref.source}) — no es un límite legal chileno.`);
+  else footParts.push(NO_REFERENCE_REASON[card.parametro] || 'Sin valor de referencia confirmado para este parámetro y matriz.');
+  if (flatlineYears.size) footParts.push(`Años marcados en gris (${[...flatlineYears].sort().join(', ')}): todas las estaciones reportaron el mismo valor exacto — probable límite de detección del laboratorio, no una medición real.`);
+  if (hiddenCount > 0) footParts.push(`Mostrando las ${shownStations.length} estaciones con más mediciones de ${stationNames.length} totales (incluyendo siempre la estación con el valor más alto registrado).`);
+  document.getElementById(`poal-cardfoot-${key}`).textContent = footParts.join(' ');
+}
+
+function renderDualAvgCard(key, card) {
+  const seriesData = card.series.map(s => {
+    const filtered = readingsToRows(s.readings, card.matriz, s.parametro, s.unidad);
+    const flatlineYears = computeFlatlineYears(filtered);
+    const byYear = {};
+    filtered.forEach(r => { (byYear[r.year] = byYear[r.year] || []).push(r.valor_numeric); });
+    const years = Object.keys(byYear).map(Number).sort((a, b) => a - b);
+    const avgByYear = {};
+    years.forEach(y => { avgByYear[y] = byYear[y].reduce((a, b) => a + b, 0) / byYear[y].length; });
+    return { ...s, years, avgByYear, flatlineYears };
+  });
+
+  const hasAny = seriesData.some(s => s.years.length > 0);
+  if (!hasAny) {
+    document.getElementById(`poal-unit-${key}`).textContent = card.series[0]?.unidad || '';
+    document.getElementById(`poal-cardfoot-${key}`).textContent = 'Sin datos cargados todavía para esta combinación — pendiente de carga desde el archivo DIRECTEMAR.';
     return;
   }
 
-  const matrices = [...new Set(rows.map(r => r.matriz))].sort();
-  matrizSel.innerHTML = matrices.map(m => `<option value="${m}">${m}</option>`).join('');
+  const allYears = [...new Set(seriesData.flatMap(s => s.years))].sort((a, b) => a - b);
+  const datasets = seriesData.map((s, i) => {
+    const pointColors = allYears.map(y => s.flatlineYears.has(y) ? '#C7D2DA' : s.color);
+    const pointRadii = allYears.map(y => (s.avgByYear[y] == null) ? 0 : (s.flatlineYears.has(y) ? 3 : 3.5));
+    return {
+      label: s.label, data: allYears.map(y => s.avgByYear[y] ?? null),
+      borderColor: s.color, backgroundColor: s.color + '22', spanGaps: true, tension: 0.25,
+      pointRadius: pointRadii, pointBackgroundColor: pointColors, pointBorderColor: pointColors,
+      borderWidth: 1.6, yAxisID: i === 0 ? 'y' : 'y1',
+    };
+  });
 
-  const STATION_COLORS = ['#0891B2', '#EA580C', '#059669', '#DC2626', '#7C3AED', '#CA8A04'];
-  let charts = [];
+  const ctx = document.getElementById(`poal-chart-${key}`).getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: { labels: allYears, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#8598A8', font: { family: 'IBM Plex Mono', size: 10 }, maxTicksLimit: 10 }, grid: { color: 'rgba(15,36,56,0.06)' } },
+        y: { position: 'left', ticks: { color: seriesData[0].color, font: { family: 'IBM Plex Mono', size: 10 } }, grid: { color: 'rgba(15,36,56,0.06)' } },
+        y1: { position: 'right', ticks: { color: seriesData[1].color, font: { family: 'IBM Plex Mono', size: 10 } }, grid: { drawOnChartArea: false } },
+      },
+    },
+  });
 
-  function render() {
-    charts.forEach(c => c.destroy());
-    charts = [];
-    const matriz = matrizSel.value;
-    const inMatriz = rows.filter(r => r.matriz === matriz);
-    const parametros = [...new Set(inMatriz.map(r => r.parametro))].sort();
+  document.getElementById(`poal-unit-${key}`).textContent = seriesData.find(s => s.unidad)?.unidad || 'ug/L';
+  document.getElementById(`poal-status-${key}`).innerHTML = `<span class="poal-card-status nodata">promedio entre estaciones</span>`;
+  document.getElementById(`poal-cardlegend-${key}`).innerHTML =
+    seriesData.map(s => `<div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:${s.color}"></span>${s.label}</div>`).join('') +
+    `<div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:#C7D2DA"></span>Sospecha no-detectado</div>`;
+  document.getElementById(`poal-cardfoot-${key}`).textContent =
+    'Cada línea es el promedio entre las estaciones con datos ese año, no una serie por estación individual — casi todas se mueven juntas en el mismo límite de detección. Ejes separados (cadmio a la izquierda, mercurio a la derecha) porque sus umbrales de referencia difieren en un orden de magnitud. Años en gris: todas las estaciones reportaron el mismo valor exacto ese año.';
+}
 
-    if (parametros.length === 0) {
-      grid.innerHTML = '<p style="color:var(--ink-muted);font-size:13px;">Sin datos para esta matriz.</p>';
-      return;
-    }
-
-    grid.innerHTML = parametros.map(p => `
-      <div class="glass poal-card">
-        <div class="poal-card-head">
-          <span class="poal-card-title">${p}</span>
-          <span class="poal-card-unit" id="poal-unit-${cssSafe(p)}"></span>
-        </div>
-        <div class="poal-card-chart"><canvas id="poal-chart-${cssSafe(p)}"></canvas></div>
-        <div class="poal-card-legend" id="poal-cardlegend-${cssSafe(p)}"></div>
-        <div id="poal-status-${cssSafe(p)}"></div>
-        <div class="poal-card-footnote" id="poal-cardfoot-${cssSafe(p)}"></div>
-        <div class="poal-card-explainer" id="poal-explainer-${cssSafe(p)}"></div>
-      </div>
-    `).join('');
-
-    parametros.forEach(param => {
-      const filtered = inMatriz.filter(r => r.parametro === param);
-      const flatlineYears = computeFlatlineYears(filtered);
-
-      // rank stations by how many real observations they have, keep the
-      // top N so the legend and chart stay readable — a 15-code legend
-      // with no context is worse than fewer, clearly-labeled lines.
-      const countByStation = {};
-      filtered.forEach(r => { countByStation[r.estacion] = (countByStation[r.estacion] || 0) + 1; });
-      const stationNames = Object.keys(countByStation).sort((a, b) => countByStation[b] - countByStation[a]);
-      const shownStations = stationNames.slice(0, MAX_STATIONS_SHOWN);
-      const hiddenCount = stationNames.length - shownStations.length;
-
-      const byStation = {};
-      filtered.forEach(r => { if (shownStations.includes(r.estacion)) (byStation[r.estacion] = byStation[r.estacion] || []).push(r); });
-      const allYears = [...new Set(filtered.filter(r => shownStations.includes(r.estacion)).map(r => r.year))].sort((a, b) => a - b);
-
-      const datasets = shownStations.map((code, i) => {
-        const color = STATION_COLORS[i % STATION_COLORS.length];
-        const byYear = {};
-        (byStation[code] || []).forEach(r => { byYear[r.year] = r.valor_numeric; });
-        const pointColors = allYears.map(y => flatlineYears.has(y) ? '#C7D2DA' : color);
-        const pointRadii = allYears.map(y => (byYear[y] == null) ? 0 : (flatlineYears.has(y) ? 3 : 3.5));
-        return {
-          label: stationLabel(code), data: allYears.map(y => byYear[y] ?? null),
-          borderColor: color, backgroundColor: color + '22', spanGaps: true, tension: 0.25,
-          pointRadius: pointRadii, pointBackgroundColor: pointColors, pointBorderColor: pointColors,
-          borderWidth: 1.6,
-        };
-      });
-
-      const matrizKey = matriz.toLowerCase();
-      const ref = REFERENCE_VALUES[param]?.[matrizKey];
-      let statusHTML = '';
-      if (ref && allYears.length) {
-        datasets.push({
-          label: `Referencia (${ref.source})`, data: allYears.map(() => ref.value),
-          borderColor: '#DC2626', borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0, fill: false,
-        });
-        // status pill: compare the most recent real (non-flatline) value to the reference
-        const lastRealYear = [...allYears].reverse().find(y => !flatlineYears.has(y) &&
-          shownStations.some(code => (byStation[code] || []).some(r => r.year === y)));
-        if (lastRealYear != null) {
-          const valsThatYear = shownStations.map(code => (byStation[code] || []).find(r => r.year === lastRealYear)?.valor_numeric).filter(v => v != null);
-          const maxVal = valsThatYear.length ? Math.max(...valsThatYear) : null;
-          if (maxVal != null) {
-            const over = ref.direction === 'min' ? maxVal < ref.value : maxVal > ref.value;
-            statusHTML = `<span class="poal-card-status ${over ? 'over' : 'ok'}">${lastRealYear}: ${over ? (ref.direction === 'min' ? 'bajo el mínimo' : (maxVal / ref.value).toFixed(1) + 'x sobre referencia') : 'dentro de referencia'}</span>`;
-          }
-        }
-      } else {
-        statusHTML = `<span class="poal-card-status nodata">sin línea de referencia</span>`;
-      }
-
-      const ctx = document.getElementById(`poal-chart-${cssSafe(param)}`).getContext('2d');
-      charts.push(new Chart(ctx, {
-        type: 'line',
-        data: { labels: allYears, datasets },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { ticks: { color: '#8598A8', font: { family: 'IBM Plex Mono', size: 10 }, maxTicksLimit: 10 }, grid: { color: 'rgba(15,36,56,0.06)' } },
-            y: { ticks: { color: '#8598A8', font: { family: 'IBM Plex Mono', size: 10 } }, grid: { color: 'rgba(15,36,56,0.06)' } },
-          },
-        },
-      }));
-
-      const unit = filtered.find(r => r.unidad)?.unidad || '';
-      document.getElementById(`poal-unit-${cssSafe(param)}`).textContent = unit;
-      document.getElementById(`poal-status-${cssSafe(param)}`).innerHTML = statusHTML;
-
-      document.getElementById(`poal-cardlegend-${cssSafe(param)}`).innerHTML =
-        shownStations.map((code, i) => `
-          <div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:${STATION_COLORS[i % STATION_COLORS.length]}"></span>${stationLabel(code)}</div>
-        `).join('') +
-        (ref ? `<div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:#DC2626"></span>Referencia</div>` : '') +
-        (flatlineYears.size ? `<div class="poal-card-legend-item"><span class="poal-card-legend-dot" style="background:#C7D2DA"></span>Sospecha no-detectado</div>` : '') +
-        (hiddenCount > 0 ? `<div class="poal-card-legend-item" style="color:var(--ink-muted);">+${hiddenCount} estación(es) más con menos datos</div>` : '');
-
-      const footParts = [];
-      if (ref) footParts.push(`Línea de referencia: ${ref.value} ${ref.unit} (${ref.source}) — no es un límite legal chileno.`);
-      else footParts.push(NO_REFERENCE_REASON[param] || NO_REFERENCE_REASON[`${param} (${matriz})`] || 'Sin valor de referencia confirmado para este parámetro y matriz.');
-      if (flatlineYears.size) footParts.push(`Años marcados en gris (${[...flatlineYears].sort().join(', ')}): todas las estaciones reportaron el mismo valor exacto — probable límite de detección del laboratorio, no una medición real.`);
-      if (hiddenCount > 0) footParts.push(`Mostrando las ${shownStations.length} estaciones con más mediciones de ${stationNames.length} totales.`);
-      document.getElementById(`poal-cardfoot-${cssSafe(param)}`).textContent = footParts.join(' ');
-
-      document.getElementById(`poal-explainer-${cssSafe(param)}`).innerHTML = EXPLAINER_BY_PARAM[param] || EXPLAINER_GENERIC;
-    });
-  }
-
-  function cssSafe(s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, ''); }
-
-  matrizSel.addEventListener('change', render);
-  if (matrices.includes('Sedimento')) matrizSel.value = 'Sedimento';
-  render();
-})();
+cardKeys.forEach(key => {
+  const card = POAL_DATA[key];
+  if (card.kind === 'single') renderSingleCard(key, card);
+  else if (card.kind === 'dual-avg') renderDualAvgCard(key, card);
+});
 
 } catch (e) {
   console.error('POAL grid failed to initialize:', e);
