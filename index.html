@@ -154,6 +154,7 @@
     letter-spacing: 0.06em; color: rgba(255,255,255,0.7);
   }
   .hero-overlay .trust-strip .trust-sep { color: rgba(255,255,255,0.35); }
+  .trust-short { display: none; }
   .kpi-grid {
     display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
   }
@@ -414,12 +415,21 @@
       background: linear-gradient(180deg, rgba(4,16,31,0.55) 0%, rgba(4,16,31,0.88) 55%, rgba(4,16,31,0.92) 100%);
     }
     .hero-overlay { align-items: flex-end; padding-bottom: 28px; }
+    .hero-overlay p.lede { display: none; }
     /* .poal-charts-block's minmax(460px, 1fr) forces every track — including
        a single one — to be at least 460px wide, wider than any phone
        viewport, which is what was pushing the whole page into horizontal
        scroll and throwing off the 100vw full-bleed math for the hero image
        and map below. Dropping the minimum here is the actual fix. */
     .poal-charts-block { grid-template-columns: 1fr; }
+    /* Trust strip: full institution names wrap onto their own lines on
+       narrow screens and the middle dots start reading like stray dashes.
+       Below 900px, show acronyms only and drop "Reportes ciudadanos" so
+       the whole strip fits on one line under the lede. */
+    .hero-overlay .trust-strip { gap: 6px; }
+    .trust-full { display: none; }
+    .trust-short { display: inline; }
+    .trust-optional { display: none; }
   }
 </style>
 </head>
@@ -471,9 +481,9 @@
         <p class="lede" data-i18n-html="hero.lede">Fiscalizaciones, mediciones de agua y reportes ciudadanos de toda la región — con foco en Bahía Quintero-Puchuncaví, el punto de mayor concentración industrial.</p>
         <div class="trust-strip" data-i18n-html="hero.trust">
           <span>Fuentes</span><span class="trust-sep">·</span>
-          <span>Sistema Nacional de Información de Fiscalización Ambiental (SMA)</span><span class="trust-sep">·</span>
-          <span>DIRECTEMAR (Armada de Chile)</span><span class="trust-sep">·</span>
-          <span>Reportes ciudadanos</span>
+          <span><span class="trust-full">Sistema Nacional de Información de Fiscalización Ambiental (SMA)</span><span class="trust-short">SMA</span></span><span class="trust-sep">·</span>
+          <span><span class="trust-full">DIRECTEMAR (Armada de Chile)</span><span class="trust-short">DIRECTEMAR</span></span><span class="trust-sep trust-optional">·</span>
+          <span class="trust-optional">Reportes ciudadanos</span>
         </div>
       </div>
     </div>
@@ -725,7 +735,7 @@ es: {
   'hero.eyebrow': 'La Salud del Océano',
   'hero.h1': 'Valparaíso, <em>en vivo</em>.',
   'hero.lede': 'Fiscalizaciones, mediciones de agua y reportes ciudadanos de toda la región — con foco en Bahía Quintero-Puchuncaví, el punto de mayor concentración industrial.',
-  'hero.trust': '<span>Fuentes</span><span class="trust-sep">·</span><span>Sistema Nacional de Información de Fiscalización Ambiental (SMA)</span><span class="trust-sep">·</span><span>DIRECTEMAR (Armada de Chile)</span><span class="trust-sep">·</span><span>Reportes ciudadanos</span>',
+  'hero.trust': '<span>Fuentes</span><span class="trust-sep">·</span><span><span class="trust-full">Sistema Nacional de Información de Fiscalización Ambiental (SMA)</span><span class="trust-short">SMA</span></span><span class="trust-sep">·</span><span><span class="trust-full">DIRECTEMAR (Armada de Chile)</span><span class="trust-short">DIRECTEMAR</span></span><span class="trust-sep trust-optional">·</span><span class="trust-optional">Reportes ciudadanos</span>',
   'hero.caption': 'Región de Valparaíso, Chile · Foto: Denys Amaro / Unsplash',
   'thesis.eyebrow': 'Lo que muestran los datos',
   'thesis.text': 'Los datos ambientales de la Región de Valparaíso existen, pero están repartidos entre la Superintendencia del Medio Ambiente, La Armada y diferentes partes del gobierno que casi nunca se cruzan entre sí.',
@@ -840,7 +850,7 @@ en: {
   'hero.eyebrow': 'Ocean Health',
   'hero.h1': 'Valparaíso, <em>live</em>.',
   'hero.lede': 'Enforcement actions, water measurements, and citizen reports for the whole region — with a focus on Quintero-Puchuncaví Bay, the point of highest industrial concentration.',
-  'hero.trust': '<span>Sources</span><span class="trust-sep">·</span><span>National Environmental Enforcement Information System (SMA)</span><span class="trust-sep">·</span><span>DIRECTEMAR (Chilean Navy)</span><span class="trust-sep">·</span><span>Citizen reports</span>',
+  'hero.trust': '<span>Sources</span><span class="trust-sep">·</span><span><span class="trust-full">National Environmental Enforcement Information System (SMA)</span><span class="trust-short">SMA</span></span><span class="trust-sep">·</span><span><span class="trust-full">DIRECTEMAR (Chilean Navy)</span><span class="trust-short">DIRECTEMAR</span></span><span class="trust-sep trust-optional">·</span><span class="trust-optional">Citizen reports</span>',
   'hero.caption': 'Valparaíso Region, Chile · Photo: Denys Amaro / Unsplash',
   'thesis.eyebrow': 'What the data shows',
   'thesis.text': 'Environmental data for the Valparaíso Region exists, but it\'s split across the Environmental Superintendency, the Navy, and different parts of government that almost never cross-reference each other.',
